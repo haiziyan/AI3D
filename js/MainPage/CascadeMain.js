@@ -376,6 +376,12 @@ function initialize(projectContent = null) {
             let alternatingColor = true;
             realConsoleLog = console.log;
             console.log = function (message) {
+                // 检查 consoleContainer 是否已初始化
+                if (!consoleContainer) {
+                    realConsoleLog.apply(console, arguments);
+                    return;
+                }
+                
                 let newline = document.createElement("div");
                 newline.style.fontFamily = "monospace";
                 newline.style.color = (alternatingColor = !alternatingColor) ? "LightGray" : "white";
@@ -397,6 +403,12 @@ function initialize(projectContent = null) {
 
             // Print Errors in Red
             window.onerror = function (err, url, line, colno, errorObj) {
+                // 检查 consoleContainer 是否已初始化
+                if (!consoleContainer) {
+                    realConsoleLog.call(console, "Error:", err);
+                    return;
+                }
+                
                 let newline = document.createElement("div");
                 newline.style.color = "red";
                 newline.style.fontFamily = "monospace";
@@ -409,21 +421,23 @@ function initialize(projectContent = null) {
 
                 // Highlight the error'd code in the editor
                 if (!errorObj || !(errorObj.stack.includes("wasm-function"))) {
-                    monaco.editor.setModelMarkers(monacoEditor.getModel(), 'test', [{
-                        startLineNumber: line,
-                        startColumn: colno,
-                        endLineNumber: line,
-                        endColumn: 1000,
-                        message: JSON.stringify(err, getCircularReplacer()),
-                        severity: monaco.MarkerSeverity.Error
-                    }]);
+                    if (monacoEditor && monacoEditor.getModel()) {
+                        monaco.editor.setModelMarkers(monacoEditor.getModel(), 'test', [{
+                            startLineNumber: line,
+                            startColumn: colno,
+                            endLineNumber: line,
+                            endColumn: 1000,
+                            message: JSON.stringify(err, getCircularReplacer()),
+                            severity: monaco.MarkerSeverity.Error
+                        }]);
+                    }
                 }
             };
 
             // If we've received a progress update from the Worker Thread, append it to our previous message
             messageHandlers["Progress"] = (payload) => {
                 // Add a dot to the progress indicator for each progress message we find in the queue
-                if (consoleContainer.lastElementChild) {
+                if (consoleContainer && consoleContainer.lastElementChild) {
                     consoleContainer.lastElementChild.innerText =
                         "> Generating Model" + ".".repeat(payload.opNumber) + ((payload.opType)? " ("+payload.opType+")" : "");
                 }

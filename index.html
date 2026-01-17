@@ -396,8 +396,14 @@
                 });
                 
                 // 添加active类到当前tab
-                event.target.closest('.tab-btn').classList.add('active');
-                document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+                const clickedBtn = event.currentTarget;
+                clickedBtn.classList.add('active');
+                
+                const tabId = 'tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
+                const tabContent = document.getElementById(tabId);
+                if (tabContent) {
+                    tabContent.classList.add('active');
+                }
                 
                 // 如果切换到生成记录tab，加载数据
                 if (tabName === 'history' && authManager) {
