@@ -1394,19 +1394,50 @@ body {
   
   /* 移动端布局优化 - 显示tab标签栏，但样式优化 */
   .lm_header {
-    height: 32px !important;
-    background: var(--tertiary-bg) !important;
+    height: 40px !important;
+    background: var(--secondary-bg) !important;
+    display: flex !important;
+    border-bottom: 2px solid var(--accent-color) !important;
   }
   
   .lm_tab {
-    height: 32px !important;
-    line-height: 32px !important;
-    padding: 0 10px !important;
-    font-size: 12px !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    padding: 0 16px !important;
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+    background: var(--tertiary-bg) !important;
+    color: var(--text-secondary) !important;
+    border-radius: 8px 8px 0 0 !important;
+    margin-right: 4px !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .lm_tab:hover {
+    background: var(--secondary-bg) !important;
+    color: var(--text-primary) !important;
+  }
+  
+  .lm_tab.lm_active {
+    background: var(--accent-color) !important;
+    color: white !important;
   }
   
   .lm_title {
-    font-size: 12px !important;
+    font-size: 14px !important;
+    pointer-events: none !important;
+  }
+  
+  .lm_tabs {
+    display: flex !important;
+    flex: 1 !important;
+  }
+  
+  /* 隐藏关闭按钮等控件 */
+  .lm_close_tab {
+    display: none !important;
   }
   
   /* 移动端AI模块优化 - 将输入框和按钮放在底部 */
@@ -1430,13 +1461,13 @@ body {
     left: 0 !important;
     right: 0 !important;
     background: var(--tertiary-bg) !important;
-    padding: 12px !important;
+    padding: 10px 12px !important;
     z-index: 999 !important;
     border-top: 2px solid var(--divider-color) !important;
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5) !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 8px !important;
     /* 防止输入法弹出时被遮挡 */
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
@@ -1447,9 +1478,9 @@ body {
   }
   
   .ai-prompt-textarea {
-    height: 80px;
+    height: 60px;
     font-size: 13px;
-    padding: 10px;
+    padding: 8px;
     margin: 0 !important;
     /* 防止输入法弹出时页面滚动 */
     position: relative;
@@ -1470,19 +1501,56 @@ body {
   /* 移动端Golden Layout调整 */
   .lm_goldenlayout {
     padding-bottom: 0 !important;
-    height: calc(100vh - 56px - 170px) !important; /* 减去顶部导航栏和底部AI输入框的高度 */
+    height: calc(100vh - 56px - 150px) !important; /* 减去顶部导航栏和底部AI输入框的高度 */
     position: relative !important;
+    width: 100% !important;
   }
   
-  /* 移动端隐藏AI模块的tab */
-  .lm_tab[title="AI 生成器"] {
+  /* 确保root容器正确 */
+  .lm_root {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  /* 移动端隐藏AI模块的tab - 使用更强的选择器 */
+  .lm_stack .lm_header .lm_tab:nth-child(3),
+  .lm_stack .lm_header .lm_tabs .lm_tab:last-child {
     display: none !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
   }
   
   /* 确保stack占满空间 */
   .lm_stack {
     width: 100% !important;
     height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* 确保items容器正确显示 */
+  .lm_items {
+    flex: 1 !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  /* 确保每个item占满空间 */
+  .lm_item {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: none !important;
+  }
+  
+  /* 只显示激活的item */
+  .lm_item.lm_active {
+    display: block !important;
   }
   
   /* 确保stack内的items容器正确显示 */
@@ -1573,6 +1641,7 @@ body {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
+    position: relative !important;
   }
   
   /* 确保canvas和编辑器容器正确显示 */
@@ -1580,19 +1649,26 @@ body {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
   }
   
   /* Monaco编辑器容器 */
   .monaco-editor {
     width: 100% !important;
     height: 100% !important;
+    position: relative !important;
   }
   
   /* 确保Three.js canvas正确显示 */
   canvas {
     display: block !important;
+    width: 100% !important;
+    height: 100% !important;
     max-width: 100% !important;
     max-height: 100% !important;
+    position: relative !important;
   }
 }
 

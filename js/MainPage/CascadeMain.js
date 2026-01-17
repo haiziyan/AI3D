@@ -368,6 +368,16 @@ function initialize(projectContent = null) {
         // 检测是否为移动端
         const isMobile = window.innerWidth <= 768;
         
+        // 移动端：隐藏AI模块的Tab
+        if (isMobile) {
+            setTimeout(() => {
+                const aiTab = container.tab;
+                if (aiTab && aiTab.element) {
+                    aiTab.element.hide();
+                }
+            }, 100);
+        }
+        
         let aiModuleContainer = document.createElement("div");
         aiModuleContainer.className = "ai-module-container";
         aiModuleContainer.innerHTML = `
@@ -621,8 +631,27 @@ function initialize(projectContent = null) {
 
     // Resize the layout when the browser resizes
     window.onorientationchange = function (event) {
-        myLayout.updateSize(window.innerWidth, window.innerHeight -
-            document.getElementsByClassName('topnav')[0].offsetHeight);
+        const isMobile = window.innerWidth <= 768;
+        const topnavHeight = document.getElementsByClassName('topnav')[0].offsetHeight;
+        const aiInputHeight = isMobile ? (document.getElementById('aiInputWrapper')?.offsetHeight || 150) : 0;
+        const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
+        
+        myLayout.updateSize(window.innerWidth, layoutHeight);
+        
+        // 更新Monaco编辑器
+        if (monacoEditor) {
+            monacoEditor.layout();
+        }
+        
+        // 更新Three.js渲染器
+        if (threejsViewport && threejsViewport.renderer) {
+            const container = threejsViewport.container.getElement().get(0);
+            threejsViewport.renderer.setSize(container.offsetWidth, container.offsetHeight);
+            if (threejsViewport.camera) {
+                threejsViewport.camera.aspect = container.offsetWidth / container.offsetHeight;
+                threejsViewport.camera.updateProjectionMatrix();
+            }
+        }
     };
     
     // 监听窗口大小变化，处理移动端AI输入框位置
@@ -633,7 +662,7 @@ function initialize(projectContent = null) {
         if (aiInputWrapper) {
             if (isMobile) {
                 // 移动端：将AI输入框移到body底部
-                if (aiInputWrapper.parentElement.className !== 'body') {
+                if (aiInputWrapper.parentElement.tagName !== 'BODY') {
                     document.body.appendChild(aiInputWrapper);
                 }
             } else {
@@ -645,14 +674,37 @@ function initialize(projectContent = null) {
             }
         }
         
-        myLayout.updateSize(window.innerWidth, window.innerHeight -
-            document.getElementById('topnav').offsetHeight);
+        const topnavHeight = document.getElementById('topnav').offsetHeight;
+        const aiInputHeight = isMobile ? (aiInputWrapper?.offsetHeight || 150) : 0;
+        const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
+        
+        myLayout.updateSize(window.innerWidth, layoutHeight);
+        
+        // 更新Monaco编辑器
+        if (monacoEditor) {
+            monacoEditor.layout();
+        }
+        
+        // 更新Three.js渲染器
+        if (threejsViewport && threejsViewport.renderer) {
+            const container = threejsViewport.container.getElement().get(0);
+            threejsViewport.renderer.setSize(container.offsetWidth, container.offsetHeight);
+            if (threejsViewport.camera) {
+                threejsViewport.camera.aspect = container.offsetWidth / container.offsetHeight;
+                threejsViewport.camera.updateProjectionMatrix();
+            }
+        }
     });
 
     // Initialize the Layout
     myLayout.init();
-    myLayout.updateSize(window.innerWidth, window.innerHeight -
-        document.getElementById('topnav').offsetHeight);
+    
+    const topnavHeight = document.getElementById('topnav').offsetHeight;
+    const aiInputHeight = isMobile ? 150 : 0; // 移动端预留AI输入框高度
+    const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
+    
+    console.log('初始化布局尺寸:', window.innerWidth, 'x', layoutHeight);
+    myLayout.updateSize(window.innerWidth, layoutHeight);
     
     // 移动端调试：确保布局正确显示
     if (isMobile) {
@@ -664,13 +716,19 @@ function initialize(projectContent = null) {
         setTimeout(() => {
             const cascadeView = document.querySelector('[title="3D 视图"]');
             const codeEditor = document.querySelector('[title="代码编辑器"]');
+            const aiModule = document.querySelector('[title="AI 生成器"]');
             const canvas = document.querySelector('canvas');
             const monacoEditorEl = document.querySelector('.monaco-editor');
+            const lmStack = document.querySelector('.lm_stack');
+            const lmItems = document.querySelector('.lm_items');
             
             console.log('3D视图容器:', cascadeView);
             console.log('代码编辑器容器:', codeEditor);
+            console.log('AI模块容器:', aiModule);
             console.log('Canvas元素:', canvas);
             console.log('Monaco编辑器元素:', monacoEditorEl);
+            console.log('Stack容器:', lmStack);
+            console.log('Items容器:', lmItems);
             
             if (canvas) {
                 console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
@@ -678,22 +736,48 @@ function initialize(projectContent = null) {
             if (monacoEditorEl) {
                 console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
             }
+            if (lmStack) {
+                console.log('Stack尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
+            }
+            if (lmItems) {
+                console.log('Items尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
+            }
+            
+            // 隐藏AI模块的Tab
+            const tabs = document.querySelectorAll('.lm_tab');
+            tabs.forEach(tab => {
+                const title = tab.querySelector('.lm_title');
+                if (title && title.textContent.includes('AI 生成器')) {
+                    console.log('隐藏AI模块Tab');
+                    tab.style.display = 'none';
+                }
+            });
             
             // 强制更新布局
-            myLayout.updateSize(window.innerWidth, window.innerHeight -
-                document.getElementById('topnav').offsetHeight);
+            const topnavHeight = document.getElementById('topnav').offsetHeight;
+            const aiInputHeight = document.getElementById('aiInputWrapper')?.offsetHeight || 150;
+            const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
+            console.log('计算布局高度:', layoutHeight, '= 窗口高度', window.innerHeight, '- 导航栏', topnavHeight, '- AI输入框', aiInputHeight);
+            
+            myLayout.updateSize(window.innerWidth, layoutHeight);
             
             // 强制更新Monaco编辑器布局
             if (monacoEditor) {
+                console.log('更新Monaco编辑器布局');
                 monacoEditor.layout();
             }
             
             // 强制更新Three.js视图
             if (threejsViewport && threejsViewport.renderer) {
-                threejsViewport.renderer.setSize(
-                    threejsViewport.container.getElement().get(0).offsetWidth,
-                    threejsViewport.container.getElement().get(0).offsetHeight
-                );
+                const container = threejsViewport.container.getElement().get(0);
+                const width = container.offsetWidth;
+                const height = container.offsetHeight;
+                console.log('更新Three.js渲染器尺寸:', width, 'x', height);
+                threejsViewport.renderer.setSize(width, height);
+                if (threejsViewport.camera) {
+                    threejsViewport.camera.aspect = width / height;
+                    threejsViewport.camera.updateProjectionMatrix();
+                }
             }
         }, 500);
     }
