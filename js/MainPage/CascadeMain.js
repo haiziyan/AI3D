@@ -356,14 +356,6 @@ function initialize(projectContent = null) {
         container.getElement().get(0).appendChild(aiModuleContainer);
         container.getElement().get(0).style.overflow = 'hidden';
         
-        // 设置控制台容器
-        consoleContainer = document.getElementById('consoleOutputContent');
-        
-        // 刷新消息队列（如果有缓存的消息）
-        if (window.flushConsoleQueue) {
-            window.flushConsoleQueue();
-        }
-        
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {
             let seen = new WeakSet();
@@ -479,6 +471,25 @@ function initialize(projectContent = null) {
             console.log("Welcome to AI 3D Studio!");
             console.log("Loading CAD Kernel...");
         }
+        
+        // 设置控制台容器（在 console.log 重写之后）
+        consoleContainer = document.getElementById('consoleOutputContent');
+        
+        // 调试：验证控制台容器是否正确初始化
+        if (consoleContainer) {
+            realConsoleLog("控制台容器已初始化:", consoleContainer);
+        } else {
+            realConsoleLog("错误：控制台容器未找到！");
+        }
+        
+        // 立即刷新消息队列（如果有缓存的消息）
+        if (window.flushConsoleQueue) {
+            realConsoleLog("刷新消息队列，队列长度:", messageQueue.length);
+            window.flushConsoleQueue();
+        }
+        
+        // 测试：直接输出一条消息
+        console.log("控制台测试消息 - 如果你看到这条消息，说明控制台工作正常！");
         
         // 绑定AI生成按钮事件
         setTimeout(() => {
