@@ -55,20 +55,16 @@ function initialize(projectContent = null) {
             GUIState = JSON.parse(decode(this.searchParams.get("gui")));
         }
 
+        // 检测是否为移动端
+        const isMobile = window.innerWidth <= 768;
+
         // Define the Default Golden Layout
-        // AI模块在最左侧栏（包含控制台输出），代码编辑器和3D视图在右侧用Tab切换
-        myLayout = new GoldenLayout({
-            content: [{
-                type: 'row',
+        // 移动端：只显示3D视图，AI模块移到底部
+        // 桌面端：AI模块在最左侧栏（包含控制台输出），代码编辑器和3D视图在右侧用Tab切换
+        if (isMobile) {
+            myLayout = new GoldenLayout({
                 content: [{
-                    type: 'component',
-                    componentName: 'aiModule',
-                    title: 'AI 生成器',
-                    componentState: {},
-                    isClosable: false,
-                    width: 25.0
-                }, {
-                    type: 'stack',
+                    type: 'row',
                     content: [{
                         type: 'component',
                         componentName: 'cascadeView',
@@ -77,19 +73,54 @@ function initialize(projectContent = null) {
                         isClosable: false
                     }, {
                         type: 'component',
-                        componentName: 'codeEditor',
-                        title: '代码编辑器',
-                        componentState: { code: codeStr },
-                        isClosable: false
+                        componentName: 'aiModule',
+                        title: 'AI 生成器',
+                        componentState: {},
+                        isClosable: false,
+                        width: 0.1  // 移动端时宽度设为最小
                     }]
-                }]
-            }],
-            settings: {
-                showPopoutIcon: false,
-                showMaximiseIcon: false,
-                showCloseIcon: false
-            }
-        });
+                }],
+                settings: {
+                    showPopoutIcon: false,
+                    showMaximiseIcon: false,
+                    showCloseIcon: false
+                }
+            });
+        } else {
+            myLayout = new GoldenLayout({
+                content: [{
+                    type: 'row',
+                    content: [{
+                        type: 'component',
+                        componentName: 'aiModule',
+                        title: 'AI 生成器',
+                        componentState: {},
+                        isClosable: false,
+                        width: 25.0
+                    }, {
+                        type: 'stack',
+                        content: [{
+                            type: 'component',
+                            componentName: 'cascadeView',
+                            title: '3D 视图',
+                            componentState: GUIState,
+                            isClosable: false
+                        }, {
+                            type: 'component',
+                            componentName: 'codeEditor',
+                            title: '代码编辑器',
+                            componentState: { code: codeStr },
+                            isClosable: false
+                        }]
+                    }]
+                }],
+                settings: {
+                    showPopoutIcon: false,
+                    showMaximiseIcon: false,
+                    showCloseIcon: false
+                }
+            });
+        }
 
     }
 
@@ -318,6 +349,9 @@ function initialize(projectContent = null) {
     myLayout.registerComponent('aiModule', function (container) {
         consoleGolden = container;
         
+        // 检测是否为移动端
+        const isMobile = window.innerWidth <= 768;
+        
         let aiModuleContainer = document.createElement("div");
         aiModuleContainer.className = "ai-module-container";
         aiModuleContainer.innerHTML = `
@@ -333,7 +367,7 @@ function initialize(projectContent = null) {
                     <div id="consoleOutputContent" class="console-content"></div>
                 </div>
                 
-                <div class="ai-input-wrapper">
+                <div class="ai-input-wrapper" id="aiInputWrapper">
                     <div class="ai-section-title">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -355,6 +389,16 @@ function initialize(projectContent = null) {
         `;
         container.getElement().get(0).appendChild(aiModuleContainer);
         container.getElement().get(0).style.overflow = 'hidden';
+        
+        // 如果是移动端，将AI输入框移到body底部
+        if (isMobile) {
+            setTimeout(() => {
+                const aiInputWrapper = document.getElementById('aiInputWrapper');
+                if (aiInputWrapper) {
+                    document.body.appendChild(aiInputWrapper);
+                }
+            }, 100);
+        }
         
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {
@@ -532,6 +576,30 @@ function initialize(projectContent = null) {
         myLayout.updateSize(window.innerWidth, window.innerHeight -
             document.getElementsByClassName('topnav')[0].offsetHeight);
     };
+    
+    // 监听窗口大小变化，处理移动端AI输入框位置
+    window.addEventListener('resize', function() {
+        const isMobile = window.innerWidth <= 768;
+        const aiInputWrapper = document.getElementById('aiInputWrapper');
+        
+        if (aiInputWrapper) {
+            if (isMobile) {
+                // 移动端：将AI输入框移到body底部
+                if (aiInputWrapper.parentElement.className !== 'body') {
+                    document.body.appendChild(aiInputWrapper);
+                }
+            } else {
+                // 桌面端：确保AI输入框在原位置
+                const aiModuleContent = document.querySelector('.ai-module-content');
+                if (aiModuleContent && !aiModuleContent.contains(aiInputWrapper)) {
+                    aiModuleContent.appendChild(aiInputWrapper);
+                }
+            }
+        }
+        
+        myLayout.updateSize(window.innerWidth, window.innerHeight -
+            document.getElementById('topnav').offsetHeight);
+    });
 
     // Initialize the Layout
     myLayout.init();

@@ -283,7 +283,7 @@ body {
   border: 1px solid var(--divider-color);
 }
 
-.btn-login, .btn-signup, .btn-user-center, .btn-signout {
+.btn-auth, .btn-user-center, .btn-signout {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -291,27 +291,18 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.btn-login {
-  background-color: var(--secondary-bg);
-  color: var(--text-secondary);
-  border: 1px solid var(--divider-color);
-}
-
-.btn-login:hover {
-  background-color: var(--accent-color);
-  border-color: var(--accent-color);
-  color: var(--text-primary);
-}
-
-.btn-signup {
+.btn-auth {
   background: var(--accent-color);
   color: var(--text-primary);
   border: none;
 }
 
-.btn-signup:hover {
+.btn-auth:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
 }
@@ -320,9 +311,6 @@ body {
   background: var(--accent-color);
   color: var(--text-primary);
   border: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .btn-user-center:hover {
@@ -1287,10 +1275,11 @@ body {
     order: 3;
     width: 100%;
     margin-top: 8px;
+    display: none !important; /* 移动端隐藏菜单 */
   }
   
   .menu-toggle {
-    display: flex;
+    display: none; /* 移动端隐藏菜单切换按钮 */
   }
   
   .nav-menu {
@@ -1371,14 +1360,18 @@ body {
     padding: 4px 8px;
   }
   
-  .btn-login, .btn-signup, .btn-user-center {
+  .btn-auth, .btn-user-center {
     padding: 6px 10px;
     font-size: 12px;
   }
   
-  .btn-login svg, .btn-signup svg, .btn-user-center svg {
+  .btn-auth svg, .btn-user-center svg {
     width: 14px;
     height: 14px;
+  }
+  
+  .btn-auth .btn-text, .btn-user-center .btn-text {
+    display: none; /* 移动端隐藏按钮文字 */
   }
   
   .modal-content {
@@ -1392,6 +1385,175 @@ body {
   
   .logo span {
     display: none;
+  }
+  
+  /* 移动端布局优化 - 隐藏代码编辑器tab，只显示3D视图 */
+  .lm_header {
+    display: none !important; /* 隐藏tab标签栏 */
+  }
+  
+  /* 移动端AI模块优化 - 将输入框和按钮放在底部 */
+  .ai-module-container {
+    padding: 8px;
+  }
+  
+  .ai-module-content {
+    gap: 8px;
+  }
+  
+  /* 控制台输出在移动端隐藏 */
+  .console-output {
+    display: none !important;
+  }
+  
+  /* AI输入区域固定在底部 */
+  .ai-input-wrapper {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: var(--tertiary-bg) !important;
+    padding: 12px !important;
+    z-index: 999 !important;
+    border-top: 2px solid var(--divider-color) !important;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .ai-section-title {
+    display: none; /* 移动端隐藏标题 */
+  }
+  
+  .ai-prompt-textarea {
+    height: 80px;
+    font-size: 13px;
+    padding: 10px;
+    margin: 0 !important;
+  }
+  
+  .ai-generate-btn-module {
+    padding: 10px 16px;
+    font-size: 13px;
+    margin: 0 !important;
+  }
+  
+  /* 移动端Golden Layout调整 */
+  .lm_goldenlayout {
+    padding-bottom: 0 !important;
+    height: calc(100vh - 56px - 170px) !important; /* 减去顶部导航栏和底部AI输入框的高度 */
+  }
+  
+  /* 移动端隐藏左侧AI模块面板（因为已经移到底部） */
+  .lm_row > .lm_item:first-child:has(.ai-module-container) {
+    display: none !important;
+  }
+  
+  /* 确保3D视图canvas占满屏幕 */
+  .lm_item_container {
+    width: 100% !important;
+  }
+  
+  /* 移动端隐藏GUI面板 */
+  .gui-panel {
+    display: none !important;
+  }
+  
+  /* 确保canvas能正确显示 */
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+  }
+}
+
+/* 移动端专用样式 - 更精确的选择器 */
+@media (max-width: 768px) {
+  /* 隐藏包含AI模块的列 */
+  .lm_item.lm_column:has(.ai-module-container),
+  .lm_item:not(.lm_stack):has(.ai-module-container) {
+    width: 0 !important;
+    min-width: 0 !important;
+    display: none !important;
+  }
+  
+  /* 确保3D视图占满整个可用空间 */
+  .lm_stack {
+    width: 100% !important;
+  }
+  
+  /* 移动端时，AI输入框不随页面滚动 */
+  body {
+    overflow: hidden;
+  }
+  
+  #appbody {
+    height: calc(100vh - 56px) !important;
+    overflow: hidden;
+  }
+  
+  /* 移动端AI输入框样式优化 */
+  .ai-input-wrapper {
+    gap: 10px;
+  }
+  
+  .ai-prompt-textarea::placeholder {
+    font-size: 11px;
+  }
+  
+  /* 移动端隐藏代码编辑器组件 */
+  .lm_item:has([title="代码编辑器"]) {
+    display: none !important;
+  }
+  
+  /* 移动端强制只显示3D视图 */
+  .lm_stack > .lm_items {
+    display: block !important;
+  }
+  
+  .lm_stack > .lm_items > .lm_item:not(:first-child) {
+    display: none !important;
+  }
+}
+
+/* 针对更小屏幕的优化 */
+@media (max-width: 480px) {
+  #appbody {
+    height: calc(100vh - 48px) !important;
+  }
+  
+  .topnav {
+    height: 48px;
+  }
+  
+  .lm_goldenlayout {
+    height: calc(100vh - 48px - 150px) !important; /* 减去顶部导航栏和底部AI输入框的高度 */
+  }
+  
+  .ai-input-wrapper {
+    padding: 10px 8px !important;
+  }
+  
+  .ai-prompt-textarea {
+    height: 60px !important;
+    font-size: 12px !important;
+    padding: 8px !important;
+  }
+  
+  .ai-generate-btn-module {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+  
+  .ai-generate-btn-module svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* 更小屏幕时进一步优化按钮文字 */
+  .ai-generate-btn-module {
+    justify-content: center;
   }
 }
 
@@ -1415,12 +1577,12 @@ body {
     padding: 3px 6px;
   }
   
-  .btn-login, .btn-signup, .btn-user-center, .btn-signout {
+  .btn-auth, .btn-user-center, .btn-signout {
     padding: 6px 10px;
     font-size: 11px;
   }
   
-  .btn-login span, .btn-signup span, .btn-user-center span {
+  .btn-auth .btn-text, .btn-user-center .btn-text {
     display: none;
   }
   
@@ -1429,7 +1591,7 @@ body {
   }
   
   .ai-prompt-textarea {
-    height: 80px;
+    height: 70px;
     font-size: 12px;
   }
   
@@ -1462,6 +1624,15 @@ body {
   
   .console-content {
     font-size: 11px;
+  }
+  
+  /* 移动端AI输入区域进一步优化 */
+  .ai-input-wrapper {
+    padding: 10px;
+  }
+  
+  .ai-prompt-textarea {
+    margin-bottom: 8px;
   }
 }
 
