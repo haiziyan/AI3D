@@ -279,7 +279,7 @@ body {
   flex-direction: column;
   background: var(--tertiary-bg);
   padding: 16px;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .ai-module-content {
@@ -293,6 +293,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .ai-section-title {
@@ -452,7 +453,6 @@ body {
 
 /* ==================== 控制台输出（集成在AI模块中） ==================== */
 .console-output {
-  margin-top: 16px;
   background-color: var(--primary-bg);
   border-radius: 8px;
   border: 1px solid var(--divider-color);
@@ -460,6 +460,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .console-header {
@@ -472,6 +473,7 @@ body {
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .console-header svg {
@@ -487,8 +489,7 @@ body {
   line-height: 1.6;
   background-color: var(--tertiary-bg);
   box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.3);
-  min-height: 200px;
-  max-height: 400px;
+  min-height: 0;
 }
 
 .console-content::-webkit-scrollbar {
@@ -638,6 +639,64 @@ body {
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+}
+
+/* ==================== 认证Tab（登录/注册） ==================== */
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--divider-color);
+  padding-bottom: 0;
+}
+
+.auth-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: -2px;
+  flex: 1;
+  justify-content: center;
+}
+
+.auth-tab-btn:hover {
+  color: var(--text-primary);
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.auth-tab-btn.active {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+}
+
+.auth-tab-btn svg {
+  flex-shrink: 0;
+}
+
+.auth-form-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.auth-form-content.active {
+  display: block;
+}
+
+.auth-form-content h2 {
+  margin: 0 0 24px 0;
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
 }
 
 /* ==================== 用户中心 ==================== */

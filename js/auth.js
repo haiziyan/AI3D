@@ -181,6 +181,7 @@ class AuthManager {
         if (userInfoElement) {
             if (this.currentUser) {
                 userInfoElement.innerHTML = `
+                    <span class="user-credits">${this.userCredits.toFixed(2)} 积分</span>
                     <button onclick="authManager.showUserCenter()" class="btn-user-center">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -191,8 +192,23 @@ class AuthManager {
                 `;
             } else {
                 userInfoElement.innerHTML = `
-                    <button onclick="authManager.showLoginModal()" class="btn-login">登录</button>
-                    <button onclick="authManager.showSignupModal()" class="btn-signup">注册</button>
+                    <button onclick="authManager.showAuthModal()" class="btn-login">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                            <polyline points="10 17 15 12 10 7"/>
+                            <line x1="15" y1="12" x2="3" y2="12"/>
+                        </svg>
+                        登录
+                    </button>
+                    <button onclick="authManager.showAuthModal('signup')" class="btn-signup">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                            <line x1="20" y1="8" x2="20" y2="14"/>
+                            <line x1="23" y1="11" x2="17" y2="11"/>
+                        </svg>
+                        注册
+                    </button>
                 `;
             }
         }
@@ -216,16 +232,18 @@ class AuthManager {
         }
     }
 
-    showLoginModal() {
+    showAuthModal(tab = 'login') {
         const modal = document.getElementById('authModal');
-        const modalTitle = document.getElementById('authModalTitle');
-        const authForm = document.getElementById('authForm');
         
-        modalTitle.textContent = '登录';
-        authForm.onsubmit = async (e) => {
+        // 设置表单提交事件
+        const loginForm = document.getElementById('loginFormElement');
+        const signupForm = document.getElementById('signupFormElement');
+        
+        // 登录表单
+        loginForm.onsubmit = async (e) => {
             e.preventDefault();
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
             
             try {
                 await this.signIn(email, password);
@@ -236,19 +254,17 @@ class AuthManager {
             }
         };
         
-        modal.style.display = 'flex';
-    }
-
-    showSignupModal() {
-        const modal = document.getElementById('authModal');
-        const modalTitle = document.getElementById('authModalTitle');
-        const authForm = document.getElementById('authForm');
-        
-        modalTitle.textContent = '注册';
-        authForm.onsubmit = async (e) => {
+        // 注册表单
+        signupForm.onsubmit = async (e) => {
             e.preventDefault();
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+            
+            if (password !== passwordConfirm) {
+                alert('两次输入的密码不一致');
+                return;
+            }
             
             try {
                 await this.signUp(email, password);
@@ -258,6 +274,22 @@ class AuthManager {
                 alert('注册失败: ' + error.message);
             }
         };
+        
+        // 切换到指定的tab
+        document.querySelectorAll('.auth-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelectorAll('.auth-form-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        if (tab === 'signup') {
+            document.querySelectorAll('.auth-tab-btn')[1].classList.add('active');
+            document.getElementById('signupForm').classList.add('active');
+        } else {
+            document.querySelectorAll('.auth-tab-btn')[0].classList.add('active');
+            document.getElementById('loginForm').classList.add('active');
+        }
         
         modal.style.display = 'flex';
     }
