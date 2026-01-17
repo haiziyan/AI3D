@@ -6,7 +6,7 @@ var myLayout, monacoEditor, threejsViewport,
     consoleContainer, consoleGolden, codeContainer, gui,
     GUIState, guiSeparatorAdded = false, userGui = false, count = 0, //focused = true,
     messageHandlers = {},
-    startup, file = {}, realConsoleLog;
+    startup, file = {}, realConsoleLog, messageQueue = [], alternatingColor = true;
 window.workerWorking = false;
 
 let starterCode = 
@@ -359,6 +359,11 @@ function initialize(projectContent = null) {
         // 设置控制台容器
         consoleContainer = document.getElementById('consoleOutputContent');
         
+        // 刷新消息队列（如果有缓存的消息）
+        if (window.flushConsoleQueue) {
+            window.flushConsoleQueue();
+        }
+        
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {
             let seen = new WeakSet();
@@ -373,12 +378,14 @@ function initialize(projectContent = null) {
 
         // Overwrite the existing logging/error behaviour to print messages to the Console window
         if (!realConsoleLog) {
-            let alternatingColor = true;
             realConsoleLog = console.log;
+            
             console.log = function (message) {
-                // 检查 consoleContainer 是否已初始化
+                realConsoleLog.apply(console, arguments);
+                
+                // 如果控制台容器未初始化，将消息加入队列
                 if (!consoleContainer) {
-                    realConsoleLog.apply(console, arguments);
+                    messageQueue.push({ type: 'log', message: message });
                     return;
                 }
                 
@@ -395,17 +402,42 @@ function initialize(projectContent = null) {
                 }
                 consoleContainer.appendChild(newline);
                 consoleContainer.scrollTop = consoleContainer.scrollHeight;
-                realConsoleLog.apply(console, arguments);
             };
+            
+            // 刷新消息队列到控制台
+            window.flushConsoleQueue = function() {
+                if (consoleContainer && messageQueue.length > 0) {
+                    messageQueue.forEach(item => {
+                        if (item.type === 'log') {
+                            console.log(item.message);
+                        } else if (item.type === 'error') {
+                            // 处理错误消息
+                            let newline = document.createElement("div");
+                            newline.style.color = "red";
+                            newline.style.fontFamily = "monospace";
+                            newline.style.fontSize = "1.2em";
+                            newline.innerHTML = item.message;
+                            consoleContainer.appendChild(newline);
+                        }
+                    });
+                    messageQueue = [];
+                    consoleContainer.scrollTop = consoleContainer.scrollHeight;
+                }
+            };
+            
             // Call this console.log when triggered from the WASM
             messageHandlers["log"  ] = (payload) => { console.log(payload); };
             messageHandlers["error"] = (payload) => { window.workerWorking = false; console.error(payload); };
 
             // Print Errors in Red
             window.onerror = function (err, url, line, colno, errorObj) {
-                // 检查 consoleContainer 是否已初始化
+                realConsoleLog.call(console, "Error:", err);
+                
+                // 如果控制台容器未初始化，将错误加入队列
                 if (!consoleContainer) {
-                    realConsoleLog.call(console, "Error:", err);
+                    let errorText = JSON.stringify(err, getCircularReplacer());
+                    if (errorText.startsWith('"')) { errorText = errorText.slice(1, -1); }
+                    messageQueue.push({ type: 'error', message: "Line " + line + ": " + errorText });
                     return;
                 }
                 
