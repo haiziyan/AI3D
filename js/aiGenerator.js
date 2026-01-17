@@ -47,7 +47,7 @@ class AIGenerator {
 
 ### 4. 布尔运算
 - Union(shape1, shape2) 或 Union([shapes]) - 并集
-- Difference(baseShape, toolShape) 或 Difference(base, [tools]) - 差集（从 base 中减去 tool）
+- Difference(base, [tools]) - 差集（从 base 中减去 tool）
 - Intersection(shape1, shape2) 或 Intersection([shapes]) - 交集
 
 ### 5. 高级建模操作
@@ -115,7 +115,6 @@ let final = Translate([0, 0, 10], result);
 - 不要包含 \`\`\`javascript 或其他 markdown 标记
 - 不要添加额外的解释文字
 - 代码必须可以直接在 AI 3D Studio 中执行
-- 确保所有形状都通过 sceneShapes.push() 添加到场景
 
 现在，请根据用户的描述生成相应的 AI 3D Studio 代码。`
                         },

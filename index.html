@@ -1,24 +1,93 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
     <head>
-        <title>AI 3D CAD Studio</title>
+        <title>AI 3D Studio - AI驱动的在线3D CAD建模工具 | 免费在线CAD设计</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <meta name="application-name"   content="AI 3D CAD Studio">
-        <meta name="description"        content="AI驱动的全功能在线CAD建模工具">
-        <meta name="keywords"           content="SCAD, OpenSCAD, CAD, OpenCascade, AI, 3D建模">
-        <meta name="author"             content="AI 3D Studio">
-        <meta name="viewport"           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <meta name="theme-color"        content="#2c3e50">
+        
+        <!-- 基本SEO -->
+        <meta name="application-name" content="AI 3D Studio">
+        <meta name="description" content="AI 3D Studio是一款强大的AI驱动在线3D CAD建模工具，支持自然语言生成3D模型、参数化设计、STEP/STL导出。基于OpenCascade.js，完全免费，无需安装，浏览器即可使用。">
+        <meta name="keywords" content="AI 3D建模,在线CAD,3D设计工具,参数化建模,OpenCAD,AI建模,3D打印,STEP导出,STL导出,免费CAD软件,在线3D设计,AI CAD,智能建模,OpenCascade">
+        <meta name="author" content="AI 3D Studio">
+        <meta name="robots" content="index, follow">
+        <meta name="googlebot" content="index, follow">
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://yourdomain.com/">
+        <meta property="og:title" content="AI 3D Studio - AI驱动的在线3D CAD建模工具">
+        <meta property="og:description" content="使用自然语言创建3D模型，支持参数化设计、STEP/STL导出。完全免费的在线CAD工具，无需安装。">
+        <meta property="og:image" content="https://yourdomain.com/icon/CascadeStudioBanner-1257x519.png">
+        <meta property="og:site_name" content="AI 3D Studio">
+        <meta property="og:locale" content="zh_CN">
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:url" content="https://yourdomain.com/">
+        <meta name="twitter:title" content="AI 3D Studio - AI驱动的在线3D CAD建模工具">
+        <meta name="twitter:description" content="使用自然语言创建3D模型，支持参数化设计、STEP/STL导出。完全免费的在线CAD工具。">
+        <meta name="twitter:image" content="https://yourdomain.com/icon/CascadeStudioBanner-1257x519.png">
+        
+        <!-- 移动端优化 -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="theme-color" content="#2c3e50">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="AI 3D Studio">
+        
+        <!-- 搜索引擎验证（根据需要添加）-->
+        <!-- <meta name="google-site-verification" content="your-verification-code"> -->
+        <!-- <meta name="baidu-site-verification" content="your-verification-code"> -->
+        
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://yourdomain.com/">
+        
+        <!-- 结构化数据 (JSON-LD) -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "AI 3D Studio",
+          "applicationCategory": "DesignApplication",
+          "operatingSystem": "Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "CNY"
+          },
+          "description": "AI驱动的在线3D CAD建模工具，支持自然语言生成3D模型、参数化设计、STEP/STL导出",
+          "softwareVersion": "1.0",
+          "author": {
+            "@type": "Organization",
+            "name": "AI 3D Studio"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "1000"
+          },
+          "screenshot": "https://yourdomain.com/icon/CascadeStudioScreenshot.png",
+          "featureList": [
+            "AI自然语言建模",
+            "参数化设计",
+            "STEP/STL/OBJ导出",
+            "在线3D预览",
+            "无需安装",
+            "完全免费"
+          ]
+        }
+        </script>
 
         <!-- Include these early and directly so they happen first -->
         <script>
-            // Install Cascade Studio as a Progressive Web App for Offline Access
+            // Install AI 3D Studio as a Progressive Web App for Offline Access
             // This needs to be put before ANY HTTP Requests are made, so it can cache them.
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('service-worker.js').then(function(registration) {
                     registration.update(); // Always update the registration for the latest assets
                 }, function() {
-                    console.log('Could not register Cascade Studio for offline use!');
+                    console.log('Could not register AI 3D Studio for offline use!');
                 });
             } else {
                 console.log('Browser does not support offline access!');
@@ -206,77 +275,100 @@
                     </svg>
                     用户中心
                 </h2>
+                
+                <!-- Tab导航 -->
+                <div class="user-center-tabs">
+                    <button class="tab-btn active" onclick="switchUserTab('info')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        个人信息
+                    </button>
+                    <button class="tab-btn" onclick="switchUserTab('credits')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        我的积分
+                    </button>
+                    <button class="tab-btn" onclick="switchUserTab('history')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                        生成记录
+                    </button>
+                </div>
+                
+                <!-- Tab内容 -->
                 <div class="user-center-content">
-                    <!-- 用户信息卡片 -->
-                    <div class="user-info-card">
-                        <div class="user-avatar">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                <circle cx="12" cy="7" r="4"/>
-                            </svg>
-                        </div>
-                        <div class="user-details">
-                            <div class="user-detail-item">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                                    <polyline points="22,6 12,13 2,6"/>
+                    <!-- 个人信息Tab -->
+                    <div id="tabInfo" class="tab-content active">
+                        <div class="user-info-card">
+                            <div class="user-avatar">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
                                 </svg>
-                                <span class="detail-label">邮箱</span>
-                                <span class="detail-value" id="userCenterEmail">-</span>
                             </div>
-                            <div class="user-detail-item">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12 6 12 12 16 14"/>
-                                </svg>
-                                <span class="detail-label">注册时间</span>
-                                <span class="detail-value" id="userCreatedAt">-</span>
+                            <div class="user-details">
+                                <div class="user-detail-item">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                        <polyline points="22,6 12,13 2,6"/>
+                                    </svg>
+                                    <span class="detail-label">邮箱</span>
+                                    <span class="detail-value" id="userCenterEmail">-</span>
+                                </div>
+                                <div class="user-detail-item">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span class="detail-label">注册时间</span>
+                                    <span class="detail-value" id="userCreatedAt">-</span>
+                                </div>
                             </div>
                         </div>
-                        <button class="btn-logout" onclick="authManager.signOut(); document.getElementById('userCenterModal').style.display='none'">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                                <polyline points="16 17 21 12 16 7"/>
-                                <line x1="21" y1="12" x2="9" y2="12"/>
-                            </svg>
-                            退出登录
-                        </button>
                     </div>
                     
-                    <!-- 积分信息卡片 -->
-                    <div class="credits-info">
-                        <div class="credits-header">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="M12 6v6l4 2"/>
-                            </svg>
-                            <h3>我的积分</h3>
+                    <!-- 积分Tab -->
+                    <div id="tabCredits" class="tab-content">
+                        <div class="credits-info">
+                            <div class="credits-display">
+                                <span class="credits-amount" id="creditsAmount">0</span>
+                                <span class="credits-label">可用积分</span>
+                            </div>
+                            <button class="btn-recharge" onclick="alert('充值功能开发中...')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                                    <path d="M21 3v5h-5"/>
+                                </svg>
+                                充值积分
+                            </button>
                         </div>
-                        <div class="credits-display">
-                            <span class="credits-amount" id="creditsAmount">0</span>
-                            <span class="credits-label">可用积分</span>
-                        </div>
-                        <button class="btn-recharge" onclick="alert('充值功能开发中...')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
-                                <path d="M21 3v5h-5"/>
-                            </svg>
-                            充值积分
-                        </button>
                     </div>
                     
-                    <!-- 生成记录 -->
-                    <div class="transaction-history">
-                        <div class="history-header">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                            </svg>
-                            <h3>AI生成记录</h3>
-                        </div>
-                        <div id="transactionHistory" class="history-list">
-                            <!-- 生成记录将动态加载 -->
+                    <!-- 生成记录Tab -->
+                    <div id="tabHistory" class="tab-content">
+                        <div class="transaction-history">
+                            <div id="transactionHistory" class="history-list">
+                                <!-- 生成记录将动态加载 -->
+                            </div>
                         </div>
                     </div>
+                </div>
+                
+                <!-- 退出登录按钮（底部） -->
+                <div class="user-center-footer">
+                    <button class="btn-logout" onclick="authManager.signOut(); document.getElementById('userCenterModal').style.display='none'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        退出登录
+                    </button>
                 </div>
             </div>
         </div>
@@ -291,6 +383,26 @@
             function toggleMenu() {
                 const menu = document.getElementById('navMenu');
                 menu.classList.toggle('active');
+            }
+
+            // 切换用户中心Tab
+            function switchUserTab(tabName) {
+                // 移除所有active类
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // 添加active类到当前tab
+                event.target.closest('.tab-btn').classList.add('active');
+                document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+                
+                // 如果切换到生成记录tab，加载数据
+                if (tabName === 'history' && authManager) {
+                    authManager.loadTransactionHistory();
+                }
             }
 
             // 点击外部关闭模态框

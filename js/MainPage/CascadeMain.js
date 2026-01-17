@@ -10,7 +10,7 @@ var myLayout, monacoEditor, threejsViewport,
 window.workerWorking = false;
 
 let starterCode = 
-`// Welcome to Cascade Studio!   Here are some useful functions:
+`// Welcome to AI 3D Studio!   Here are some useful functions:
 //  Translate(), Rotate(), Scale(), Mirror(), Union(), Difference(), Intersection()
 //  Box(), Sphere(), Cylinder(), Cone(), Text3D(), Polygon()
 //  Offset(), Extrude(), RotatedExtrude(), Revolve(), Pipe(), Loft(), 
@@ -56,27 +56,17 @@ function initialize(projectContent = null) {
         }
 
         // Define the Default Golden Layout
-        // 控制台和AI模块在最左侧栏（控制台在上方），代码编辑器和3D视图在右侧用Tab切换
+        // AI模块在最左侧栏（包含控制台输出），代码编辑器和3D视图在右侧用Tab切换
         myLayout = new GoldenLayout({
             content: [{
                 type: 'row',
                 content: [{
-                    type: 'column',
-                    width: 25.0,
-                    content: [{
-                        type: 'component',
-                        componentName: 'console',
-                        title: '控制台',
-                        componentState: {},
-                        isClosable: false,
-                        height: 35
-                    }, {
-                        type: 'component',
-                        componentName: 'aiModule',
-                        title: 'AI 生成器',
-                        componentState: {},
-                        isClosable: false
-                    }]
+                    type: 'component',
+                    componentName: 'aiModule',
+                    title: 'AI 生成器',
+                    componentState: {},
+                    isClosable: false,
+                    width: 25.0
                 }, {
                     type: 'stack',
                     content: [{
@@ -217,7 +207,7 @@ function initialize(projectContent = null) {
                 }
 
                 gui = new Tweakpane.Pane({
-                    title: 'Cascade Control Panel',
+                    title: 'AI 3D Control Panel',
                     container: document.getElementById('guiPanel')
                 });
                 guiSeparatorAdded = false;
@@ -266,7 +256,7 @@ function initialize(projectContent = null) {
                 // to the URL depending on the current mode of the editor.
                 if (saveToURL) {
                     console.log("Saved to URL!"); //Generation Complete! 
-                    window.history.replaceState({}, 'Cascade Studio',
+                    window.history.replaceState({}, 'AI 3D Studio',
                       new URL(location.pathname + "#code=" + encode(newCode) + "&gui=" + encode(JSON.stringify(GUIState)), location.href).href
                     );
                 }
@@ -324,8 +314,10 @@ function initialize(projectContent = null) {
         });
     });
 
-    // Set up the AI Module Component
+    // Set up the AI Module Component (with integrated console)
     myLayout.registerComponent('aiModule', function (container) {
+        consoleGolden = container;
+        
         let aiModuleContainer = document.createElement("div");
         aiModuleContainer.className = "ai-module-container";
         aiModuleContainer.innerHTML = `
@@ -339,14 +331,7 @@ function initialize(projectContent = null) {
                         </svg>
                         AI 模型描述
                     </div>
-                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" placeholder="用自然语言描述你想要的 3D 模型...
-
-示例：
-• 创建一个边长100的立方体，中间挖一个半径30的球形孔
-• 生成一个参数化齿轮，外径100，内径40，齿数20
-• 设计一个手机支架，底座100x80x10，支撑臂倾斜60度
-
-提示：使用明确的尺寸和参数，描述越详细效果越好！"></textarea>
+                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" placeholder="用自然语言描述你想要的 3D 模型，例如：创建一个边长100的立方体，中间挖一个半径30的球形孔"></textarea>
                     <button id="aiGenerateBtnModule" class="ai-generate-btn-module">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
@@ -356,85 +341,24 @@ function initialize(projectContent = null) {
                     </button>
                 </div>
                 
-                <div class="ai-tips">
-                    <div class="ai-tips-title">
+                <div class="console-output">
+                    <div class="console-header">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="16" x2="12" y2="12"/>
-                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                            <polyline points="4 17 10 11 4 5"/>
+                            <line x1="12" y1="19" x2="20" y2="19"/>
                         </svg>
-                        快速提示
+                        控制台输出
                     </div>
-                    <ul class="ai-tips-list">
-                        <li>按 Ctrl+Enter 快速生成</li>
-                        <li>提供明确的尺寸参数</li>
-                        <li>使用专业的 CAD 术语</li>
-                        <li>复杂模型可分步描述</li>
-                    </ul>
-                </div>
-                
-                <div class="ai-examples">
-                    <div class="ai-examples-title">快速示例</div>
-                    <button class="ai-example-btn" data-example="创建一个边长100的立方体，中间挖一个半径30的球形孔，所有边添加5mm圆角">
-                        带孔和圆角的立方体
-                    </button>
-                    <button class="ai-example-btn" data-example="创建一个参数化的齿轮：外径滑块(80-150，默认100)，内径滑块(20-60，默认40)，厚度滑块(10-40，默认20)">
-                        参数化齿轮
-                    </button>
-                    <button class="ai-example-btn" data-example="设计一个手机支架：底座长方体100x80x10，支撑臂从底座后部向上倾斜60度、高度80、厚度10，顶部有宽度70、深度10的手机槽">
-                        手机支架
-                    </button>
-                    <button class="ai-example-btn" data-example="创建一个咖啡杯：使用旋转拉伸，底部直径60，顶部直径80，高度100，壁厚3">
-                        咖啡杯
-                    </button>
+                    <div id="consoleOutputContent" class="console-content"></div>
                 </div>
             </div>
         `;
         container.getElement().get(0).appendChild(aiModuleContainer);
-        container.getElement().get(0).style.overflow = 'auto';
+        container.getElement().get(0).style.overflow = 'hidden';
         
-        // 绑定AI生成按钮事件
-        setTimeout(() => {
-            const aiBtn = document.getElementById('aiGenerateBtnModule');
-            const aiInput = document.getElementById('aiPromptInputModule');
-            
-            if (aiBtn && aiInput) {
-                aiBtn.onclick = () => {
-                    const prompt = aiInput.value.trim();
-                    if (prompt && window.aiGenerator) {
-                        window.aiGenerator.generateFromPrompt(prompt);
-                    }
-                };
-                
-                // 支持Ctrl+Enter快捷键
-                aiInput.onkeydown = (e) => {
-                    if (e.ctrlKey && e.key === 'Enter') {
-                        e.preventDefault();
-                        aiBtn.click();
-                    }
-                };
-                
-                // 绑定示例按钮
-                const exampleBtns = document.querySelectorAll('.ai-example-btn');
-                exampleBtns.forEach(btn => {
-                    btn.onclick = () => {
-                        const example = btn.getAttribute('data-example');
-                        aiInput.value = example;
-                        aiInput.focus();
-                    };
-                });
-            }
-        }, 100);
-    });
-
-    // Set up the Error and Status Reporting Dockable Console Window
-    myLayout.registerComponent('console', function (container) {
-        consoleGolden = container;
-        consoleContainer = document.createElement("div");
-        container.getElement().get(0).appendChild(consoleContainer);
-        container.getElement().get(0).style.overflow  = 'auto';
-        container.getElement().get(0).style.boxShadow = "inset 0px 0px 3px rgba(0,0,0,0.75)";
-
+        // 设置控制台容器
+        consoleContainer = document.getElementById('consoleOutputContent');
+        
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {
             let seen = new WeakSet();
@@ -464,7 +388,7 @@ function initialize(projectContent = null) {
                     newline.innerHTML = "undefined";
                 }
                 consoleContainer.appendChild(newline);
-                consoleContainer.parentElement.scrollTop = consoleContainer.parentElement.scrollHeight;
+                consoleContainer.scrollTop = consoleContainer.scrollHeight;
                 realConsoleLog.apply(console, arguments);
             };
             // Call this console.log when triggered from the WASM
@@ -481,7 +405,7 @@ function initialize(projectContent = null) {
                 if (errorText.startsWith('"')) { errorText = errorText.slice(1, -1); }
                 newline.innerHTML = "Line " + line + ": " + errorText;
                 consoleContainer.appendChild(newline);
-                consoleContainer.parentElement.scrollTop = consoleContainer.parentElement.scrollHeight;
+                consoleContainer.scrollTop = consoleContainer.scrollHeight;
 
                 // Highlight the error'd code in the editor
                 if (!errorObj || !(errorObj.stack.includes("wasm-function"))) {
@@ -499,14 +423,45 @@ function initialize(projectContent = null) {
             // If we've received a progress update from the Worker Thread, append it to our previous message
             messageHandlers["Progress"] = (payload) => {
                 // Add a dot to the progress indicator for each progress message we find in the queue
-                consoleContainer.parentElement.lastElementChild.lastElementChild.innerText =
-                    "> Generating Model" + ".".repeat(payload.opNumber) + ((payload.opType)? " ("+payload.opType+")" : "");
+                if (consoleContainer.lastElementChild) {
+                    consoleContainer.lastElementChild.innerText =
+                        "> Generating Model" + ".".repeat(payload.opNumber) + ((payload.opType)? " ("+payload.opType+")" : "");
+                }
             };
 
             // Print friendly welcoming messages
-            console.log("Welcome to Cascade Studio!");
+            console.log("Welcome to AI 3D Studio!");
             console.log("Loading CAD Kernel...");
         }
+        
+        // 绑定AI生成按钮事件
+        setTimeout(() => {
+            const aiBtn = document.getElementById('aiGenerateBtnModule');
+            const aiInput = document.getElementById('aiPromptInputModule');
+            
+            if (aiBtn && aiInput) {
+                aiBtn.onclick = () => {
+                    const prompt = aiInput.value.trim();
+                    if (prompt && window.aiGenerator) {
+                        window.aiGenerator.generateFromPrompt(prompt);
+                    }
+                };
+                
+                // 支持Ctrl+Enter快捷键
+                aiInput.onkeydown = (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        e.preventDefault();
+                        aiBtn.click();
+                    }
+                };
+            }
+        }, 100);
+    });
+
+    // Set up the Error and Status Reporting (now integrated in AI Module)
+    myLayout.registerComponent('console', function (container) {
+        // This component is deprecated but kept for compatibility
+        // Console output is now integrated into the AI Module
     });
 
     // onbeforeunload doesn't get triggered in time to do any good
@@ -664,7 +619,7 @@ async function saveProject() {
     let currentCode = monacoEditor.getValue();
     if (!file.handle) {
         file.handle = await getNewFileHandle(
-            "Cascade Studio project files",
+            "AI 3D Studio project files",
             "application/json",
             "json"
         );
@@ -698,14 +653,14 @@ const loadProject = async () => {
 
     // Load Project .json from a file
     [file.handle] = await getNewFileHandle(
-        'Cascade Studio project files',
+        'AI 3D Studio project files',
         'application/json',
         'json',
         open = true
     );
     let fileSystemFile = await file.handle.getFile();
     let jsonContent = await fileSystemFile.text();
-    window.history.replaceState({}, 'Cascade Studio','?');
+    window.history.replaceState({}, 'AI 3D Studio','?');
     initialize(projectContent=jsonContent);
     codeContainer.setTitle(file.handle.name);
     file.content = monacoEditor.getValue();
