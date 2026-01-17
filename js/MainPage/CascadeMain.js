@@ -56,7 +56,7 @@ function initialize(projectContent = null) {
         }
 
         // Define the Default Golden Layout
-        // AI模块和控制台在最左侧栏，代码编辑器和3D视图在右侧用Tab切换
+        // 控制台和AI模块在最左侧栏（控制台在上方），代码编辑器和3D视图在右侧用Tab切换
         myLayout = new GoldenLayout({
             content: [{
                 type: 'row',
@@ -65,14 +65,15 @@ function initialize(projectContent = null) {
                     width: 25.0,
                     content: [{
                         type: 'component',
-                        componentName: 'aiModule',
-                        title: 'AI 生成器',
-                        componentState: {},
-                        isClosable: false
-                    }, {
-                        type: 'component',
                         componentName: 'console',
                         title: '控制台',
+                        componentState: {},
+                        isClosable: false,
+                        height: 35
+                    }, {
+                        type: 'component',
+                        componentName: 'aiModule',
+                        title: 'AI 生成器',
                         componentState: {},
                         isClosable: false
                     }]

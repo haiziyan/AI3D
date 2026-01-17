@@ -142,6 +142,9 @@ let final = Translate([0, 0, 10], result);
             // 扣除积分
             await authManager.deductCredits(creditsUsed);
 
+            // 记录生成历史到数据库
+            await this.logGeneration(prompt, creditsUsed, totalTokens);
+
             console.log(`AI 生成完成，消耗 ${totalTokens} tokens，扣除 ${creditsUsed.toFixed(2)} 积分`);
 
             // 提取生成的代码
@@ -159,6 +162,29 @@ let final = Translate([0, 0, 10], result);
         } catch (error) {
             console.error('AI 生成失败:', error);
             throw error;
+        }
+    }
+
+    async logGeneration(description, creditsConsumed, tokensUsed) {
+        if (!authManager.supabase || !authManager.currentUser) return;
+
+        try {
+            const { error } = await authManager.supabase
+                .from('ai_generations')
+                .insert([
+                    {
+                        user_id: authManager.currentUser.id,
+                        description: description,
+                        credits_consumed: creditsConsumed,
+                        tokens_used: tokensUsed
+                    }
+                ]);
+
+            if (error) {
+                console.error('记录生成历史失败:', error);
+            }
+        } catch (err) {
+            console.error('记录生成历史异常:', err);
         }
     }
 

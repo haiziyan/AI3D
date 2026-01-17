@@ -287,15 +287,16 @@ class AuthManager {
         if (!this.supabase || !this.currentUser) return;
 
         try {
+            // 从 ai_generations 表加载生成记录
             const { data, error } = await this.supabase
-                .from('credit_transactions')
+                .from('ai_generations')
                 .select('*')
                 .eq('user_id', this.currentUser.id)
                 .order('created_at', { ascending: false })
                 .limit(20);
 
             if (error) {
-                console.error('加载交易历史失败:', error);
+                console.error('加载生成记录失败:', error);
                 return;
             }
 
@@ -308,23 +309,39 @@ class AuthManager {
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                 <polyline points="14 2 14 8 20 8"/>
                             </svg>
-                            <p>暂无消费记录</p>
-                            <span>开始使用AI生成功能后，消费记录将显示在这里</span>
+                            <p>暂无生成记录</p>
+                            <span>开始使用AI生成功能后，生成记录将显示在这里</span>
                         </div>
                     `;
                 } else {
-                    historyList.innerHTML = data.map(tx => `
-                        <div class="transaction-item">
-                            <span class="tx-date">${new Date(tx.created_at).toLocaleString('zh-CN')}</span>
-                            <span class="tx-desc">${tx.description}</span>
-                            <span class="tx-amount ${tx.amount < 0 ? 'negative' : 'positive'}">${tx.amount > 0 ? '+' : ''}${tx.amount.toFixed(2)}</span>
-                            <span class="tx-balance">余额: ${tx.balance_after.toFixed(2)}</span>
+                    historyList.innerHTML = data.map(record => `
+                        <div class="generation-item">
+                            <div class="gen-header">
+                                <span class="gen-date">${new Date(record.created_at).toLocaleString('zh-CN', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</span>
+                                <span class="gen-credits">-${record.credits_consumed.toFixed(2)} 积分</span>
+                            </div>
+                            <div class="gen-description">${record.description || 'AI生成任务'}</div>
+                            <div class="gen-footer">
+                                <span class="gen-tokens">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2"/>
+                                    </svg>
+                                    ${record.tokens_used || 0} tokens
+                                </span>
+                            </div>
                         </div>
                     `).join('');
                 }
             }
         } catch (err) {
-            console.error('加载交易历史异常:', err);
+            console.error('加载生成记录异常:', err);
         }
     }
 }

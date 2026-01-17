@@ -751,7 +751,7 @@ body {
   background: linear-gradient(135deg, #229954, #1e8449);
 }
 
-/* 消费记录 */
+/* 生成记录 */
 .transaction-history {
   background: linear-gradient(135deg, var(--tertiary-bg) 0%, var(--primary-bg) 100%);
   padding: 24px;
@@ -802,56 +802,72 @@ body {
   background: var(--accent-color);
 }
 
-.transaction-item {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  gap: 12px;
-  padding: 12px;
+/* 生成记录项 */
+.generation-item {
   background-color: var(--primary-bg);
   border-radius: 8px;
-  margin-bottom: 8px;
-  font-size: 13px;
-  align-items: center;
-  transition: all 0.3s ease;
+  padding: 16px;
+  margin-bottom: 12px;
   border-left: 3px solid transparent;
+  transition: all 0.3s ease;
 }
 
-.transaction-item:hover {
+.generation-item:hover {
   background-color: var(--secondary-bg);
   transform: translateX(4px);
   border-left-color: var(--accent-color);
+  box-shadow: var(--shadow-sm);
 }
 
-.tx-date {
+.gen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.gen-date {
   color: var(--text-muted);
   font-size: 12px;
+  font-family: var(--font-mono);
 }
 
-.tx-desc {
-  color: var(--text-secondary);
-}
-
-.tx-amount {
+.gen-credits {
+  color: var(--error-color);
+  font-size: 13px;
   font-weight: 600;
   font-family: var(--font-mono);
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.tx-amount.negative {
-  color: var(--error-color);
   background-color: rgba(231, 76, 60, 0.1);
+  padding: 4px 10px;
+  border-radius: 12px;
 }
 
-.tx-amount.positive {
-  color: var(--success-color);
-  background-color: rgba(46, 204, 113, 0.1);
+.gen-description {
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--divider-color);
 }
 
-.tx-balance {
+.gen-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gen-tokens {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: var(--text-muted);
   font-size: 12px;
   font-family: var(--font-mono);
+}
+
+.gen-tokens svg {
+  color: var(--accent-color);
 }
 
 /* 空状态 */
