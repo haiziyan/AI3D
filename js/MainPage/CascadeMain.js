@@ -575,6 +575,38 @@ function initialize(projectContent = null) {
                         aiBtn.click();
                     }
                 };
+                
+                // 移动端：处理输入法弹出时的页面滚动问题
+                if (window.innerWidth <= 768) {
+                    let originalHeight = window.innerHeight;
+                    
+                    aiInput.addEventListener('focus', function() {
+                        console.log('AI输入框获得焦点');
+                        // 延迟执行，等待输入法弹出
+                        setTimeout(() => {
+                            // 滚动到输入框位置
+                            this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                    });
+                    
+                    aiInput.addEventListener('blur', function() {
+                        console.log('AI输入框失去焦点');
+                        // 恢复页面位置
+                        window.scrollTo(0, 0);
+                    });
+                    
+                    // 监听窗口大小变化（输入法弹出会改变窗口高度）
+                    window.addEventListener('resize', function() {
+                        const currentHeight = window.innerHeight;
+                        if (currentHeight < originalHeight) {
+                            // 输入法弹出
+                            console.log('输入法弹出，高度变化:', originalHeight, '->', currentHeight);
+                        } else {
+                            // 输入法收起
+                            originalHeight = currentHeight;
+                        }
+                    });
+                }
             }
         }, 100);
     });
@@ -636,12 +668,37 @@ function initialize(projectContent = null) {
         setTimeout(() => {
             const cascadeView = document.querySelector('[title="3D 视图"]');
             const codeEditor = document.querySelector('[title="代码编辑器"]');
+            const canvas = document.querySelector('canvas');
+            const monacoEditorEl = document.querySelector('.monaco-editor');
+            
             console.log('3D视图容器:', cascadeView);
             console.log('代码编辑器容器:', codeEditor);
+            console.log('Canvas元素:', canvas);
+            console.log('Monaco编辑器元素:', monacoEditorEl);
+            
+            if (canvas) {
+                console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+            }
+            if (monacoEditorEl) {
+                console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
+            }
             
             // 强制更新布局
             myLayout.updateSize(window.innerWidth, window.innerHeight -
                 document.getElementById('topnav').offsetHeight);
+            
+            // 强制更新Monaco编辑器布局
+            if (monacoEditor) {
+                monacoEditor.layout();
+            }
+            
+            // 强制更新Three.js视图
+            if (threejsViewport && threejsViewport.renderer) {
+                threejsViewport.renderer.setSize(
+                    threejsViewport.container.getElement().get(0).offsetWidth,
+                    threejsViewport.container.getElement().get(0).offsetHeight
+                );
+            }
         }, 500);
     }
 
