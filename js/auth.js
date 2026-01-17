@@ -17,6 +17,9 @@ class AuthManager {
             if (user) {
                 this.currentUser = user;
                 await this.loadUserCredits();
+            } else {
+                // 如果没有用户登录，显示登录/注册按钮
+                this.updateUI();
             }
 
             // 监听认证状态变化
@@ -31,6 +34,9 @@ class AuthManager {
                     this.updateUI();
                 }
             });
+        } else {
+            // 如果 Supabase 未配置，也显示登录/注册按钮
+            this.updateUI();
         }
     }
 
