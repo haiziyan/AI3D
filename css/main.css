@@ -274,6 +274,7 @@ body {
   flex-direction: column;
   background: var(--tertiary-bg);
   padding: 16px;
+  overflow: auto;
 }
 
 .ai-module-content {
@@ -289,28 +290,45 @@ body {
   gap: 12px;
 }
 
+.ai-section-title {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-section-title svg {
+  color: var(--accent-color);
+}
+
 .ai-prompt-textarea {
   width: 100%;
-  min-height: 120px;
+  min-height: 150px;
   background-color: var(--primary-bg);
   border: 2px solid var(--divider-color);
   border-radius: 8px;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13px;
   padding: 12px;
   font-family: var(--font-main);
   resize: vertical;
   transition: all 0.3s ease;
+  line-height: 1.6;
+  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .ai-prompt-textarea:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .ai-prompt-textarea::placeholder {
   color: var(--text-muted);
+  font-size: 12px;
 }
 
 .ai-generate-btn-module {
@@ -343,6 +361,80 @@ body {
 
 .ai-generate-btn-module.generating svg {
   animation: spin 2s linear infinite;
+}
+
+.ai-tips {
+  background-color: var(--primary-bg);
+  border-left: 3px solid var(--accent-color);
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.ai-tips-title {
+  color: var(--accent-color);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-tips-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ai-tips-list li {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.6;
+  padding: 4px 0;
+  padding-left: 16px;
+  position: relative;
+}
+
+.ai-tips-list li:before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--accent-color);
+}
+
+.ai-examples {
+  margin-top: 12px;
+}
+
+.ai-examples-title {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ai-example-btn {
+  display: block;
+  width: 100%;
+  background-color: var(--primary-bg);
+  border: 1px solid var(--divider-color);
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  line-height: 1.4;
+}
+
+.ai-example-btn:hover {
+  background-color: var(--secondary-bg);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+  transform: translateX(4px);
 }
 
 @keyframes spin {

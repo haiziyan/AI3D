@@ -330,13 +330,61 @@ function initialize(projectContent = null) {
         aiModuleContainer.innerHTML = `
             <div class="ai-module-content">
                 <div class="ai-input-wrapper">
-                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" placeholder="用一句话描述你想要的 3D 模型，AI 将为你生成代码..."></textarea>
+                    <div class="ai-section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                        AI 模型描述
+                    </div>
+                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" placeholder="用自然语言描述你想要的 3D 模型...
+
+示例：
+• 创建一个边长100的立方体，中间挖一个半径30的球形孔
+• 生成一个参数化齿轮，外径100，内径40，齿数20
+• 设计一个手机支架，底座100x80x10，支撑臂倾斜60度
+
+提示：使用明确的尺寸和参数，描述越详细效果越好！"></textarea>
                     <button id="aiGenerateBtnModule" class="ai-generate-btn-module">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
                             <polyline points="12 6 12 12 16 14"/>
                         </svg>
                         生成代码
+                    </button>
+                </div>
+                
+                <div class="ai-tips">
+                    <div class="ai-tips-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        快速提示
+                    </div>
+                    <ul class="ai-tips-list">
+                        <li>按 Ctrl+Enter 快速生成</li>
+                        <li>提供明确的尺寸参数</li>
+                        <li>使用专业的 CAD 术语</li>
+                        <li>复杂模型可分步描述</li>
+                    </ul>
+                </div>
+                
+                <div class="ai-examples">
+                    <div class="ai-examples-title">快速示例</div>
+                    <button class="ai-example-btn" data-example="创建一个边长100的立方体，中间挖一个半径30的球形孔，所有边添加5mm圆角">
+                        带孔和圆角的立方体
+                    </button>
+                    <button class="ai-example-btn" data-example="创建一个参数化的齿轮：外径滑块(80-150，默认100)，内径滑块(20-60，默认40)，厚度滑块(10-40，默认20)">
+                        参数化齿轮
+                    </button>
+                    <button class="ai-example-btn" data-example="设计一个手机支架：底座长方体100x80x10，支撑臂从底座后部向上倾斜60度、高度80、厚度10，顶部有宽度70、深度10的手机槽">
+                        手机支架
+                    </button>
+                    <button class="ai-example-btn" data-example="创建一个咖啡杯：使用旋转拉伸，底部直径60，顶部直径80，高度100，壁厚3">
+                        咖啡杯
                     </button>
                 </div>
             </div>
@@ -348,6 +396,7 @@ function initialize(projectContent = null) {
         setTimeout(() => {
             const aiBtn = document.getElementById('aiGenerateBtnModule');
             const aiInput = document.getElementById('aiPromptInputModule');
+            
             if (aiBtn && aiInput) {
                 aiBtn.onclick = () => {
                     const prompt = aiInput.value.trim();
@@ -359,9 +408,20 @@ function initialize(projectContent = null) {
                 // 支持Ctrl+Enter快捷键
                 aiInput.onkeydown = (e) => {
                     if (e.ctrlKey && e.key === 'Enter') {
+                        e.preventDefault();
                         aiBtn.click();
                     }
                 };
+                
+                // 绑定示例按钮
+                const exampleBtns = document.querySelectorAll('.ai-example-btn');
+                exampleBtns.forEach(btn => {
+                    btn.onclick = () => {
+                        const example = btn.getAttribute('data-example');
+                        aiInput.value = example;
+                        aiInput.focus();
+                    };
+                });
             }
         }, 100);
     });
