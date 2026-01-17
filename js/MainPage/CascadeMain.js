@@ -56,11 +56,27 @@ function initialize(projectContent = null) {
         }
 
         // Define the Default Golden Layout
-        // 任务1：将代码区与CAD视图合并，用Tab页面切换
+        // AI模块和控制台在最左侧栏，代码编辑器和3D视图在右侧用Tab切换
         myLayout = new GoldenLayout({
             content: [{
-                type: 'column',
+                type: 'row',
                 content: [{
+                    type: 'column',
+                    width: 25.0,
+                    content: [{
+                        type: 'component',
+                        componentName: 'aiModule',
+                        title: 'AI 生成器',
+                        componentState: {},
+                        isClosable: false
+                    }, {
+                        type: 'component',
+                        componentName: 'console',
+                        title: '控制台',
+                        componentState: {},
+                        isClosable: false
+                    }]
+                }, {
                     type: 'stack',
                     content: [{
                         type: 'component',
@@ -75,13 +91,6 @@ function initialize(projectContent = null) {
                         componentState: { code: codeStr },
                         isClosable: false
                     }]
-                }, {
-                    type: 'component',
-                    componentName: 'console',
-                    title: '控制台',
-                    componentState: {},
-                    height: 25.0,
-                    isClosable: false
                 }]
             }],
             settings: {
@@ -312,6 +321,49 @@ function initialize(projectContent = null) {
             container.getElement().get(0).appendChild(floatingGUIContainer);
             threejsViewport = new CascadeEnvironment(container);
         });
+    });
+
+    // Set up the AI Module Component
+    myLayout.registerComponent('aiModule', function (container) {
+        let aiModuleContainer = document.createElement("div");
+        aiModuleContainer.className = "ai-module-container";
+        aiModuleContainer.innerHTML = `
+            <div class="ai-module-content">
+                <div class="ai-input-wrapper">
+                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" placeholder="用一句话描述你想要的 3D 模型，AI 将为你生成代码..."></textarea>
+                    <button id="aiGenerateBtnModule" class="ai-generate-btn-module">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        生成代码
+                    </button>
+                </div>
+            </div>
+        `;
+        container.getElement().get(0).appendChild(aiModuleContainer);
+        container.getElement().get(0).style.overflow = 'auto';
+        
+        // 绑定AI生成按钮事件
+        setTimeout(() => {
+            const aiBtn = document.getElementById('aiGenerateBtnModule');
+            const aiInput = document.getElementById('aiPromptInputModule');
+            if (aiBtn && aiInput) {
+                aiBtn.onclick = () => {
+                    const prompt = aiInput.value.trim();
+                    if (prompt && window.aiGenerator) {
+                        window.aiGenerator.generateFromPrompt(prompt);
+                    }
+                };
+                
+                // 支持Ctrl+Enter快捷键
+                aiInput.onkeydown = (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        aiBtn.click();
+                    }
+                };
+            }
+        }, 100);
     });
 
     // Set up the Error and Status Reporting Dockable Console Window

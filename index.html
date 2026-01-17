@@ -166,25 +166,6 @@
             </div>
         </div>
 
-        <!-- AI 输入区域 -->
-        <div id="aiInputPanel" class="ai-input-panel">
-            <div class="ai-input-container">
-                <svg class="ai-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                    <path d="M2 17l10 5 10-5"/>
-                    <path d="M2 12l10 5 10-5"/>
-                </svg>
-                <input type="text" id="aiPromptInput" placeholder="用一句话描述你想要的 3D 模型，AI 将为你生成代码..." />
-                <button id="aiGenerateBtn" class="ai-generate-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    生成
-                </button>
-            </div>
-        </div>
-
         <!-- 主应用区域 -->
         <div id="appbody" style="height:auto">
             <link data-name="vs/editor/editor.main" rel="stylesheet" href="./node_modules/monaco-editor/min/vs/editor/editor.main.css">
@@ -241,7 +222,7 @@
         <script>
             // 初始化
             window.addEventListener('load', () => {
-                initAIInput();
+                // AI输入已移至左侧栏，不需要初始化顶部面板
                 
                 // 更新用户中心的积分显示
                 setInterval(() => {

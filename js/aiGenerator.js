@@ -123,16 +123,10 @@ UI 控件：
 let aiGenerator;
 if (typeof window !== 'undefined') {
     aiGenerator = new AIGenerator();
-}
-
-// AI 输入框处理
-function initAIInput() {
-    const aiInput = document.getElementById('aiPromptInput');
-    const aiButton = document.getElementById('aiGenerateBtn');
     
-    if (aiButton) {
-        aiButton.onclick = async () => {
-            const prompt = aiInput.value.trim();
+    // 添加生成方法到全局对象，供左侧栏AI模块调用
+    window.aiGenerator = {
+        generateFromPrompt: async function(prompt) {
             if (!prompt) {
                 alert('请输入描述');
                 return;
@@ -144,8 +138,18 @@ function initAIInput() {
                 return;
             }
 
-            aiButton.disabled = true;
-            aiButton.textContent = '生成中...';
+            const aiButton = document.getElementById('aiGenerateBtnModule');
+            if (aiButton) {
+                aiButton.disabled = true;
+                aiButton.classList.add('generating');
+                aiButton.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    生成中...
+                `;
+            }
 
             try {
                 const result = await aiGenerator.generateCodeWithRetry(prompt);
@@ -163,19 +167,23 @@ function initAIInput() {
             } catch (error) {
                 alert('生成失败: ' + error.message);
             } finally {
-                aiButton.disabled = false;
-                aiButton.textContent = '生成';
+                if (aiButton) {
+                    aiButton.disabled = false;
+                    aiButton.classList.remove('generating');
+                    aiButton.innerHTML = `
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        生成代码
+                    `;
+                }
             }
-        };
-    }
+        }
+    };
+}
 
-    // 支持回车键生成
-    if (aiInput) {
-        aiInput.onkeypress = (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                aiButton.click();
-            }
-        };
-    }
+// AI 输入框处理（已废弃，保留以防兼容性问题）
+function initAIInput() {
+    // 顶部AI输入已移除，此函数保留为空
 }
