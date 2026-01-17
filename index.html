@@ -164,6 +164,10 @@
                     <span></span>
                 </div>
                 <div class="nav-menu" id="navMenu">
+                    <div class="mobile-menu-header">
+                        <span>菜单</span>
+                        <button class="close-menu" onclick="toggleMenu()">×</button>
+                    </div>
                     <!-- 文件菜单 -->
                     <div class="menu-dropdown">
                         <button class="menu-btn">
@@ -341,6 +345,11 @@
                                 关于
                             </a>
                         </div>
+                    </div>
+                    
+                    <!-- 移动端：登录/注册按钮放在菜单底部 -->
+                    <div class="mobile-menu-footer">
+                        <div id="mobileUserInfo"></div>
                     </div>
                 </div>
             </div>
