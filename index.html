@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
     <head>
-        <title>Cascade Studio</title>
+        <title>AI 3D CAD Studio</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <meta name="application-name"   content="Cascade Studio">
-        <meta name="description"        content="A Full Live-Scripted CAD Kernel in the Browser">
-        <meta name="keywords"           content="SCAD, OpenSCAD, CAD, OpenCascade, Scripting">
-        <meta name="author"             content="Johnathon Selstad">
-        <meta name="viewport"           content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color"        content="#1e1e1e">
+        <meta name="application-name"   content="AI 3D CAD Studio">
+        <meta name="description"        content="AI驱动的全功能在线CAD建模工具">
+        <meta name="keywords"           content="SCAD, OpenSCAD, CAD, OpenCascade, AI, 3D建模">
+        <meta name="author"             content="AI 3D Studio">
+        <meta name="viewport"           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="theme-color"        content="#2c3e50">
 
         <!-- Include these early and directly so they happen first -->
         <script>
@@ -42,6 +42,9 @@
         <link rel="manifest"           href="./manifest.webmanifest">
         <link rel="apple-touch-icon"   href="./icon/apple-touch-icon.png">
 
+        <!-- Supabase -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
         <script type="text/javascript" src="./node_modules/three/build/three.min.js"></script>
         <script type="text/javascript" src="./node_modules/three/examples/js/controls/DragControls.js"></script>
         <script type="text/javascript" src="./node_modules/three/examples/js/controls/OrbitControls.js"></script>
@@ -59,24 +62,130 @@
 
         <script type="text/javascript" src="./node_modules/rawflate/rawdeflate.js"></script>
         <script type="text/javascript" src="./node_modules/rawflate/rawinflate.js"></script>
+        
+        <!-- 配置和认证 -->
+        <script type="text/javascript" src="./js/config.js"></script>
+        <script type="text/javascript" src="./js/auth.js"></script>
+        <script type="text/javascript" src="./js/aiGenerator.js"></script>
+        
         <script type="text/javascript" src="./js/MainPage/CascadeViewHandles.js"></script>
         <script type="text/javascript" src="./js/MainPage/CascadeView.js"></script>
     </head>
 
-    <body onload="initialize();" style="margin:0px; background-color:rgb(34, 34, 34); "><!--overflow:hidden; position:fixed;-->
-        <h1 hidden></h1> <!-- Puts the Lighthouse Score over 90 heheh-->
+    <body onload="initialize();" style="margin:0px; background-color:#2c3e50;">
+        <h1 hidden>AI 3D CAD Studio</h1>
+        
+        <!-- 顶部导航栏 -->
         <div id="topnav" class="topnav">
-            <a href="https://github.com/zalo/CascadeStudio">Cascade Studio 0.0.7</a>
-            <a href="#" title="Save Project to .json" onmouseup="saveProject();">Save Project</a>
-            <a href="#" title="Load Project from .json" onmouseup="loadProject();">Load Project</a>
-            <a href="#" onmouseup="threejsViewport.saveShapeSTEP();">Save STEP</a>
-            <a href="#" onmouseup="threejsViewport.saveShapeSTL();">Save STL</a>
-            <a href="#" onmouseup="threejsViewport.saveShapeOBJ();">Save OBJ</a>
-            <label for="files" title="Import STEP, IGES, or (ASCII) STL from File">Import STEP/IGES/STL
-                <input id="files" name="files" type="file" accept=".iges,.step,.igs,.stp,.stl" multiple style="display:none;" oninput="loadFiles();"/>
-            </label>
-            <a href="#" title="Clears the external step/iges/stl files stored in the project." onmouseup="clearExternalFiles();">Clear Imported Files</a>
+            <div class="nav-left">
+                <a href="#" class="logo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    AI 3D CAD Studio
+                </a>
+            </div>
+            
+            <div class="nav-center">
+                <div class="menu-toggle" onclick="toggleMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="nav-menu" id="navMenu">
+                    <div class="menu-section">
+                        <span class="menu-label">文件</span>
+                        <a href="#" title="保存项目到 .json" onmouseup="saveProject();">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            保存项目
+                        </a>
+                        <a href="#" title="加载项目从 .json" onmouseup="loadProject();">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                            </svg>
+                            加载项目
+                        </a>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <span class="menu-label">导出</span>
+                        <a href="#" onmouseup="threejsViewport.saveShapeSTEP();">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            导出 STEP
+                        </a>
+                        <a href="#" onmouseup="threejsViewport.saveShapeSTL();">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            导出 STL
+                        </a>
+                        <a href="#" onmouseup="threejsViewport.saveShapeOBJ();">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            导出 OBJ
+                        </a>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <span class="menu-label">导入</span>
+                        <label for="files" title="导入 STEP, IGES, 或 STL 文件">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                            </svg>
+                            导入文件
+                            <input id="files" name="files" type="file" accept=".iges,.step,.igs,.stp,.stl" multiple style="display:none;" oninput="loadFiles();"/>
+                        </label>
+                        <a href="#" title="清除导入的文件" onmouseup="clearExternalFiles();">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                            清除导入
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-right">
+                <div id="userInfo"></div>
+            </div>
         </div>
+
+        <!-- AI 输入区域 -->
+        <div id="aiInputPanel" class="ai-input-panel">
+            <div class="ai-input-container">
+                <svg class="ai-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+                <input type="text" id="aiPromptInput" placeholder="用一句话描述你想要的 3D 模型，AI 将为你生成代码..." />
+                <button id="aiGenerateBtn" class="ai-generate-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    生成
+                </button>
+            </div>
+        </div>
+
+        <!-- 主应用区域 -->
         <div id="appbody" style="height:auto">
             <link data-name="vs/editor/editor.main" rel="stylesheet" href="./node_modules/monaco-editor/min/vs/editor/editor.main.css">
             <script>var require = { paths: { 'vs': 'node_modules/monaco-editor/min/vs' } };</script>
@@ -86,5 +195,82 @@
             <script type="text/javascript" src="./js/MainPage/CascadeMain.js"></script>
         </div>
 
+        <!-- 登录/注册模态框 -->
+        <div id="authModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="document.getElementById('authModal').style.display='none'">&times;</span>
+                <h2 id="authModalTitle">登录</h2>
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="authEmail">邮箱</label>
+                        <input type="email" id="authEmail" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="authPassword">密码</label>
+                        <input type="password" id="authPassword" required />
+                    </div>
+                    <button type="submit" class="btn-primary">确定</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 用户中心模态框 -->
+        <div id="userCenterModal" class="modal">
+            <div class="modal-content modal-large">
+                <span class="close" onclick="document.getElementById('userCenterModal').style.display='none'">&times;</span>
+                <h2>用户中心</h2>
+                <div class="user-center-content">
+                    <div class="credits-info">
+                        <h3>我的积分</h3>
+                        <div class="credits-display">
+                            <span class="credits-amount" id="creditsAmount">0</span>
+                            <span class="credits-label">积分</span>
+                        </div>
+                        <button class="btn-recharge" onclick="alert('充值功能开发中...')">充值积分</button>
+                    </div>
+                    <div class="transaction-history">
+                        <h3>消费记录</h3>
+                        <div id="transactionHistory" class="history-list">
+                            <!-- 交易记录将动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // 初始化
+            window.addEventListener('load', () => {
+                initAIInput();
+                
+                // 更新用户中心的积分显示
+                setInterval(() => {
+                    if (authManager && authManager.currentUser) {
+                        const creditsAmount = document.getElementById('creditsAmount');
+                        if (creditsAmount) {
+                            creditsAmount.textContent = authManager.userCredits.toFixed(2);
+                        }
+                    }
+                }, 1000);
+            });
+
+            // 切换移动端菜单
+            function toggleMenu() {
+                const menu = document.getElementById('navMenu');
+                menu.classList.toggle('active');
+            }
+
+            // 点击外部关闭模态框
+            window.onclick = function(event) {
+                const authModal = document.getElementById('authModal');
+                const userCenterModal = document.getElementById('userCenterModal');
+                if (event.target == authModal) {
+                    authModal.style.display = 'none';
+                }
+                if (event.target == userCenterModal) {
+                    userCenterModal.style.display = 'none';
+                }
+            }
+        </script>
     </body>
 </html>

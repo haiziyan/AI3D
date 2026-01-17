@@ -56,34 +56,32 @@ function initialize(projectContent = null) {
         }
 
         // Define the Default Golden Layout
-        // Code on the left, Model on the right
-        // Console on the bottom right
+        // 任务1：将代码区与CAD视图合并，用Tab页面切换
         myLayout = new GoldenLayout({
             content: [{
-                type: 'row',
+                type: 'column',
                 content: [{
-                    type: 'component',
-                    componentName: 'codeEditor',
-                    title: '* Untitled',
-                    componentState: { code: codeStr },
-                    width: 50.0,
-                    isClosable: false
-                }, {
-                    type: 'column',
+                    type: 'stack',
                     content: [{
                         type: 'component',
                         componentName: 'cascadeView',
-                        title: 'CAD View',
+                        title: '3D 视图',
                         componentState: GUIState,
                         isClosable: false
                     }, {
                         type: 'component',
-                        componentName: 'console',
-                        title: 'Console',
-                        componentState: {},
-                        height: 20.0,
+                        componentName: 'codeEditor',
+                        title: '代码编辑器',
+                        componentState: { code: codeStr },
                         isClosable: false
                     }]
+                }, {
+                    type: 'component',
+                    componentName: 'console',
+                    title: '控制台',
+                    componentState: {},
+                    height: 25.0,
+                    isClosable: false
                 }]
             }],
             settings: {
