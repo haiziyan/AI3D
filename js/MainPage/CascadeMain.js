@@ -68,29 +68,25 @@ function initialize(projectContent = null) {
             console.log('使用移动端布局配置');
             myLayout = new GoldenLayout({
                 content: [{
-                    type: 'row',
+                    type: 'stack',
                     content: [{
-                        type: 'stack',
-                        content: [{
-                            type: 'component',
-                            componentName: 'cascadeView',
-                            title: '3D 视图',
-                            componentState: GUIState,
-                            isClosable: false
-                        }, {
-                            type: 'component',
-                            componentName: 'codeEditor',
-                            title: '代码编辑器',
-                            componentState: { code: codeStr },
-                            isClosable: false
-                        }]
+                        type: 'component',
+                        componentName: 'cascadeView',
+                        title: '3D 视图',
+                        componentState: GUIState,
+                        isClosable: false
+                    }, {
+                        type: 'component',
+                        componentName: 'codeEditor',
+                        title: '代码编辑器',
+                        componentState: { code: codeStr },
+                        isClosable: false
                     }, {
                         type: 'component',
                         componentName: 'aiModule',
                         title: 'AI 生成器',
                         componentState: {},
-                        isClosable: false,
-                        width: 0.01  // 移动端时宽度设为最小（几乎不可见）
+                        isClosable: false
                     }]
                 }],
                 settings: {
