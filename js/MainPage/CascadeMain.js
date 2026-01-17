@@ -33,6 +33,10 @@ Translate([-25, 0, 40], Text3D("Hi!", 36, 0.15, 'Consolas'));
 function initialize(projectContent = null) {
     this.searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
 
+    // 检测是否为移动端
+    const isMobile = window.innerWidth <= 768;
+    console.log('初始化 - 移动端检测:', isMobile, '窗口宽度:', window.innerWidth);
+
     // Load the initial Project from - "projectContent", or the URL
     let loadFromURL     = this.searchParams.has("code")
     // Set up the Windowing/Docking/Layout System  ---------------------------------------
@@ -55,29 +59,38 @@ function initialize(projectContent = null) {
             GUIState = JSON.parse(decode(this.searchParams.get("gui")));
         }
 
-        // 检测是否为移动端
-        const isMobile = window.innerWidth <= 768;
-
         // Define the Default Golden Layout
-        // 移动端：只显示3D视图，AI模块移到底部
+        // 移动端：只显示3D视图和代码编辑器（隐藏AI模块，AI输入框移到底部）
         // 桌面端：AI模块在最左侧栏（包含控制台输出），代码编辑器和3D视图在右侧用Tab切换
+        console.log('创建布局 - 移动端模式:', isMobile);
+        
         if (isMobile) {
+            console.log('使用移动端布局配置');
             myLayout = new GoldenLayout({
                 content: [{
                     type: 'row',
                     content: [{
-                        type: 'component',
-                        componentName: 'cascadeView',
-                        title: '3D 视图',
-                        componentState: GUIState,
-                        isClosable: false
+                        type: 'stack',
+                        content: [{
+                            type: 'component',
+                            componentName: 'cascadeView',
+                            title: '3D 视图',
+                            componentState: GUIState,
+                            isClosable: false
+                        }, {
+                            type: 'component',
+                            componentName: 'codeEditor',
+                            title: '代码编辑器',
+                            componentState: { code: codeStr },
+                            isClosable: false
+                        }]
                     }, {
                         type: 'component',
                         componentName: 'aiModule',
                         title: 'AI 生成器',
                         componentState: {},
                         isClosable: false,
-                        width: 0.1  // 移动端时宽度设为最小
+                        width: 0.01  // 移动端时宽度设为最小（几乎不可见）
                     }]
                 }],
                 settings: {
@@ -87,6 +100,7 @@ function initialize(projectContent = null) {
                 }
             });
         } else {
+            console.log('使用桌面端布局配置');
             myLayout = new GoldenLayout({
                 content: [{
                     type: 'row',
@@ -126,7 +140,9 @@ function initialize(projectContent = null) {
 
     // Set up the Dockable Monaco Code Editor
     myLayout.registerComponent('codeEditor', function (container, state) {
+        console.log('注册 codeEditor 组件');
         myLayout.on("initialised", () => {
+            console.log('codeEditor 初始化');
             // Destroy the existing editor if it exists
             if (monacoEditor) {
                 monaco.editor.getModels().forEach(model => model.dispose());
@@ -187,6 +203,7 @@ function initialize(projectContent = null) {
                 minimap: { enabled: false }//,
                 //model: null
             });
+            console.log('monacoEditor 创建完成:', monacoEditor);
 
             // Collapse all Functions in the Editor to suppress library clutter -----------------
             let codeLines = state.code.split(/\r\n|\r|\n/);
@@ -328,9 +345,11 @@ function initialize(projectContent = null) {
 
     // Set up the Dockable Three.js 3D Viewport for viewing the CAD Model
     myLayout.registerComponent('cascadeView', function (container, state) {
+        console.log('注册 cascadeView 组件');
         GUIState = state;
         container.setState(GUIState);
         myLayout.on("initialised", () => {
+            console.log('cascadeView 初始化');
             // Destroy the existing editor if it exists
             if (threejsViewport) {
                 threejsViewport.active = false;
@@ -342,6 +361,7 @@ function initialize(projectContent = null) {
             floatingGUIContainer.id = "guiPanel";
             container.getElement().get(0).appendChild(floatingGUIContainer);
             threejsViewport = new CascadeEnvironment(container);
+            console.log('threejsViewport 创建完成:', threejsViewport);
         });
     });
 
@@ -382,7 +402,7 @@ function initialize(projectContent = null) {
                             <circle cx="12" cy="12" r="10"/>
                             <polyline points="12 6 12 12 16 14"/>
                         </svg>
-                        生成代码
+                        生成模型
                     </button>
                 </div>
             </div>
@@ -605,6 +625,25 @@ function initialize(projectContent = null) {
     myLayout.init();
     myLayout.updateSize(window.innerWidth, window.innerHeight -
         document.getElementById('topnav').offsetHeight);
+    
+    // 移动端调试：确保布局正确显示
+    if (isMobile) {
+        console.log('移动端模式已启用');
+        console.log('窗口宽度:', window.innerWidth);
+        console.log('布局高度:', window.innerHeight - document.getElementById('topnav').offsetHeight);
+        
+        // 延迟执行，确保DOM完全加载
+        setTimeout(() => {
+            const cascadeView = document.querySelector('[title="3D 视图"]');
+            const codeEditor = document.querySelector('[title="代码编辑器"]');
+            console.log('3D视图容器:', cascadeView);
+            console.log('代码编辑器容器:', codeEditor);
+            
+            // 强制更新布局
+            myLayout.updateSize(window.innerWidth, window.innerHeight -
+                document.getElementById('topnav').offsetHeight);
+        }, 500);
+    }
 
     // If the Main Page loads before the CAD Worker, register a 
     // callback to start the model evaluation when the CAD is ready.
