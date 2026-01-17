@@ -240,14 +240,19 @@ body {
 }
 
 .btn-user-center {
-  background-color: var(--secondary-bg);
-  color: var(--text-primary);
-  border: 1px solid var(--divider-color);
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-user-center:hover {
-  background-color: var(--accent-color);
-  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, var(--accent-hover), #1f6fa8);
 }
 
 .btn-signout {
@@ -571,23 +576,127 @@ body {
 /* ==================== 用户中心 ==================== */
 .user-center-content {
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 20px;
 }
 
-.credits-info {
-  background-color: var(--tertiary-bg);
+/* 用户信息卡片 */
+.user-info-card {
+  background: linear-gradient(135deg, var(--tertiary-bg) 0%, var(--primary-bg) 100%);
   padding: 24px;
   border-radius: 12px;
-  text-align: center;
   border: 1px solid var(--divider-color);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  border-radius: 50%;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.user-avatar svg {
+  color: white;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: var(--primary-bg);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.user-detail-item:hover {
+  background-color: var(--secondary-bg);
+  transform: translateX(4px);
+}
+
+.user-detail-item svg {
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.detail-label {
+  color: var(--text-muted);
+  font-size: 13px;
+  min-width: 80px;
+}
+
+.detail-value {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+  word-break: break-all;
+}
+
+.btn-logout {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--error-color), #c0392b);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-logout:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, #c0392b, #a93226);
+}
+
+/* 积分信息卡片 */
+.credits-info {
+  background: linear-gradient(135deg, var(--tertiary-bg) 0%, var(--primary-bg) 100%);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--divider-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.credits-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.credits-header svg {
+  color: var(--accent-color);
 }
 
 .credits-info h3 {
-  margin: 0 0 16px 0;
+  margin: 0;
   color: var(--text-secondary);
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .credits-display {
@@ -596,6 +705,10 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+  border-radius: 12px;
+  border: 2px solid var(--accent-color);
 }
 
 .credits-amount {
@@ -605,11 +718,13 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  font-family: var(--font-mono);
 }
 
 .credits-label {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .btn-recharge {
@@ -624,25 +739,44 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-recharge:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, #229954, #1e8449);
 }
 
+/* 消费记录 */
 .transaction-history {
-  background-color: var(--tertiary-bg);
+  background: linear-gradient(135deg, var(--tertiary-bg) 0%, var(--primary-bg) 100%);
   padding: 24px;
   border-radius: 12px;
   border: 1px solid var(--divider-color);
+  box-shadow: var(--shadow-sm);
+  grid-column: 1 / -1;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.history-header svg {
+  color: var(--accent-color);
 }
 
 .transaction-history h3 {
-  margin: 0 0 16px 0;
+  margin: 0;
   color: var(--text-secondary);
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .history-list {
@@ -679,11 +813,13 @@ body {
   font-size: 13px;
   align-items: center;
   transition: all 0.3s ease;
+  border-left: 3px solid transparent;
 }
 
 .transaction-item:hover {
   background-color: var(--secondary-bg);
   transform: translateX(4px);
+  border-left-color: var(--accent-color);
 }
 
 .tx-date {
@@ -698,19 +834,54 @@ body {
 .tx-amount {
   font-weight: 600;
   font-family: var(--font-mono);
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .tx-amount.negative {
   color: var(--error-color);
+  background-color: rgba(231, 76, 60, 0.1);
 }
 
 .tx-amount.positive {
   color: var(--success-color);
+  background-color: rgba(46, 204, 113, 0.1);
 }
 
 .tx-balance {
   color: var(--text-muted);
   font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state svg {
+  color: var(--divider-color);
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  margin: 0 0 8px 0;
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.empty-state span {
+  font-size: 13px;
+  color: var(--text-muted);
+  max-width: 300px;
 }
 
 /* ==================== TweakPane 主题 ==================== */

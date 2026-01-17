@@ -181,10 +181,13 @@ class AuthManager {
         if (userInfoElement) {
             if (this.currentUser) {
                 userInfoElement.innerHTML = `
-                    <span class="user-email">${this.currentUser.email}</span>
-                    <span class="user-credits">积分: ${this.userCredits.toFixed(2)}</span>
-                    <button onclick="authManager.showUserCenter()" class="btn-user-center">用户中心</button>
-                    <button onclick="authManager.signOut()" class="btn-signout">登出</button>
+                    <button onclick="authManager.showUserCenter()" class="btn-user-center">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        用户中心
+                    </button>
                 `;
             } else {
                 userInfoElement.innerHTML = `
@@ -192,6 +195,24 @@ class AuthManager {
                     <button onclick="authManager.showSignupModal()" class="btn-signup">注册</button>
                 `;
             }
+        }
+        
+        // 更新用户中心内的信息
+        this.updateUserCenterInfo();
+    }
+    
+    updateUserCenterInfo() {
+        if (!this.currentUser) return;
+        
+        const userEmailElement = document.getElementById('userCenterEmail');
+        const creditsAmountElement = document.getElementById('creditsAmount');
+        
+        if (userEmailElement) {
+            userEmailElement.textContent = this.currentUser.email;
+        }
+        
+        if (creditsAmountElement) {
+            creditsAmountElement.textContent = this.userCredits.toFixed(2);
         }
     }
 
@@ -243,7 +264,22 @@ class AuthManager {
 
     showUserCenter() {
         const modal = document.getElementById('userCenterModal');
+        this.updateUserCenterInfo();
         this.loadTransactionHistory();
+        
+        // 显示注册时间
+        if (this.currentUser && this.currentUser.created_at) {
+            const createdAtElement = document.getElementById('userCreatedAt');
+            if (createdAtElement) {
+                const date = new Date(this.currentUser.created_at);
+                createdAtElement.textContent = date.toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        }
+        
         modal.style.display = 'flex';
     }
 
@@ -264,15 +300,28 @@ class AuthManager {
             }
 
             const historyList = document.getElementById('transactionHistory');
-            if (historyList && data) {
-                historyList.innerHTML = data.map(tx => `
-                    <div class="transaction-item">
-                        <span class="tx-date">${new Date(tx.created_at).toLocaleString('zh-CN')}</span>
-                        <span class="tx-desc">${tx.description}</span>
-                        <span class="tx-amount ${tx.amount < 0 ? 'negative' : 'positive'}">${tx.amount > 0 ? '+' : ''}${tx.amount.toFixed(2)}</span>
-                        <span class="tx-balance">余额: ${tx.balance_after.toFixed(2)}</span>
-                    </div>
-                `).join('');
+            if (historyList) {
+                if (!data || data.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            <p>暂无消费记录</p>
+                            <span>开始使用AI生成功能后，消费记录将显示在这里</span>
+                        </div>
+                    `;
+                } else {
+                    historyList.innerHTML = data.map(tx => `
+                        <div class="transaction-item">
+                            <span class="tx-date">${new Date(tx.created_at).toLocaleString('zh-CN')}</span>
+                            <span class="tx-desc">${tx.description}</span>
+                            <span class="tx-amount ${tx.amount < 0 ? 'negative' : 'positive'}">${tx.amount > 0 ? '+' : ''}${tx.amount.toFixed(2)}</span>
+                            <span class="tx-balance">余额: ${tx.balance_after.toFixed(2)}</span>
+                        </div>
+                    `).join('');
+                }
             }
         } catch (err) {
             console.error('加载交易历史异常:', err);

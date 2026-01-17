@@ -22,7 +22,7 @@ class AIGenerator {
                     messages: [
                         {
                             role: 'system',
-                            content: `你是一个专业的 CAD 建模助手，精通 Cascade Studio（基于 OpenCascade.js）。用户会用自然语言描述 3D 模型，你需要生成可执行的 JavaScript 代码。
+                            content: `你是一个专业的 CAD 建模助手，精通 AI 3D Studio（基于 OpenCascade.js）。用户会用自然语言描述 3D 模型，你需要生成可执行的 JavaScript 代码。
 
 ## 核心 API 参考
 
@@ -93,13 +93,11 @@ let base = Box(100, 100, 20);
 let hole = Cylinder(radius, 30, true);
 
 // 4. 布尔运算
-let result = Difference(base, hole);
+let result = Difference(base, [hole]);
 
 // 5. 变换和定位
 let final = Translate([0, 0, 10], result);
 
-// 6. 添加到场景（重要！）
-sceneShapes.push(final);
 \`\`\`
 
 ## 最佳实践
@@ -116,10 +114,10 @@ sceneShapes.push(final);
 - 只返回纯 JavaScript 代码
 - 不要包含 \`\`\`javascript 或其他 markdown 标记
 - 不要添加额外的解释文字
-- 代码必须可以直接在 Cascade Studio 中执行
+- 代码必须可以直接在 AI 3D Studio 中执行
 - 确保所有形状都通过 sceneShapes.push() 添加到场景
 
-现在，请根据用户的描述生成相应的 Cascade Studio 代码。`
+现在，请根据用户的描述生成相应的 AI 3D Studio 代码。`
                         },
                         {
                             role: 'user',
