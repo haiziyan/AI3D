@@ -531,7 +531,10 @@ function initialize(projectContent = null) {
         
         // 加载生成历史记录
         window.refreshGenerationHistory = async function() {
-            if (!authManager || !authManager.currentUser) {
+            // 修复Bug 1: 增加更严格的登录状态检查
+            const isLoggedIn = authManager && authManager.currentUser && authManager.supabase;
+            
+            if (!isLoggedIn) {
                 const historyContent = document.getElementById('generationHistoryContent');
                 if (historyContent) {
                     historyContent.innerHTML = `
@@ -783,10 +786,11 @@ function initialize(projectContent = null) {
             }
         };
 
-        // 初始加载历史记录
+        // 修复Bug 1: 初始加载历史记录，延迟更长时间确保authManager已初始化
         setTimeout(() => {
+            console.log('AI模块初始化完成，尝试加载历史记录');
             window.refreshGenerationHistory();
-        }, 500);
+        }, 1500);
         
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {

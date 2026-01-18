@@ -25,6 +25,7 @@
   body {
     margin: 0;
     padding: 0;
+    padding-top: 56px;
     font-family: var(--font-main);
     background-color: var(--primary-bg);
     color: var(--text-primary);
@@ -40,7 +41,10 @@
     justify-content: space-between;
     padding: 0 16px;
     height: 56px;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     border-bottom: 1px solid var(--divider-color);
   }
@@ -982,10 +986,19 @@
   
   /* ==================== 移动端适配 ==================== */
   @media (max-width: 768px) {
+    /* 修复Bug 2: 确保body的padding-top与导航栏高度一致 */
+    body {
+      padding-top: 56px;
+    }
+    
     /* 导航栏 */
     .topnav {
       height: 56px;
       padding: 8px 12px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
     }
     
     .nav-center {
@@ -1216,7 +1229,7 @@
       display: none;
     }
     
-    /* 关键修复：body和appbody的高度设置 */
+    /* 修复Bug 2: 关键修复body和appbody的高度设置 */
     html, body {
       position: relative;
       overflow: hidden;
@@ -1224,10 +1237,11 @@
       width: 100%;
       margin: 0;
       padding: 0;
+      padding-top: 56px;
     }
     
     #appbody {
-      position: absolute !important;
+      position: fixed !important;
       top: 56px !important;
       left: 0 !important;
       right: 0 !important;
@@ -1463,13 +1477,25 @@
   }
   
   @media (max-width: 480px) {
+    /* 修复Bug 2: 小屏幕设备的导航栏定位 */
+    body {
+      padding-top: 48px;
+    }
+    
     .topnav {
       height: 48px;
       padding: 6px 8px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
     }
     
     #appbody {
+      position: fixed !important;
       top: 48px !important;
+      left: 0 !important;
+      right: 0 !important;
       bottom: 140px !important;
     }
     

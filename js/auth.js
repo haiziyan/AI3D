@@ -17,6 +17,13 @@ class AuthManager {
             if (user) {
                 this.currentUser = user;
                 await this.loadUserCredits();
+                // 修复Bug 1: 初始化时如果已登录，刷新生成历史
+                if (window.refreshGenerationHistory) {
+                    setTimeout(() => {
+                        console.log('初始化完成，用户已登录，刷新生成历史记录');
+                        window.refreshGenerationHistory();
+                    }, 1000);
+                }
             } else {
                 // 如果没有用户登录，显示登录/注册按钮
                 this.updateUI();
@@ -28,11 +35,12 @@ class AuthManager {
                     this.currentUser = session.user;
                     this.loadUserCredits();
                     this.updateUI();
-                    // 登录后自动刷新生成历史记录
+                    // 修复Bug 1: 登录后延迟更长时间刷新，确保状态完全同步
                     if (window.refreshGenerationHistory) {
                         setTimeout(() => {
+                            console.log('登录成功，刷新生成历史记录');
                             window.refreshGenerationHistory();
-                        }, 500);
+                        }, 1000);
                     }
                 } else if (event === 'SIGNED_OUT') {
                     this.currentUser = null;
@@ -41,6 +49,7 @@ class AuthManager {
                     // 登出后也刷新生成历史记录（显示登录提示）
                     if (window.refreshGenerationHistory) {
                         setTimeout(() => {
+                            console.log('登出成功，刷新生成历史记录');
                             window.refreshGenerationHistory();
                         }, 500);
                     }
