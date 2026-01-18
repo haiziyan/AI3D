@@ -1270,15 +1270,15 @@ body {
     display: none !important;
   }
   
-  /* 隐藏第3个Tab（AI模块） */
+  /* 隐藏第2个Tab（代码编辑器）和第3个Tab（AI模块） */
+  .lm_stack .lm_tabs .lm_tab:nth-child(2),
   .lm_stack .lm_tabs .lm_tab:nth-child(3) {
     display: none !important;
     visibility: hidden !important;
   }
   
-  /* 确保前两个Tab显示 */
-  .lm_stack .lm_tabs .lm_tab:nth-child(1),
-  .lm_stack .lm_tabs .lm_tab:nth-child(2) {
+  /* 只显示第1个Tab（3D视图） */
+  .lm_stack .lm_tabs .lm_tab:nth-child(1) {
     display: inline-flex !important;
     visibility: visible !important;
     opacity: 1 !important;
