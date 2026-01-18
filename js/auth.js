@@ -458,7 +458,7 @@ class AuthManager {
                                         <polyline points="17 8 12 3 7 8"/>
                                         <line x1="12" y1="3" x2="12" y2="15"/>
                                     </svg>
-                                    加载代码
+                                    加载模型
                                 </button>
                                 ` : ''}
                             </div>
@@ -489,8 +489,8 @@ class AuthManager {
                 .single();
 
             if (error) {
-                console.error('加载代码失败:', error);
-                alert('加载代码失败: ' + error.message);
+                console.error('加载模型失败:', error);
+                alert('加载模型失败: ' + error.message);
                 return;
             }
 
@@ -514,8 +514,8 @@ class AuthManager {
                 alert('未找到生成的代码');
             }
         } catch (err) {
-            console.error('加载代码异常:', err);
-            alert('加载代码失败: ' + err.message);
+            console.error('加载模型异常:', err);
+            alert('加载模型失败: ' + err.message);
         }
     }
 }

@@ -305,6 +305,14 @@
                             </svg>
                         </button>
                         <div class="dropdown-content">
+                            <a href="#" onclick="resetLayout(); return false;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                                    <path d="M21 3v5h-5"/>
+                                </svg>
+                                恢复界面布局
+                            </a>
+                            <div class="dropdown-divider"></div>
                             <a href="#" onclick="toggleTheme(); return false;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="5"/>
@@ -612,6 +620,16 @@
             // 新建项目
             function createNewProject() {
                 if (confirm('确定要创建新项目吗？未保存的更改将丢失。')) {
+                    window.location.reload();
+                }
+            }
+            
+            // 恢复界面布局
+            function resetLayout() {
+                if (confirm('确定要恢复默认界面布局吗？当前布局设置将被重置。')) {
+                    // 清除URL参数
+                    window.history.replaceState({}, 'AI 3D Studio', window.location.pathname);
+                    // 重新加载页面
                     window.location.reload();
                 }
             }

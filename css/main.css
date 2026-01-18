@@ -914,6 +914,11 @@ body {
   background: var(--accent-color) !important;
 }
 
+/* 默认隐藏移动端用户信息区域（PC端不显示） */
+.mobile-user-section {
+  display: none;
+}
+
 /* ==================== 移动端适配 ==================== */
 @media (max-width: 768px) {
   /* 导航栏 */
@@ -935,6 +940,11 @@ body {
   /* 桌面端用户信息隐藏 */
   .desktop-user-info {
     display: none !important;
+  }
+  
+  /* 移动端显示移动端用户信息区域 */
+  .mobile-user-section {
+    display: block;
   }
   
   .menu-toggle {
