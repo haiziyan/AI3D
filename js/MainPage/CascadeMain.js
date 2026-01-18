@@ -401,6 +401,23 @@ function initialize(projectContent = null) {
             container.getElement().get(0).appendChild(floatingGUIContainer);
             threejsViewport = new CascadeEnvironment(container);
             console.log('threejsViewport 创建完成:', threejsViewport);
+            
+            // 监听容器显示事件
+            container.on('show', function() {
+                console.log('3D视图显示，刷新渲染器');
+                if (threejsViewport && threejsViewport.renderer) {
+                    const containerEl = container.getElement().get(0);
+                    const width = containerEl.offsetWidth;
+                    const height = containerEl.offsetHeight;
+                    console.log('刷新Canvas尺寸:', width, 'x', height);
+                    threejsViewport.renderer.setSize(width, height);
+                    if (threejsViewport.camera) {
+                        threejsViewport.camera.aspect = width / height;
+                        threejsViewport.camera.updateProjectionMatrix();
+                    }
+                    threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
+                }
+            });
         });
     });
 
