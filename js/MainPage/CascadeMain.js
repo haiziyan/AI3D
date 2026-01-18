@@ -1014,6 +1014,81 @@ function initialize(projectContent = null) {
     // Initialize the Layout
     myLayout.init();
     
+    // 移动端：立即修复Tab显示问题
+    if (isMobile) {
+        setTimeout(() => {
+            const lmHeader = document.querySelector('.lm_header');
+            const lmTabs = document.querySelector('.lm_tabs');
+            const allTabs = document.querySelectorAll('.lm_tab');
+            
+            console.log('立即修复Tab显示 - Header:', lmHeader, 'Tabs:', lmTabs, 'Tab数量:', allTabs.length);
+            
+            if (lmHeader) {
+                lmHeader.setAttribute('style', `
+                    height: 48px !important;
+                    min-height: 48px !important;
+                    display: flex !important;
+                    visibility: visible !important;
+                    width: 100% !important;
+                `);
+            }
+            
+            if (lmTabs) {
+                lmTabs.setAttribute('style', `
+                    display: flex !important;
+                    flex: 1 !important;
+                    height: 48px !important;
+                    width: 100% !important;
+                    visibility: visible !important;
+                `);
+            }
+            
+            allTabs.forEach((tab, index) => {
+                const title = tab.querySelector('.lm_title');
+                const titleText = title ? title.textContent.trim() : '';
+                
+                console.log(`修复Tab ${index}: "${titleText}"`);
+                
+                // 隐藏AI模块的Tab
+                if (titleText.includes('AI 生成器')) {
+                    tab.style.display = 'none';
+                    return;
+                }
+                
+                // 显示其他Tab
+                tab.setAttribute('style', `
+                    height: 48px !important;
+                    line-height: 48px !important;
+                    padding: 0 20px !important;
+                    font-size: 15px !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    min-width: 100px !important;
+                    width: auto !important;
+                    flex-shrink: 0 !important;
+                    background: var(--tertiary-bg) !important;
+                    color: var(--text-secondary) !important;
+                    border-radius: 8px 8px 0 0 !important;
+                    margin-right: 4px !important;
+                `);
+                
+                // 确保标题可见
+                if (title) {
+                    title.style.cssText = `
+                        font-size: 15px !important;
+                        display: inline-block !important;
+                        visibility: visible !important;
+                        white-space: nowrap !important;
+                        line-height: 48px !important;
+                    `;
+                }
+            });
+        }, 50);
+    }
+    
     // 方法1：监听activeContentItemChanged事件
     myLayout.on('activeContentItemChanged', function(contentItem) {
         console.log('activeContentItemChanged事件触发:', contentItem);
@@ -1239,27 +1314,52 @@ function initialize(projectContent = null) {
                     lmStack.style.height = appbodyHeight + 'px';
                 }
                 
-                // 强制设置 Header - 使用 !important 覆盖内联样式
+                // 强制设置 Header - 直接覆盖内联样式
                 if (lmHeader) {
-                    lmHeader.style.cssText = `
+                    lmHeader.setAttribute('style', `
                         height: ${headerHeight}px !important;
                         min-height: ${headerHeight}px !important;
                         display: flex !important;
                         visibility: visible !important;
                         width: 100% !important;
-                    `;
+                    `);
                 }
                 
                 // 强制设置 Tabs 容器
                 if (lmTabs) {
-                    lmTabs.style.cssText = `
+                    lmTabs.setAttribute('style', `
                         display: flex !important;
                         flex: 1 !important;
                         height: ${headerHeight}px !important;
                         width: 100% !important;
                         visibility: visible !important;
-                    `;
+                    `);
                 }
+                
+                // 强制设置每个Tab的样式
+                const allTabs = lmHeader.querySelectorAll('.lm_tab');
+                allTabs.forEach((tab, index) => {
+                    // 跳过AI模块的Tab（第3个）
+                    if (index === 2) {
+                        tab.style.display = 'none';
+                        return;
+                    }
+                    
+                    tab.setAttribute('style', `
+                        height: ${headerHeight}px !important;
+                        line-height: ${headerHeight}px !important;
+                        padding: 0 20px !important;
+                        font-size: 15px !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        min-width: 100px !important;
+                        width: auto !important;
+                        flex-shrink: 0 !important;
+                    `);
+                });
                 
                 // 强制设置 Items 容器使用绝对定位
                 lmItems.style.position = 'absolute';
