@@ -877,23 +877,23 @@ function initialize(projectContent = null) {
                 appbody.style.width = '100%';
                 appbody.style.height = 'auto';
                 
-                // 强制设置 Golden Layout 根容器
+                // 强制设置 Golden Layout 根容器 - 使用具体像素值
                 const lmRoot = document.querySelector('.lm_root');
                 if (lmRoot) {
                     lmRoot.style.position = 'absolute';
                     lmRoot.style.top = '0';
                     lmRoot.style.left = '0';
-                    lmRoot.style.width = '100%';
-                    lmRoot.style.height = '100%';
+                    lmRoot.style.width = window.innerWidth + 'px';
+                    lmRoot.style.height = appbodyHeight + 'px';
                 }
                 
-                // 强制设置 Stack 容器
+                // 强制设置 Stack 容器 - 使用具体像素值
                 if (lmStack) {
                     lmStack.style.position = 'absolute';
                     lmStack.style.top = '0';
                     lmStack.style.left = '0';
-                    lmStack.style.width = '100%';
-                    lmStack.style.height = '100%';
+                    lmStack.style.width = window.innerWidth + 'px';
+                    lmStack.style.height = appbodyHeight + 'px';
                 }
                 
                 // 强制设置 Header
@@ -1032,15 +1032,39 @@ function initialize(projectContent = null) {
                 setTimeout(() => {
                     const lmItems = document.querySelector('.lm_items');
                     const lmStack = document.querySelector('.lm_stack');
+                    const lmRoot = document.querySelector('.lm_root');
                     const lmHeader = document.querySelector('.lm_header');
+                    const appbody = document.getElementById('appbody');
                     
-                    if (lmItems && lmStack) {
+                    if (lmItems && lmStack && appbody) {
                         const headerHeight = 48;
-                        const stackHeight = lmStack.offsetHeight || layoutHeight;
-                        const itemsHeight = stackHeight - headerHeight;
-                        const itemsWidth = lmStack.offsetWidth || window.innerWidth;
+                        const appbodyHeight = appbody.offsetHeight || layoutHeight;
+                        const itemsHeight = appbodyHeight - headerHeight;
+                        const itemsWidth = window.innerWidth;
                         
                         console.log('Golden Layout 更新后再次修复:');
+                        console.log('Appbody尺寸:', appbody.offsetWidth, 'x', appbody.offsetHeight);
+                        
+                        // 强制设置 lm_root 具体像素值
+                        if (lmRoot) {
+                            lmRoot.setAttribute('style', `
+                                position: absolute !important;
+                                top: 0 !important;
+                                left: 0 !important;
+                                width: ${itemsWidth}px !important;
+                                height: ${appbodyHeight}px !important;
+                            `);
+                        }
+                        
+                        // 强制设置 Stack 具体像素值
+                        lmStack.setAttribute('style', `
+                            position: absolute !important;
+                            top: 0 !important;
+                            left: 0 !important;
+                            width: ${itemsWidth}px !important;
+                            height: ${appbodyHeight}px !important;
+                        `);
+                        
                         console.log('Stack尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
                         console.log('计算Items尺寸:', itemsWidth, 'x', itemsHeight);
                         
