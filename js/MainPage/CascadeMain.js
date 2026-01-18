@@ -1086,15 +1086,36 @@ function initialize(projectContent = null) {
                         
                         console.log('=== 最终尺寸检查 ===');
                         console.log('Items容器尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
+                        console.log('Items容器 computed style:', window.getComputedStyle(lmItems).width, 'x', window.getComputedStyle(lmItems).height);
+                        console.log('Items容器 display:', window.getComputedStyle(lmItems).display);
+                        console.log('Items容器 visibility:', window.getComputedStyle(lmItems).visibility);
+                        
+                        // 检查父容器
+                        console.log('Stack容器尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
+                        console.log('Stack computed style:', window.getComputedStyle(lmStack).width, 'x', window.getComputedStyle(lmStack).height);
+                        
+                        const appbody = document.getElementById('appbody');
+                        if (appbody) {
+                            console.log('Appbody尺寸:', appbody.offsetWidth, 'x', appbody.offsetHeight);
+                            console.log('Appbody computed style:', window.getComputedStyle(appbody).width, 'x', window.getComputedStyle(appbody).height);
+                        }
+                        
+                        const lmRoot = document.querySelector('.lm_root');
+                        if (lmRoot) {
+                            console.log('lm_root尺寸:', lmRoot.offsetWidth, 'x', lmRoot.offsetHeight);
+                            console.log('lm_root computed style:', window.getComputedStyle(lmRoot).width, 'x', window.getComputedStyle(lmRoot).height);
+                        }
                         
                         const canvas = document.querySelector('canvas');
                         const monacoEditorEl = document.querySelector('.monaco-editor');
                         
                         if (canvas) {
                             console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+                            console.log('Canvas computed style:', window.getComputedStyle(canvas).width, 'x', window.getComputedStyle(canvas).height);
                         }
                         if (monacoEditorEl) {
                             console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
+                            console.log('Monaco computed style:', window.getComputedStyle(monacoEditorEl).width, 'x', window.getComputedStyle(monacoEditorEl).height);
                         }
                         
                         // 强制更新Monaco编辑器布局
