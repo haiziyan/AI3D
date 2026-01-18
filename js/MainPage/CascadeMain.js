@@ -907,9 +907,14 @@ function initialize(projectContent = null) {
                 lmItems.style.position = 'absolute';
                 lmItems.style.top = headerHeight + 'px';
                 lmItems.style.left = '0';
+                lmItems.style.right = '0';
+                lmItems.style.bottom = '0';
                 lmItems.style.width = '100%';
                 lmItems.style.height = itemsHeight + 'px';
                 lmItems.style.overflow = 'hidden';
+                
+                // 强制浏览器重排（触发样式生效）
+                void lmItems.offsetHeight;
                 
                 // 修复所有 lm_item_container
                 const itemContainers = lmItems.querySelectorAll('.lm_item_container');
@@ -919,7 +924,13 @@ function initialize(projectContent = null) {
                     container.style.position = 'absolute';
                     container.style.top = '0';
                     container.style.left = '0';
+                    container.style.display = ''; // 移除 display:none
                 });
+                
+                // 强制浏览器重排
+                if (itemContainers.length > 0) {
+                    void itemContainers[0].offsetHeight;
+                }
                 
                 // 修复所有 lm_content 容器
                 const contents = lmItems.querySelectorAll('.lm_content');
@@ -930,6 +941,19 @@ function initialize(projectContent = null) {
                     content.style.top = '0';
                     content.style.left = '0';
                 });
+                
+                // 强制浏览器重排
+                if (contents.length > 0) {
+                    void contents[0].offsetHeight;
+                }
+                
+                // 显示当前激活的 item
+                const activeItem = lmItems.querySelector('.lm_item_container');
+                if (activeItem) {
+                    activeItem.style.display = 'block';
+                    activeItem.style.visibility = 'visible';
+                    activeItem.style.opacity = '1';
+                }
             }
             
             // 强制更新布局
@@ -940,9 +964,70 @@ function initialize(projectContent = null) {
             
             myLayout.updateSize(window.innerWidth, layoutHeight);
             
-            // 再次检查尺寸
+            // 第一次检查尺寸（立即）
             setTimeout(() => {
-                console.log('=== 修复后尺寸检查 ===');
+                console.log('=== 第一次尺寸检查 ===');
+                if (lmItems) {
+                    console.log('Items容器尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
+                }
+                if (canvas) {
+                    console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+                }
+                if (monacoEditorEl) {
+                    console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
+                }
+                
+                // 如果尺寸还是0，再次强制设置
+                if (lmItems && lmItems.offsetHeight === 0) {
+                    console.log('尺寸仍为0，再次强制设置...');
+                    const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+                    const aiInputHeight = document.getElementById('aiInputWrapper')?.offsetHeight || 140;
+                    const appbodyHeight = window.innerHeight - topnavHeight - aiInputHeight;
+                    const headerHeight = 48;
+                    const itemsHeight = appbodyHeight - headerHeight;
+                    
+                    lmItems.style.cssText = `
+                        position: absolute !important;
+                        top: ${headerHeight}px !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        bottom: 0 !important;
+                        width: 100% !important;
+                        height: ${itemsHeight}px !important;
+                        overflow: hidden !important;
+                    `;
+                    
+                    // 强制所有子容器显示
+                    const allContainers = lmItems.querySelectorAll('.lm_item_container, .lm_content');
+                    allContainers.forEach(el => {
+                        el.style.cssText = `
+                            position: absolute !important;
+                            top: 0 !important;
+                            left: 0 !important;
+                            width: 100% !important;
+                            height: 100% !important;
+                            display: block !important;
+                            visibility: visible !important;
+                        `;
+                    });
+                    
+                    // 强制 Golden Layout 更新
+                    const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
+                    myLayout.updateSize(window.innerWidth, layoutHeight);
+                }
+            }, 100);
+            
+            // 第二次检查尺寸（延迟更长时间）
+            setTimeout(() => {
+                console.log('=== 第二次尺寸检查 ===');
+                
+                // 强制 Golden Layout 重新计算尺寸
+                const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+                const aiInputHeight = document.getElementById('aiInputWrapper')?.offsetHeight || 140;
+                const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
+                console.log('强制更新 Golden Layout 尺寸:', window.innerWidth, 'x', layoutHeight);
+                myLayout.updateSize(window.innerWidth, layoutHeight);
+                
                 if (lmItems) {
                     console.log('Items容器尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
                 }
@@ -964,16 +1049,18 @@ function initialize(projectContent = null) {
                     const container = threejsViewport.container.getElement().get(0);
                     const width = container.offsetWidth;
                     const height = container.offsetHeight;
-                    console.log('更新Three.js渲染器尺寸:', width, 'x', height);
-                    threejsViewport.renderer.setSize(width, height);
-                    if (threejsViewport.camera) {
-                        threejsViewport.camera.aspect = width / height;
-                        threejsViewport.camera.updateProjectionMatrix();
+                    console.log('Three.js容器尺寸:', width, 'x', height);
+                    if (width > 0 && height > 0) {
+                        threejsViewport.renderer.setSize(width, height);
+                        if (threejsViewport.camera) {
+                            threejsViewport.camera.aspect = width / height;
+                            threejsViewport.camera.updateProjectionMatrix();
+                        }
                     }
                 }
                 
                 console.log('=== 移动端初始化完成 ===');
-            }, 200);
+            }, 300);
         }, 500);
     }
 
