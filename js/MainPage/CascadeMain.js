@@ -284,6 +284,10 @@ function initialize(projectContent = null) {
 
                 // Retrieve the code from the editor window as a string
                 let newCode = monacoEditor.getValue();
+                
+                // 更新最后保存的代码，重置修改标记
+                window.lastSavedCode = newCode;
+                window.codeModifiedSinceLastRender = false;
 
                 // Clear Inline Monaco Editor Error Highlights
                 monaco.editor.setModelMarkers(monacoEditor.getModel(), 'test', []);
@@ -387,6 +391,19 @@ function initialize(projectContent = null) {
                 return true;
             };
             
+            // 初始化代码修改标记
+            window.lastSavedCode = monacoEditor.getValue();
+            window.codeModifiedSinceLastRender = false;
+            
+            // 监听代码编辑器内容变化
+            monacoEditor.onDidChangeModelContent(() => {
+                const currentCode = monacoEditor.getValue();
+                if (currentCode !== window.lastSavedCode) {
+                    window.codeModifiedSinceLastRender = true;
+                    console.log('代码已修改，标记需要刷新3D视图');
+                }
+            });
+            
             // 监听容器显示事件，更新编辑器布局
             container.on('show', function() {
                 console.log('代码编辑器显示，刷新布局');
@@ -399,13 +416,9 @@ function initialize(projectContent = null) {
                 }
             });
             
-            // 监听容器隐藏事件，标记代码已修改
+            // 监听容器隐藏事件（从代码编辑器切换到其他视图）
             container.on('hide', function() {
                 console.log('代码编辑器隐藏');
-                // 标记代码已修改，需要在切换到3D视图时刷新
-                if (monacoEditor) {
-                    window.codeModifiedSinceLastRender = true;
-                }
             });
         });
     });
@@ -445,13 +458,14 @@ function initialize(projectContent = null) {
                     }
                     threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
                     
-                    // 任务1：如果代码已修改，自动刷新3D视图
+                    // 如果代码已修改且未保存，自动刷新3D视图
                     if (window.codeModifiedSinceLastRender && monacoEditor) {
                         console.log('检测到代码已修改，自动刷新3D视图');
-                        window.codeModifiedSinceLastRender = false;
                         // 延迟执行，确保视图已完全显示
                         setTimeout(() => {
-                            monacoEditor.evaluateCode(true);
+                            if (!window.workerWorking) {
+                                monacoEditor.evaluateCode(true);
+                            }
                         }, 300);
                     }
                 }
