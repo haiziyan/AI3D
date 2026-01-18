@@ -1118,13 +1118,9 @@ function initialize(projectContent = null) {
                         console.log('Stack容器尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
                         console.log('Stack computed style:', window.getComputedStyle(lmStack).width, 'x', window.getComputedStyle(lmStack).height);
                         
-                        const appbody = document.getElementById('appbody');
-                        if (appbody) {
-                            console.log('Appbody尺寸:', appbody.offsetWidth, 'x', appbody.offsetHeight);
-                            console.log('Appbody computed style:', window.getComputedStyle(appbody).width, 'x', window.getComputedStyle(appbody).height);
-                        }
+                        console.log('Appbody尺寸:', appbody.offsetWidth, 'x', appbody.offsetHeight);
+                        console.log('Appbody computed style:', window.getComputedStyle(appbody).width, 'x', window.getComputedStyle(appbody).height);
                         
-                        const lmRoot = document.querySelector('.lm_root');
                         if (lmRoot) {
                             console.log('lm_root尺寸:', lmRoot.offsetWidth, 'x', lmRoot.offsetHeight);
                             console.log('lm_root computed style:', window.getComputedStyle(lmRoot).width, 'x', window.getComputedStyle(lmRoot).height);
