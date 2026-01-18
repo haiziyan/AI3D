@@ -1103,14 +1103,16 @@ function initialize(projectContent = null) {
                         
                         // 修复所有子容器
                         const allContainers = lmItems.querySelectorAll('.lm_item_container');
-                        allContainers.forEach(container => {
+                        allContainers.forEach((container, index) => {
+                            // 只显示第一个容器（3D视图），其他隐藏
+                            const display = index === 0 ? 'block' : 'none';
                             container.setAttribute('style', `
                                 position: absolute !important;
                                 top: 0 !important;
                                 left: 0 !important;
                                 width: ${itemsWidth}px !important;
                                 height: ${itemsHeight}px !important;
-                                display: block !important;
+                                display: ${display} !important;
                                 visibility: visible !important;
                             `);
                         });
