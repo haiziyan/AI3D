@@ -1238,14 +1238,15 @@ function initialize(projectContent = null) {
                 console.log('Header高度:', headerHeight);
                 console.log('计算Items高度:', itemsHeight);
                 
-                // 强制设置 appbody
+                // 强制设置 appbody - 使用 bottom: 0 和 padding-bottom 来避免空隙
                 appbody.style.position = 'absolute';
                 appbody.style.top = topnavHeight + 'px';
                 appbody.style.left = '0';
                 appbody.style.right = '0';
-                appbody.style.bottom = aiInputHeight + 'px';
+                appbody.style.bottom = '0';
                 appbody.style.width = '100%';
                 appbody.style.height = 'auto';
+                appbody.style.paddingBottom = aiInputHeight + 'px';
                 
                 // 强制设置 Golden Layout 根容器 - 使用具体像素值
                 const lmRoot = document.querySelector('.lm_root');
