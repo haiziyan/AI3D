@@ -494,9 +494,6 @@ function initialize(projectContent = null) {
     myLayout.registerComponent('aiModule', function (container) {
         consoleGolden = container;
         
-        // 检测是否为移动端
-        const isMobile = window.innerWidth <= 768;
-        
         // 移动端：隐藏AI模块的Tab
         if (isMobile) {
             setTimeout(() => {
@@ -947,9 +944,9 @@ function initialize(projectContent = null) {
 
     // Resize the layout when the browser resizes
     window.onorientationchange = function (event) {
-        const isMobile = window.innerWidth <= 768;
+        const isMobileResize = window.innerWidth <= 768;
         const topnavHeight = document.getElementsByClassName('topnav')[0].offsetHeight;
-        const aiInputHeight = isMobile ? (document.getElementById('aiInputWrapper')?.offsetHeight || 140) : 0;
+        const aiInputHeight = isMobileResize ? (document.getElementById('aiInputWrapper')?.offsetHeight || 140) : 0;
         const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
         
         myLayout.updateSize(window.innerWidth, layoutHeight);
@@ -972,11 +969,11 @@ function initialize(projectContent = null) {
     
     // 监听窗口大小变化，处理移动端AI输入框位置
     window.addEventListener('resize', function() {
-        const isMobile = window.innerWidth <= 768;
+        const isMobileResize = window.innerWidth <= 768;
         const aiInputWrapper = document.getElementById('aiInputWrapper');
         
         if (aiInputWrapper) {
-            if (isMobile) {
+            if (isMobileResize) {
                 // 移动端：将AI输入框移到body底部
                 if (aiInputWrapper.parentElement.tagName !== 'BODY') {
                     document.body.appendChild(aiInputWrapper);
@@ -991,7 +988,7 @@ function initialize(projectContent = null) {
         }
         
         const topnavHeight = document.getElementById('topnav').offsetHeight;
-        const aiInputHeight = isMobile ? (aiInputWrapper?.offsetHeight || 140) : 0;
+        const aiInputHeight = isMobileResize ? (aiInputWrapper?.offsetHeight || 140) : 0;
         const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
         
         myLayout.updateSize(window.innerWidth, layoutHeight);
@@ -1593,7 +1590,6 @@ function initialize(projectContent = null) {
     if (startup) { startup(); }
     
     // 移动端：额外的初始化检查，确保代码被评估
-    const isMobile = window.innerWidth <= 768;
     if (isMobile) {
         console.log('移动端：设置额外的初始化检查');
         setTimeout(() => {
