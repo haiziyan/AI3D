@@ -428,49 +428,65 @@ function initialize(projectContent = null) {
         console.log('注册 cascadeView 组件');
         GUIState = state;
         container.setState(GUIState);
-        myLayout.on("initialised", () => {
-            console.log('cascadeView 初始化');
-            // Destroy the existing editor if it exists
-            if (threejsViewport) {
-                threejsViewport.active = false;
-                threejsViewport = null;
-            }
+        
+        // Destroy the existing editor if it exists
+        if (threejsViewport) {
+            threejsViewport.active = false;
+            threejsViewport = null;
+        }
 
-            let floatingGUIContainer = document.createElement("div");
-            floatingGUIContainer.className = 'gui-panel';
-            floatingGUIContainer.id = "guiPanel";
-            container.getElement().get(0).appendChild(floatingGUIContainer);
-            threejsViewport = new CascadeEnvironment(container);
-            console.log('threejsViewport 创建完成:', threejsViewport);
-            
-            // 监听容器显示事件
-            container.on('show', function() {
-                console.log('3D视图显示，刷新渲染器');
-                if (threejsViewport && threejsViewport.renderer) {
-                    const containerEl = container.getElement().get(0);
-                    const width = containerEl.offsetWidth;
-                    const height = containerEl.offsetHeight;
-                    console.log('刷新Canvas尺寸:', width, 'x', height);
-                    threejsViewport.renderer.setSize(width, height);
-                    if (threejsViewport.camera) {
-                        threejsViewport.camera.aspect = width / height;
-                        threejsViewport.camera.updateProjectionMatrix();
-                    }
-                    threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
-                    
-                    // 如果代码已修改且未保存，自动刷新3D视图
-                    if (window.codeModifiedSinceLastRender && monacoEditor) {
-                        console.log('检测到代码已修改，自动刷新3D视图');
-                        // 延迟执行，确保视图已完全显示
-                        setTimeout(() => {
-                            if (!window.workerWorking) {
-                                monacoEditor.evaluateCode(true);
-                            }
-                        }, 300);
-                    }
-                }
+        let floatingGUIContainer = document.createElement("div");
+        floatingGUIContainer.className = 'gui-panel';
+        floatingGUIContainer.id = "guiPanel";
+        container.getElement().get(0).appendChild(floatingGUIContainer);
+        threejsViewport = new CascadeEnvironment(container);
+        console.log('threejsViewport 创建完成:', threejsViewport);
+        
+        // 监听tab激活事件（Golden Layout的正确事件）
+        container.on('tab', function(tab) {
+            console.log('3D视图tab对象创建');
+            // 监听tab的active事件
+            tab.element.on('mousedown touchstart', function() {
+                console.log('3D视图tab被点击');
+                setTimeout(() => {
+                    checkAndRefresh3DView();
+                }, 100);
             });
         });
+        
+        // 监听容器显示事件
+        container.on('show', function() {
+            console.log('3D视图显示事件触发');
+            checkAndRefresh3DView();
+        });
+        
+        // 检查并刷新3D视图的函数
+        function checkAndRefresh3DView() {
+            console.log('检查是否需要刷新3D视图');
+            if (threejsViewport && threejsViewport.renderer) {
+                const containerEl = container.getElement().get(0);
+                const width = containerEl.offsetWidth;
+                const height = containerEl.offsetHeight;
+                console.log('刷新Canvas尺寸:', width, 'x', height);
+                threejsViewport.renderer.setSize(width, height);
+                if (threejsViewport.camera) {
+                    threejsViewport.camera.aspect = width / height;
+                    threejsViewport.camera.updateProjectionMatrix();
+                }
+                threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
+                
+                // 如果代码已修改且未保存，自动刷新3D视图
+                if (window.codeModifiedSinceLastRender && monacoEditor) {
+                    console.log('检测到代码已修改，自动刷新3D视图');
+                    // 延迟执行，确保视图已完全显示
+                    setTimeout(() => {
+                        if (!window.workerWorking) {
+                            monacoEditor.evaluateCode(true);
+                        }
+                    }, 300);
+                }
+            }
+        }
     });
 
     // Set up the AI Module Component (with generation history)
@@ -997,6 +1013,65 @@ function initialize(projectContent = null) {
 
     // Initialize the Layout
     myLayout.init();
+    
+    // 方法1：监听activeContentItemChanged事件
+    myLayout.on('activeContentItemChanged', function(contentItem) {
+        console.log('activeContentItemChanged事件触发:', contentItem);
+        if (contentItem && contentItem.config && contentItem.config.componentName === 'cascadeView') {
+            console.log('检测到3D视图被激活');
+            // 延迟执行，确保tab切换完成
+            setTimeout(() => {
+                if (window.codeModifiedSinceLastRender && monacoEditor && !window.workerWorking) {
+                    console.log('代码已修改，自动刷新3D视图');
+                    monacoEditor.evaluateCode(true);
+                }
+            }, 200);
+        }
+    });
+    
+    // 方法2：监听stateChanged事件（备用）
+    myLayout.on('stateChanged', function() {
+        // 检查当前激活的tab
+        const activeContentItems = myLayout.root.getItemsByType('component');
+        activeContentItems.forEach(item => {
+            if (item.isComponent && item.container && item.container.isHidden === false) {
+                if (item.config.componentName === 'cascadeView') {
+                    console.log('stateChanged: 检测到3D视图被激活');
+                    // 延迟执行，确保tab切换完成
+                    setTimeout(() => {
+                        if (window.codeModifiedSinceLastRender && monacoEditor && !window.workerWorking) {
+                            console.log('代码已修改，自动刷新3D视图');
+                            monacoEditor.evaluateCode(true);
+                        }
+                    }, 200);
+                }
+            }
+        });
+    });
+    
+    // 方法3：直接监听DOM上的tab点击事件（最可靠）
+    setTimeout(() => {
+        const tabs = document.querySelectorAll('.lm_tab');
+        console.log('找到', tabs.length, '个tab');
+        tabs.forEach((tab, index) => {
+            const title = tab.querySelector('.lm_title');
+            if (title) {
+                console.log('Tab', index, '标题:', title.textContent);
+                if (title.textContent.includes('3D 视图') || title.textContent.includes('3D')) {
+                    console.log('为3D视图tab添加点击监听器');
+                    tab.addEventListener('click', function() {
+                        console.log('3D视图tab被点击');
+                        setTimeout(() => {
+                            if (window.codeModifiedSinceLastRender && monacoEditor && !window.workerWorking) {
+                                console.log('代码已修改，自动刷新3D视图');
+                                monacoEditor.evaluateCode(true);
+                            }
+                        }, 300);
+                    });
+                }
+            }
+        });
+    }, 500);
     
     // 移动端需要延迟计算布局尺寸，确保DOM完全渲染
     if (isMobile) {
