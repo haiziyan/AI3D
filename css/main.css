@@ -1248,17 +1248,22 @@ body {
     font-size: 15px !important;
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: center !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
     min-width: 100px !important;
+    width: auto !important;
     flex-shrink: 0 !important;
+    box-sizing: border-box !important;
   }
   
   .lm_title {
     font-size: 15px !important;
     display: inline-block !important;
     visibility: visible !important;
+    white-space: nowrap !important;
+    line-height: 48px !important;
   }
   
   .lm_close_tab, .lm_controls {
@@ -1277,6 +1282,9 @@ body {
     display: inline-flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    width: auto !important;
+    min-width: 100px !important;
+    height: 48px !important;
   }
   
   /* Stack容器 - 使用绝对定位填满整个容器 */
