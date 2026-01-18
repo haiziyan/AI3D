@@ -490,6 +490,39 @@
     background: var(--accent-hover);
   }
   
+  /* 任务5：优化历史记录按钮样式 */
+  /* 编辑按钮 - 隐藏不显示 */
+  .btn-edit-history {
+    display: none !important;
+  }
+  
+  /* 删除按钮 - 优化UI和颜色 */
+  .btn-delete-history {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--divider-color);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: auto;
+  }
+  
+  .btn-delete-history:hover {
+    background: rgba(255, 107, 107, 0.15);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+  }
+  
+  .btn-delete-history svg {
+    width: 14px;
+    height: 14px;
+  }
+  
   .loading-state, .empty-state {
     display: flex;
     flex-direction: column;
@@ -904,6 +937,27 @@
   
   .lm_content {
     background: var(--primary-bg) !important;
+    overflow: hidden !important;
+  }
+  
+  /* 任务4：确保代码编辑区和3D视图大小一致 */
+  .lm_item_container {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  .lm_items {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  /* 确保Monaco编辑器和Canvas填满容器 */
+  .monaco-editor, canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
   }
   
   .lm_splitter {

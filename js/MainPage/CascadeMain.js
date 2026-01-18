@@ -398,6 +398,15 @@ function initialize(projectContent = null) {
                     }, 100);
                 }
             });
+            
+            // 监听容器隐藏事件，标记代码已修改
+            container.on('hide', function() {
+                console.log('代码编辑器隐藏');
+                // 标记代码已修改，需要在切换到3D视图时刷新
+                if (monacoEditor) {
+                    window.codeModifiedSinceLastRender = true;
+                }
+            });
         });
     });
 
@@ -435,6 +444,16 @@ function initialize(projectContent = null) {
                         threejsViewport.camera.updateProjectionMatrix();
                     }
                     threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
+                    
+                    // 任务1：如果代码已修改，自动刷新3D视图
+                    if (window.codeModifiedSinceLastRender && monacoEditor) {
+                        console.log('检测到代码已修改，自动刷新3D视图');
+                        window.codeModifiedSinceLastRender = false;
+                        // 延迟执行，确保视图已完全显示
+                        setTimeout(() => {
+                            monacoEditor.evaluateCode(true);
+                        }, 300);
+                    }
                 }
             });
         });
