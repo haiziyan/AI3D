@@ -1170,14 +1170,26 @@ function initialize(projectContent = null) {
                 });
             }
             
-            // 隐藏AI模块的Tab
+            // 移动端：确保3D视图和代码编辑器的Tab正常显示，隐藏AI模块的Tab
             const tabs = document.querySelectorAll('.lm_tab');
+            console.log('处理Tab显示状态，共', tabs.length, '个Tab');
             tabs.forEach((tab, index) => {
                 const title = tab.querySelector('.lm_title');
-                if (title && title.textContent.includes('AI 生成器')) {
-                    console.log('隐藏AI模块Tab (索引:', index, ')');
-                    tab.style.display = 'none';
-                    tab.style.visibility = 'hidden';
+                if (title) {
+                    const titleText = title.textContent.trim();
+                    console.log(`Tab ${index}: "${titleText}"`);
+                    
+                    if (titleText.includes('AI 生成器')) {
+                        // 隐藏AI模块的Tab
+                        console.log('隐藏AI模块Tab (索引:', index, ')');
+                        tab.style.display = 'none';
+                        tab.style.visibility = 'hidden';
+                    } else {
+                        // 确保其他Tab（3D视图、代码编辑器）正常显示
+                        console.log('显示Tab (索引:', index, '):', titleText);
+                        tab.style.display = '';
+                        tab.style.visibility = 'visible';
+                    }
                 }
             });
             
