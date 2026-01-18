@@ -1492,9 +1492,9 @@ body {
   
   /* 移动端布局优化 - 显示tab标签栏，但样式优化 */
   .lm_header {
-    height: 44px !important;
-    min-height: 44px !important;
-    max-height: 44px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
     background: var(--secondary-bg) !important;
     display: flex !important;
     border-bottom: 2px solid var(--accent-color) !important;
@@ -1508,13 +1508,16 @@ body {
     flex: 1 !important;
     visibility: visible !important;
     width: 100% !important;
-    height: 44px !important;
+    height: 48px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
   }
   
   .lm_tab {
-    height: 44px !important;
-    min-height: 44px !important;
-    line-height: 44px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    line-height: 48px !important;
     padding: 0 20px !important;
     font-size: 15px !important;
     display: inline-flex !important;
@@ -1529,8 +1532,9 @@ body {
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-    min-width: 80px !important;
+    min-width: 100px !important;
     flex-shrink: 0 !important;
+    white-space: nowrap !important;
   }
   
   .lm_tab:hover {
@@ -1637,12 +1641,14 @@ body {
     height: calc(100vh - 56px - 140px) !important; /* 减去顶部导航栏和底部AI输入框的高度 */
     position: relative !important;
     width: 100% !important;
+    overflow: hidden !important;
   }
   
   /* 确保root容器正确 */
   .lm_root {
     width: 100% !important;
     height: 100% !important;
+    position: relative !important;
   }
   
   /* 移动端隐藏AI模块的tab - 只隐藏第3个tab */
@@ -1669,6 +1675,7 @@ body {
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
+    position: relative !important;
   }
   
   /* 确保items容器正确显示 */
@@ -1676,7 +1683,8 @@ body {
     flex: 1 !important;
     position: relative !important;
     width: 100% !important;
-    height: 100% !important;
+    height: calc(100% - 48px) !important; /* 减去header高度 */
+    overflow: hidden !important;
   }
   
   /* 确保每个item占满空间 */
@@ -1687,49 +1695,33 @@ body {
     width: 100% !important;
     height: 100% !important;
     display: none !important;
+    overflow: hidden !important;
   }
   
   /* 只显示激活的item */
   .lm_item.lm_active {
     display: block !important;
-  }
-  
-  /* 确保stack内的items容器正确显示 */
-  .lm_items {
-    width: 100% !important;
-    height: 100% !important;
-    position: relative !important;
-    flex: 1 !important;
-  }
-  
-  /* 确保每个item正确显示 */
-  .lm_item {
-    width: 100% !important;
-    height: 100% !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-  }
-  
-  /* 激活的tab内容显示，非激活的隐藏 */
-  .lm_items > .lm_item {
-    display: none !important;
-  }
-  
-  .lm_items > .lm_item.lm_active {
-    display: block !important;
+    z-index: 1 !important;
   }
   
   /* 确保内容容器正确显示 */
   .lm_content {
     width: 100% !important;
     height: 100% !important;
-    position: relative !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    overflow: hidden !important;
   }
   
   /* 确保3D视图canvas占满屏幕 */
   .lm_item_container {
     width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    overflow: hidden !important;
   }
   
   /* 移动端隐藏GUI面板 */
@@ -1743,9 +1735,18 @@ body {
     height: 100% !important;
     display: block !important;
     touch-action: none !important; /* 允许触摸交互 */
+    position: relative !important;
   }
   
   /* 移动端Monaco编辑器优化 */
+  .monaco-editor {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+  
   .monaco-editor .overflow-guard {
     width: 100% !important;
     height: 100% !important;
@@ -1757,7 +1758,7 @@ body {
   /* 移动端时，防止输入法弹出导致页面滚动 */
   body {
     overflow: hidden;
-    position: relative;
+    position: fixed;
     width: 100%;
     height: 100vh;
     /* 允许触摸滚动 */
@@ -1768,6 +1769,8 @@ body {
     height: calc(100vh - 56px) !important;
     overflow: hidden;
     position: relative;
+    width: 100%;
+    display: block !important;
   }
   
   /* 移动端AI输入框样式优化 */
@@ -1784,7 +1787,10 @@ body {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
-    position: relative !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    overflow: hidden !important;
   }
   
   /* 确保canvas和编辑器容器正确显示 */
@@ -1795,13 +1801,16 @@ body {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
+    overflow: hidden !important;
   }
   
   /* Monaco编辑器容器 */
   .monaco-editor {
     width: 100% !important;
     height: 100% !important;
-    position: relative !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
   }
   
   /* 确保Three.js canvas正确显示 */
@@ -1811,7 +1820,34 @@ body {
     height: 100% !important;
     max-width: 100% !important;
     max-height: 100% !important;
-    position: relative !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+  
+  /* 修复Golden Layout的splitter在移动端的显示 */
+  .lm_splitter {
+    display: none !important;
+  }
+  
+  /* 确保Golden Layout容器正确初始化 */
+  .lm_goldenlayout {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* 确保所有Golden Layout子元素可见 */
+  .lm_root,
+  .lm_row,
+  .lm_column,
+  .lm_stack,
+  .lm_header,
+  .lm_items,
+  .lm_item,
+  .lm_content {
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
@@ -1823,6 +1859,7 @@ body {
   
   .topnav {
     height: 48px;
+    padding: 6px 8px;
   }
   
   .lm_goldenlayout {
@@ -1830,14 +1867,26 @@ body {
   }
   
   .lm_header {
-    height: 28px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+  }
+  
+  .lm_tabs {
+    height: 40px !important;
   }
   
   .lm_tab {
-    height: 28px !important;
-    line-height: 28px !important;
-    padding: 0 8px !important;
-    font-size: 11px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    line-height: 40px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    min-width: 80px !important;
+  }
+  
+  .lm_items {
+    height: calc(100% - 40px) !important; /* 减去header高度 */
   }
   
   .ai-input-wrapper {
@@ -1864,12 +1913,6 @@ body {
   .ai-generate-btn-module {
     justify-content: center;
   }
-}
-
-@media (max-width: 480px) {
-  .topnav {
-    padding: 6px 8px;
-  }
   
   .logo {
     font-size: 0;
@@ -1893,20 +1936,6 @@ body {
   
   .btn-auth .btn-text, .btn-user-center .btn-text {
     display: none;
-  }
-  
-  .ai-input-panel {
-    padding: 8px;
-  }
-  
-  .ai-prompt-textarea {
-    height: 70px;
-    font-size: 12px;
-  }
-  
-  .ai-generate-btn-module {
-    padding: 10px 16px;
-    font-size: 13px;
   }
   
   .modal-content {
@@ -1933,15 +1962,6 @@ body {
   
   .console-content {
     font-size: 11px;
-  }
-  
-  /* 移动端AI输入区域进一步优化 */
-  .ai-input-wrapper {
-    padding: 10px;
-  }
-  
-  .ai-prompt-textarea {
-    margin-bottom: 8px;
   }
 }
 
