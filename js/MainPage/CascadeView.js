@@ -22,9 +22,9 @@ var Environment = function (goldenContainer) {
     this.scene = new THREE.Scene();
     this.backgroundColor  = 0x222222; //0xa0a0a0
     this.scene.background = new THREE.Color(this.backgroundColor);          
-    this.scene.fog        = new THREE.Fog  (this.backgroundColor, 200, 600);
+    // this.scene.fog        = new THREE.Fog  (this.backgroundColor, 1000, 10000); // 雾效已禁用
 
-    this.camera = new THREE.PerspectiveCamera (45, 1, 1, 5000);
+    this.camera = new THREE.PerspectiveCamera (45, 1, 0.1, 50000);
                 //new THREE.OrthographicCamera(300 / - 2, 300 / 2, 300 / 2, 300 / - 2, 1, 1000);
                 // Consider an Orthographic Camera.  It doesn't look so hot with the Matcap Material.
     this.camera.position.set(50, 100, 150);
@@ -253,8 +253,8 @@ var CascadeEnvironment = function (goldenContainer) {
     // Expand fog distance to enclose the current object; always expand
     //  otherwise you can lose the object if it gets smaller again)
     this.boundingBox = new THREE.Box3().setFromObject(this.mainObject);
-    this.fogDist = Math.max(this.fogDist, this.boundingBox.min.distanceTo(this.boundingBox.max)*1.5);
-    this.environment.scene.fog = new THREE.Fog(this.environment.backgroundColor, this.fogDist, this.fogDist + 400);
+    this.fogDist = Math.max(this.fogDist, this.boundingBox.min.distanceTo(this.boundingBox.max)*3);
+    // this.environment.scene.fog = new THREE.Fog(this.environment.backgroundColor, this.fogDist, this.fogDist + 5000); // 雾效已禁用
     
     this.environment.scene.add(this.mainObject);
     
