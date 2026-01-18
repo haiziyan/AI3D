@@ -1152,6 +1152,10 @@ function initialize(projectContent = null) {
                         if (monacoEditor) {
                             console.log('更新Monaco编辑器布局');
                             monacoEditor.layout();
+                            // 强制刷新编辑器显示
+                            setTimeout(() => {
+                                monacoEditor.layout();
+                            }, 100);
                         }
                         
                         // 强制更新Three.js视图
@@ -1162,7 +1166,14 @@ function initialize(projectContent = null) {
                                 threejsViewport.camera.aspect = itemsWidth / itemsHeight;
                                 threejsViewport.camera.updateProjectionMatrix();
                             }
+                            // 强制渲染一帧
                             threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
+                            console.log('Three.js 渲染完成');
+                            
+                            // 启动动画循环（如果有的话）
+                            if (threejsViewport.animate && typeof threejsViewport.animate === 'function') {
+                                threejsViewport.animate();
+                            }
                         }
                         
                         console.log('=== 移动端初始化完成 ===');
