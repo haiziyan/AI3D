@@ -386,6 +386,18 @@ function initialize(projectContent = null) {
                 }
                 return true;
             };
+            
+            // 监听容器显示事件，更新编辑器布局
+            container.on('show', function() {
+                console.log('代码编辑器显示，刷新布局');
+                if (monacoEditor) {
+                    // 延迟更新，确保容器尺寸已经正确
+                    setTimeout(() => {
+                        monacoEditor.layout();
+                        console.log('Monaco编辑器布局已更新');
+                    }, 100);
+                }
+            });
         });
     });
 
