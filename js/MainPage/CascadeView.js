@@ -59,20 +59,6 @@ var Environment = function (goldenContainer) {
     this.controls.screenSpacePanning = true;
     this.controls.update();
 
-    // 任务3：添加世界坐标轴辅助器（显示在右上角）
-    this.axesHelper = new THREE.AxesHelper(50);
-    this.axesHelper.name = "WorldAxes";
-    
-    // 创建一个独立的场景用于显示坐标轴
-    this.axesScene = new THREE.Scene();
-    this.axesCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-    this.axesCamera.position.set(0, 0, 2);
-    this.axesCamera.lookAt(0, 0, 0);
-    this.axesScene.add(this.axesHelper);
-    
-    // 添加环境光以便坐标轴可见
-    const axesLight = new THREE.AmbientLight(0xffffff, 1);
-    this.axesScene.add(axesLight);
 
     // Keep track of the last time the scene was interacted with
     // This allows for lazy rendering to reduce power consumption
@@ -282,7 +268,7 @@ var CascadeEnvironment = function (goldenContainer) {
       const maxDim = Math.max(size.x, size.y, size.z);
       const fov = this.environment.camera.fov * (Math.PI / 180);
       let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-      cameraZ *= 2.5; // 增加一些边距
+      cameraZ *= 2; // 增加一些边距
       
       // 更新相机位置和目标
       const cameraOffset = new THREE.Vector3(
@@ -414,45 +400,7 @@ var CascadeEnvironment = function (goldenContainer) {
     if (this.environment.viewDirty) {
       this.environment.renderer.render(this.environment.scene, this.environment.camera);
       
-      // 任务3：渲染世界坐标轴到右上角
-      if (this.environment.axesScene && this.environment.axesCamera) {
-        // 保存当前渲染器状态
-        const currentAutoClear = this.environment.renderer.autoClear;
-        this.environment.renderer.autoClear = false;
-        
-        // 同步坐标轴相机的旋转与主相机
-        this.environment.axesCamera.quaternion.copy(this.environment.camera.quaternion);
-        
-        // 计算右上角的视口位置和大小
-        const width = this.goldenContainer.width;
-        const height = this.goldenContainer.height;
-        const axesSize = Math.min(width, height) * 0.15; // 坐标轴显示区域占15%
-        const margin = 10; // 边距
-        
-        // 设置视口到右上角
-        this.environment.renderer.setViewport(
-          width - axesSize - margin,
-          height - axesSize - margin,
-          axesSize,
-          axesSize
-        );
-        this.environment.renderer.setScissor(
-          width - axesSize - margin,
-          height - axesSize - margin,
-          axesSize,
-          axesSize
-        );
-        this.environment.renderer.setScissorTest(true);
-        
-        // 渲染坐标轴场景
-        this.environment.renderer.render(this.environment.axesScene, this.environment.axesCamera);
-        
-        // 恢复渲染器状态
-        this.environment.renderer.setScissorTest(false);
-        this.environment.renderer.setViewport(0, 0, width, height);
-        this.environment.renderer.autoClear = currentAutoClear;
-      }
-      
+ 
       this.environment.viewDirty = false;
     }
   };
