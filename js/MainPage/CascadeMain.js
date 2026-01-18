@@ -1053,6 +1053,8 @@ function initialize(projectContent = null) {
                                 left: 0 !important;
                                 width: ${itemsWidth}px !important;
                                 height: ${appbodyHeight}px !important;
+                                display: block !important;
+                                visibility: visible !important;
                             `);
                         }
                         
@@ -1063,6 +1065,8 @@ function initialize(projectContent = null) {
                             left: 0 !important;
                             width: ${itemsWidth}px !important;
                             height: ${appbodyHeight}px !important;
+                            display: block !important;
+                            visibility: visible !important;
                         `);
                         
                         console.log('Stack尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
