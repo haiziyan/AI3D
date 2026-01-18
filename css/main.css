@@ -780,19 +780,36 @@ body {
   }
   
   /* 关键修复：body和appbody的高度设置 */
-  body {
+  html, body {
     position: relative;
     overflow: hidden;
     height: 100vh;
     width: 100%;
+    margin: 0;
+    padding: 0;
   }
   
   #appbody {
-    height: calc(100vh - 56px - 140px) !important;
-    overflow: hidden;
-    position: relative;
-    width: 100%;
+    position: absolute !important;
+    top: 56px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 140px !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: hidden !important;
     display: block !important;
+  }
+  
+  /* Golden Layout根容器 */
+  .lm_root {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
   }
   
   /* Golden Layout容器 */
@@ -857,21 +874,38 @@ body {
     opacity: 1 !important;
   }
   
-  /* Stack容器 */
+  /* Stack容器 - 使用绝对定位填满整个容器 */
   .lm_stack {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
   }
   
-  /* Items容器 */
+  /* Items容器 - 关键修复 */
   .lm_items {
     flex: 1 !important;
     position: relative !important;
     width: 100% !important;
-    height: calc(100% - 48px) !important;
+    min-height: 400px !important;
+    height: auto !important;
     overflow: hidden !important;
+  }
+  
+  /* 强制修复：确保Items容器有实际高度 */
+  .lm_stack .lm_items {
+    position: absolute !important;
+    top: 48px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: auto !important;
   }
   
   /* Item */
@@ -998,7 +1032,8 @@ body {
   }
   
   #appbody {
-    height: calc(100vh - 48px - 140px) !important;
+    top: 48px !important;
+    bottom: 140px !important;
   }
   
   .lm_header {
@@ -1018,8 +1053,8 @@ body {
     min-width: 80px !important;
   }
   
-  .lm_items {
-    height: calc(100% - 40px) !important;
+  .lm_stack .lm_items {
+    top: 40px !important;
   }
   
   .ai-prompt-textarea {

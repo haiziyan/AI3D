@@ -10,25 +10,68 @@ var myLayout, monacoEditor, threejsViewport,
 window.workerWorking = false;
 
 let starterCode = 
-`// Welcome to AI 3D Studio!   Here are some useful functions:
-//  Translate(), Rotate(), Scale(), Mirror(), Union(), Difference(), Intersection()
-//  Box(), Sphere(), Cylinder(), Cone(), Text3D(), Polygon()
-//  Offset(), Extrude(), RotatedExtrude(), Revolve(), Pipe(), Loft(), 
-//  FilletEdges(), ChamferEdges(),
-//  Slider(), Checkbox(), TextInput(), Dropdown()
+`// Define car design variables
+let car_length      = 50;
+let car_width       = 20;
+let overhang_front  = 8;
+let overhang_rear   = 9;
+let cabin_width     = 16;
+let cabin_length    = 25; // 33 = station, 25=sedan, 15=pickup
+let car_height      = 14;
+let bonnet_height   = 8;
+let bonnet_rounding = 4;
+let bonnet_length   = 15;
+let wheel_radius    = 5;
+let tire_width      = 3;
+let tire_protrude   = 1;
+let rim_height      = 1;
+let tire_compression= 1;
+let road_clearance  = 3; 
 
-let holeRadius = Slider("Radius", 30 , 20 , 40);
+// Derived properties
+let wheel_base      = car_length - overhang_front - overhang_rear;
+let cabin_narrowing = (car_width - cabin_width)/2;
+let cabin_base      = road_clearance + bonnet_height
+let cabin_height    = car_height-bonnet_height
 
-let sphere     = Sphere(50);
-let cylinderZ  =                     Cylinder(holeRadius, 200, true);
-let cylinderY  = Rotate([0,1,0], 90, Cylinder(holeRadius, 200, true));
-let cylinderX  = Rotate([1,0,0], 90, Cylinder(holeRadius, 200, true));
+// Draw car body and passenger cabin
+let car_body        = Translate([0,0,road_clearance],Box(car_length,car_width,bonnet_height))
+let car_cabin       = Translate([bonnet_length,cabin_narrowing,cabin_base-0.5],
+                            Box(cabin_length, cabin_width, cabin_height))
 
-Translate([0, 0, 50], Difference(sphere, [cylinderX, cylinderY, cylinderZ]));
+// Sculpt the car body more aerodynamically
+let car_body_rounded = FilletEdges(car_body,bonnet_rounding,[1,5])
+let cabin_aero       = ChamferEdges(car_cabin, cabin_height-0.5 , [1,5])
 
-Translate([-25, 0, 40], Text3D("Hi!", 36, 0.15, 'Consolas'));
+// Round all edges
+let cabin_rounded   = Offset(cabin_aero,1.5);
+let car_shrunk = Offset(car_body_rounded,-1);
+let car_rounded = Offset(car_shrunk,2); 
 
-// Don't forget to push imported or oc-defined shapes into sceneShapes to add them to the workspace!`;
+// Define wheels and wheel wells (Front/Rear - Left/Right)
+let rim              = Rotate([1,0,0],-90, Translate(
+                        [overhang_front,
+                                   -(wheel_radius-tire_compression),
+                                  -(tire_width - tire_protrude)]
+                                  , Cylinder(wheel_radius-rim_height,tire_width,true)))
+let wheel            = Rotate([1,0,0],-90, Translate( [overhang_front,
+                                   -(wheel_radius-tire_compression),
+                                  (0.5*tire_protrude)], 
+                                  Cylinder(wheel_radius,tire_width,true)));
+let wheel_FL         = Difference(wheel,[rim]);
+let wheel_well_FL    = Offset(wheel,0.8,0.01,true)
+let wheel_RL         = Translate([wheel_base,0,0], wheel_FL, true)
+let wheel_well_RL    = Translate([wheel_base,0,0], wheel_well_FL, true)
+let wheel_FR         = Rotate([0,0,1],180,Translate([-(2*overhang_front),-car_width ,0], wheel_FL, true))
+let wheel_well_FR    = Translate([0,car_width-1,0], wheel_well_FL, true)
+let wheel_RR         = Translate([wheel_base,0,0], wheel_FR, true)
+let wheel_well_RR    = Translate([wheel_base,0,0], wheel_well_FR, true)
+
+// Subtract the wheel wells from the car-body
+Difference(car_rounded,[wheel_well_FL, 
+                        wheel_well_RL, 
+                        wheel_well_FR, 
+                        wheel_well_RR])`;
 
 function initialize(projectContent = null) {
     this.searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
@@ -699,12 +742,36 @@ function initialize(projectContent = null) {
     // Initialize the Layout
     myLayout.init();
     
-    const topnavHeight = document.getElementById('topnav').offsetHeight;
-    const aiInputHeight = isMobile ? 140 : 0; // 移动端预留AI输入框高度
-    const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
-    
-    console.log('初始化布局尺寸:', window.innerWidth, 'x', layoutHeight);
-    myLayout.updateSize(window.innerWidth, layoutHeight);
+    // 移动端需要延迟计算布局尺寸，确保DOM完全渲染
+    if (isMobile) {
+        setTimeout(() => {
+            const topnavHeight = document.getElementById('topnav').offsetHeight;
+            const aiInputHeight = 140;
+            const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
+            
+            console.log('初始化布局尺寸:', window.innerWidth, 'x', layoutHeight);
+            myLayout.updateSize(window.innerWidth, layoutHeight);
+            
+            // 强制刷新布局
+            if (monacoEditor) {
+                monacoEditor.layout();
+            }
+            if (threejsViewport && threejsViewport.renderer) {
+                const container = threejsViewport.container.getElement().get(0);
+                threejsViewport.renderer.setSize(container.offsetWidth, container.offsetHeight);
+                if (threejsViewport.camera) {
+                    threejsViewport.camera.aspect = container.offsetWidth / container.offsetHeight;
+                    threejsViewport.camera.updateProjectionMatrix();
+                }
+            }
+        }, 100);
+    } else {
+        const topnavHeight = document.getElementById('topnav').offsetHeight;
+        const layoutHeight = window.innerHeight - topnavHeight;
+        
+        console.log('初始化布局尺寸:', window.innerWidth, 'x', layoutHeight);
+        myLayout.updateSize(window.innerWidth, layoutHeight);
+    }
     
     // 移动端调试：确保布局正确显示
     if (isMobile) {
@@ -783,6 +850,43 @@ function initialize(projectContent = null) {
                 }
             });
             
+            // 强制修复 lm_items 容器尺寸
+            if (lmItems && lmStack) {
+                const headerHeight = lmHeader ? lmHeader.offsetHeight : 48;
+                const stackHeight = lmStack.offsetHeight;
+                const itemsHeight = stackHeight - headerHeight;
+                
+                console.log('修复Items容器尺寸');
+                console.log('Stack高度:', stackHeight);
+                console.log('Header高度:', headerHeight);
+                console.log('计算Items高度:', itemsHeight);
+                
+                lmItems.style.width = '100%';
+                lmItems.style.height = itemsHeight + 'px';
+                lmItems.style.position = 'relative';
+                lmItems.style.overflow = 'hidden';
+                
+                // 修复所有 lm_item 容器
+                const items = lmItems.querySelectorAll('.lm_item');
+                items.forEach(item => {
+                    item.style.width = '100%';
+                    item.style.height = '100%';
+                    item.style.position = 'absolute';
+                    item.style.top = '0';
+                    item.style.left = '0';
+                });
+                
+                // 修复所有 lm_content 容器
+                const contents = lmItems.querySelectorAll('.lm_content');
+                contents.forEach(content => {
+                    content.style.width = '100%';
+                    content.style.height = '100%';
+                    content.style.position = 'absolute';
+                    content.style.top = '0';
+                    content.style.left = '0';
+                });
+            }
+            
             // 强制更新布局
             const topnavHeight = document.getElementById('topnav').offsetHeight;
             const aiInputHeight = document.getElementById('aiInputWrapper')?.offsetHeight || 140;
@@ -791,26 +895,40 @@ function initialize(projectContent = null) {
             
             myLayout.updateSize(window.innerWidth, layoutHeight);
             
-            // 强制更新Monaco编辑器布局
-            if (monacoEditor) {
-                console.log('更新Monaco编辑器布局');
-                monacoEditor.layout();
-            }
-            
-            // 强制更新Three.js视图
-            if (threejsViewport && threejsViewport.renderer) {
-                const container = threejsViewport.container.getElement().get(0);
-                const width = container.offsetWidth;
-                const height = container.offsetHeight;
-                console.log('更新Three.js渲染器尺寸:', width, 'x', height);
-                threejsViewport.renderer.setSize(width, height);
-                if (threejsViewport.camera) {
-                    threejsViewport.camera.aspect = width / height;
-                    threejsViewport.camera.updateProjectionMatrix();
+            // 再次检查尺寸
+            setTimeout(() => {
+                console.log('=== 修复后尺寸检查 ===');
+                if (lmItems) {
+                    console.log('Items容器尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
                 }
-            }
-            
-            console.log('=== 移动端初始化完成 ===');
+                if (canvas) {
+                    console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+                }
+                if (monacoEditorEl) {
+                    console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
+                }
+                
+                // 强制更新Monaco编辑器布局
+                if (monacoEditor) {
+                    console.log('更新Monaco编辑器布局');
+                    monacoEditor.layout();
+                }
+                
+                // 强制更新Three.js视图
+                if (threejsViewport && threejsViewport.renderer) {
+                    const container = threejsViewport.container.getElement().get(0);
+                    const width = container.offsetWidth;
+                    const height = container.offsetHeight;
+                    console.log('更新Three.js渲染器尺寸:', width, 'x', height);
+                    threejsViewport.renderer.setSize(width, height);
+                    if (threejsViewport.camera) {
+                        threejsViewport.camera.aspect = width / height;
+                        threejsViewport.camera.updateProjectionMatrix();
+                    }
+                }
+                
+                console.log('=== 移动端初始化完成 ===');
+            }, 200);
         }, 500);
     }
 
