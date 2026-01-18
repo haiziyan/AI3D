@@ -1028,38 +1028,95 @@ function initialize(projectContent = null) {
                 console.log('强制更新 Golden Layout 尺寸:', window.innerWidth, 'x', layoutHeight);
                 myLayout.updateSize(window.innerWidth, layoutHeight);
                 
-                if (lmItems) {
-                    console.log('Items容器尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
-                }
-                if (canvas) {
-                    console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
-                }
-                if (monacoEditorEl) {
-                    console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
-                }
-                
-                // 强制更新Monaco编辑器布局
-                if (monacoEditor) {
-                    console.log('更新Monaco编辑器布局');
-                    monacoEditor.layout();
-                }
-                
-                // 强制更新Three.js视图
-                if (threejsViewport && threejsViewport.renderer) {
-                    const container = threejsViewport.container.getElement().get(0);
-                    const width = container.offsetWidth;
-                    const height = container.offsetHeight;
-                    console.log('Three.js容器尺寸:', width, 'x', height);
-                    if (width > 0 && height > 0) {
-                        threejsViewport.renderer.setSize(width, height);
-                        if (threejsViewport.camera) {
-                            threejsViewport.camera.aspect = width / height;
-                            threejsViewport.camera.updateProjectionMatrix();
+                // Golden Layout 更新后，再次强制设置尺寸（覆盖 Golden Layout 的计算）
+                setTimeout(() => {
+                    const lmItems = document.querySelector('.lm_items');
+                    const lmStack = document.querySelector('.lm_stack');
+                    const lmHeader = document.querySelector('.lm_header');
+                    
+                    if (lmItems && lmStack) {
+                        const headerHeight = 48;
+                        const stackHeight = lmStack.offsetHeight || layoutHeight;
+                        const itemsHeight = stackHeight - headerHeight;
+                        const itemsWidth = lmStack.offsetWidth || window.innerWidth;
+                        
+                        console.log('Golden Layout 更新后再次修复:');
+                        console.log('Stack尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
+                        console.log('计算Items尺寸:', itemsWidth, 'x', itemsHeight);
+                        
+                        // 使用 setAttribute 直接修改 style 属性
+                        lmItems.setAttribute('style', `
+                            position: absolute !important;
+                            top: ${headerHeight}px !important;
+                            left: 0 !important;
+                            right: 0 !important;
+                            bottom: 0 !important;
+                            width: ${itemsWidth}px !important;
+                            height: ${itemsHeight}px !important;
+                            overflow: hidden !important;
+                        `);
+                        
+                        // 修复所有子容器
+                        const allContainers = lmItems.querySelectorAll('.lm_item_container');
+                        allContainers.forEach(container => {
+                            container.setAttribute('style', `
+                                position: absolute !important;
+                                top: 0 !important;
+                                left: 0 !important;
+                                width: ${itemsWidth}px !important;
+                                height: ${itemsHeight}px !important;
+                                display: block !important;
+                                visibility: visible !important;
+                            `);
+                        });
+                        
+                        // 修复所有 content 容器
+                        const allContents = lmItems.querySelectorAll('.lm_content');
+                        allContents.forEach(content => {
+                            content.setAttribute('style', `
+                                position: absolute !important;
+                                top: 0 !important;
+                                left: 0 !important;
+                                width: ${itemsWidth}px !important;
+                                height: ${itemsHeight}px !important;
+                                display: block !important;
+                                visibility: visible !important;
+                            `);
+                        });
+                        
+                        console.log('=== 最终尺寸检查 ===');
+                        console.log('Items容器尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
+                        
+                        const canvas = document.querySelector('canvas');
+                        const monacoEditorEl = document.querySelector('.monaco-editor');
+                        
+                        if (canvas) {
+                            console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
                         }
+                        if (monacoEditorEl) {
+                            console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
+                        }
+                        
+                        // 强制更新Monaco编辑器布局
+                        if (monacoEditor) {
+                            console.log('更新Monaco编辑器布局');
+                            monacoEditor.layout();
+                        }
+                        
+                        // 强制更新Three.js视图
+                        if (threejsViewport && threejsViewport.renderer) {
+                            console.log('更新Three.js渲染器');
+                            threejsViewport.renderer.setSize(itemsWidth, itemsHeight);
+                            if (threejsViewport.camera) {
+                                threejsViewport.camera.aspect = itemsWidth / itemsHeight;
+                                threejsViewport.camera.updateProjectionMatrix();
+                            }
+                            threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
+                        }
+                        
+                        console.log('=== 移动端初始化完成 ===');
                     }
-                }
-                
-                console.log('=== 移动端初始化完成 ===');
+                }, 100);
             }, 300);
         }, 500);
     }
