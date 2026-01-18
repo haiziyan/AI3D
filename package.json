@@ -1,6 +1,6 @@
 {
 	"name": "ai-3d-cad-studio",
-	"productName": "AI 3D CAD Studio",
+	"productName": "AI 3D Studio",
 	"version": "1.0.0",
 	"description": "AI驱动的在线CAD建模工具 - 基于OpenCascade.js和DeepSeek",
 	"homepage": "https://github.com/yourusername/AI3D",

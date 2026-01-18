@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo   AI 3D CAD Studio - 启动脚本
+echo   AI 3D Studio - 启动脚本
 echo ========================================
 echo.
 

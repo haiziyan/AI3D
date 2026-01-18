@@ -4,7 +4,7 @@
 
 ### 🎉 重大更新
 
-这是 AI 3D CAD Studio 的首个正式版本，基于 Cascade Studio 进行了全面升级。
+这是 AI 3D Studio 的首个正式版本，基于 Cascade Studio 进行了全面升级。
 
 ### ✨ 新增功能
 

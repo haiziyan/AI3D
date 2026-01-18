@@ -1,4 +1,4 @@
-# AI 3D CAD Studio
+# AI 3D Studio
 
 基于 OpenCascade.js 的 AI 驱动在线 CAD 建模工具，支持自然语言生成 3D 模型。
 

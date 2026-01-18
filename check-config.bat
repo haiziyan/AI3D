@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo   AI 3D CAD Studio - 配置检查
+echo   AI 3D Studio - 配置检查
 echo ========================================
 echo.
 

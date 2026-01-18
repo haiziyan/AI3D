@@ -2,7 +2,7 @@
 
 ## ✅ 所有任务已完成
 
-本项目已成功完成所有 6 个任务，将原版 Cascade Studio 升级为功能强大的 AI 3D CAD Studio。
+本项目已成功完成所有 6 个任务，将原版 Cascade Studio 升级为功能强大的 AI 3D Studio。
 
 ---
 
@@ -240,7 +240,7 @@
 
 ## 📊 功能对比
 
-| 功能 | 原版 Cascade Studio | AI 3D CAD Studio |
+| 功能 | 原版 Cascade Studio | AI 3D Studio |
 |------|-------------------|------------------|
 | 代码编辑 | ✅ | ✅ |
 | 3D 渲染 | ✅ | ✅ |

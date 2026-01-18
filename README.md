@@ -1,8 +1,8 @@
-# AI 3D CAD Studio
+# AI 3D Studio
 
 <div align="center">
 
-![AI 3D CAD Studio](icon/Logo.png)
+![AI 3D Studio](icon/Logo.png)
 
 **AI 驱动的在线 CAD 建模工具**
 
@@ -213,7 +213,7 @@ cylinder;
 
 ## 📊 功能对比
 
-| 功能 | Cascade Studio | AI 3D CAD Studio |
+| 功能 | Cascade Studio | AI 3D Studio |
 |------|---------------|------------------|
 | 代码编辑 | ✅ | ✅ |
 | 3D 渲染 | ✅ | ✅ |
