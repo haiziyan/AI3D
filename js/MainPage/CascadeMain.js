@@ -301,10 +301,17 @@ function initialize(projectContent = null) {
                 userGui = false;
                 messageHandlers["addButton"]({ name: "Evaluate", label: "Function", callback: () => { monacoEditor.evaluateCode(true) } });
                 messageHandlers["addSlider"]({ name: "MeshRes", default: 0.1, min: 0.01, max: 2, step: 0.01, dp: 2 });
-                messageHandlers["addCheckbox"]({ name: "Cache?", default: true });
-                messageHandlers["addCheckbox"]({ name: "GroundPlane?", default: true });
-                messageHandlers["addCheckbox"]({ name: "Grid?", default: true });
+                // 移除 Cache、GroundPlane、Grid 选项，默认设置为 false
+                if (!('Cache?' in GUIState)) { GUIState['Cache?'] = false; }
+                if (!('GroundPlane?' in GUIState)) { GUIState['GroundPlane?'] = false; }
+                if (!('Grid?' in GUIState)) { GUIState['Grid?'] = false; }
                 userGui = true;
+                
+                // 初始隐藏GUI面板（只有当有用户参数时才显示）
+                const guiPanel = document.getElementById('guiPanel');
+                if (guiPanel) {
+                    guiPanel.style.display = 'none';
+                }
                 // Remove any existing Transform Handles that could be laying around
                 threejsViewport.clearTransformHandles();
 
@@ -1344,10 +1351,22 @@ function initialize(projectContent = null) {
                 }
             });
         }
+        
+        // 显示GUI面板（因为有用户参数）
+        const guiPanel = document.getElementById('guiPanel');
+        if (guiPanel) {
+            guiPanel.style.display = 'block';
+        }
     }
     messageHandlers["addButton"] = (payload) => {
         addGuiSeparator();
         gui.addButton({ title: payload.name, label: payload.label }).on('click', payload.callback);
+        
+        // 显示GUI面板（因为有用户参数）
+        const guiPanel = document.getElementById('guiPanel');
+        if (guiPanel && userGui) {
+            guiPanel.style.display = 'block';
+        }
     }
 
     messageHandlers["addCheckbox"] = (payload) => {
@@ -1356,6 +1375,12 @@ function initialize(projectContent = null) {
         gui.addInput(GUIState, payload.name).on('change', () => {
             delayReloadEditor();
         })
+        
+        // 显示GUI面板（因为有用户参数）
+        const guiPanel = document.getElementById('guiPanel');
+        if (guiPanel && userGui) {
+            guiPanel.style.display = 'block';
+        }
     }
 
     messageHandlers["addTextbox"] = (payload) => {
@@ -1368,6 +1393,12 @@ function initialize(projectContent = null) {
                     delayReloadEditor();
                 }
             })
+        }
+        
+        // 显示GUI面板（因为有用户参数）
+        const guiPanel = document.getElementById('guiPanel');
+        if (guiPanel && userGui) {
+            guiPanel.style.display = 'block';
         }
     }
 
@@ -1383,6 +1414,12 @@ function initialize(projectContent = null) {
                     delayReloadEditor();
                 }
             })
+        }
+        
+        // 显示GUI面板（因为有用户参数）
+        const guiPanel = document.getElementById('guiPanel');
+        if (guiPanel && userGui) {
+            guiPanel.style.display = 'block';
         }
     }
 

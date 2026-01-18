@@ -28,10 +28,22 @@ class AuthManager {
                     this.currentUser = session.user;
                     this.loadUserCredits();
                     this.updateUI();
+                    // 登录后自动刷新生成历史记录
+                    if (window.refreshGenerationHistory) {
+                        setTimeout(() => {
+                            window.refreshGenerationHistory();
+                        }, 500);
+                    }
                 } else if (event === 'SIGNED_OUT') {
                     this.currentUser = null;
                     this.userCredits = 0;
                     this.updateUI();
+                    // 登出后也刷新生成历史记录（显示登录提示）
+                    if (window.refreshGenerationHistory) {
+                        setTimeout(() => {
+                            window.refreshGenerationHistory();
+                        }, 500);
+                    }
                 }
             });
         } else {
@@ -184,27 +196,94 @@ class AuthManager {
 
     updateUI() {
         const userInfoElement = document.getElementById('userInfo');
+        const mobileUserInfoElement = document.getElementById('mobileUserInfo');
+        
+        let userHTML = '';
+        if (this.currentUser) {
+            userHTML = `
+                <span class="user-credits">${this.userCredits.toFixed(2)} 积分</span>
+                <button onclick="authManager.showUserCenter()" class="btn-user-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span class="btn-text">用户中心</span>
+                </button>
+            `;
+        } else {
+            userHTML = `
+                <button onclick="authManager.showAuthModal()" class="btn-auth">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span class="btn-text">登录/注册</span>
+                </button>
+            `;
+        }
+        
+        // 桌面端用户信息
         if (userInfoElement) {
+            userInfoElement.innerHTML = userHTML;
+        }
+        
+        // 移动端用户信息（在菜单内）
+        if (mobileUserInfoElement) {
             if (this.currentUser) {
-                userInfoElement.innerHTML = `
-                    <span class="user-credits">${this.userCredits.toFixed(2)} 积分</span>
-                    <button onclick="authManager.showUserCenter()" class="btn-user-center">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        <span class="btn-text">用户中心</span>
-                    </button>
+                mobileUserInfoElement.innerHTML = `
+                    <div class="mobile-user-card">
+                        <div class="mobile-user-avatar">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                        <div class="mobile-user-info">
+                            <div class="mobile-user-email">${this.currentUser.email}</div>
+                            <div class="mobile-user-credits">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                ${this.userCredits.toFixed(2)} 积分
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mobile-user-actions">
+                        <a href="#" onclick="authManager.showUserCenter(); toggleMenu(); return false;" class="mobile-action-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            用户中心
+                        </a>
+                        <a href="#" onclick="authManager.signOut(); toggleMenu(); return false;" class="mobile-action-btn logout">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16 17 21 12 16 7"/>
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            退出登录
+                        </a>
+                    </div>
                 `;
             } else {
-                userInfoElement.innerHTML = `
-                    <button onclick="authManager.showAuthModal()" class="btn-auth">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                mobileUserInfoElement.innerHTML = `
+                    <div class="mobile-login-prompt">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        <span class="btn-text">登录/注册</span>
-                    </button>
+                        <p>登录后可使用完整功能</p>
+                        <a href="#" onclick="authManager.showAuthModal(); toggleMenu(); return false;" class="mobile-login-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                <polyline points="10 17 15 12 10 7"/>
+                                <line x1="15" y1="12" x2="3" y2="12"/>
+                            </svg>
+                            立即登录/注册
+                        </a>
+                    </div>
                 `;
             }
         }

@@ -158,11 +158,6 @@
             </div>
             
             <div class="nav-center">
-                <div class="menu-toggle" onclick="toggleMenu()">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
                 <div class="nav-menu" id="navMenu">
                     <!-- 文件菜单 -->
                     <div class="menu-dropdown">
@@ -342,11 +337,22 @@
                             </a>
                         </div>
                     </div>
+                    
+                    <!-- 移动端用户信息区域 -->
+                    <div class="mobile-user-section">
+                        <div class="dropdown-divider"></div>
+                        <div id="mobileUserInfo"></div>
+                    </div>
                 </div>
             </div>
             
             <div class="nav-right">
-                <div id="userInfo"></div>
+                <div id="userInfo" class="desktop-user-info"></div>
+                <div class="menu-toggle" onclick="toggleMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
         </div>
 
