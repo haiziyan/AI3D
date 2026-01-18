@@ -1239,11 +1239,26 @@ function initialize(projectContent = null) {
                     lmStack.style.height = appbodyHeight + 'px';
                 }
                 
-                // 强制设置 Header
+                // 强制设置 Header - 使用 !important 覆盖内联样式
                 if (lmHeader) {
-                    lmHeader.style.height = headerHeight + 'px';
-                    lmHeader.style.minHeight = headerHeight + 'px';
-                    lmHeader.style.display = 'flex';
+                    lmHeader.style.cssText = `
+                        height: ${headerHeight}px !important;
+                        min-height: ${headerHeight}px !important;
+                        display: flex !important;
+                        visibility: visible !important;
+                        width: 100% !important;
+                    `;
+                }
+                
+                // 强制设置 Tabs 容器
+                if (lmTabs) {
+                    lmTabs.style.cssText = `
+                        display: flex !important;
+                        flex: 1 !important;
+                        height: ${headerHeight}px !important;
+                        width: 100% !important;
+                        visibility: visible !important;
+                    `;
                 }
                 
                 // 强制设置 Items 容器使用绝对定位
