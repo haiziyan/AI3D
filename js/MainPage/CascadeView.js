@@ -10,12 +10,27 @@ var Environment = function (goldenContainer) {
     // Get the current Width and Height of the Parent Element
     this.parentWidth  = this.goldenContainer.width;
     this.parentHeight = this.goldenContainer.height;
+    
+    console.log('Environment 初始化 - 容器尺寸:', this.parentWidth, 'x', this.parentHeight);
+    
+    // 如果容器尺寸为0，使用窗口尺寸作为后备
+    if (this.parentWidth === 0 || this.parentHeight === 0) {
+      const isMobile = window.innerWidth <= 768;
+      const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+      const aiInputHeight = isMobile ? 140 : 0;
+      const headerHeight = 48;
+      this.parentWidth = window.innerWidth;
+      this.parentHeight = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
+      console.warn('容器尺寸为0，使用窗口尺寸:', this.parentWidth, 'x', this.parentHeight);
+    }
 
     // Create the Canvas and WebGL Renderer
     this.curCanvas = document.createElement('canvas');
     this.goldenContainer.getElement().get(0).appendChild(this.curCanvas);
     this.renderer = new THREE.WebGLRenderer({ canvas: this.curCanvas, antialias: true, webgl2: false });
-    this.renderer.setPixelRatio(window.devicePixelRatio); this.renderer.setSize(this.parentWidth, this.parentHeight);
+    this.renderer.setPixelRatio(window.devicePixelRatio); 
+    this.renderer.setSize(this.parentWidth, this.parentHeight);
+    console.log('WebGL 渲染器已创建，尺寸:', this.parentWidth, 'x', this.parentHeight);
     this.goldenContainer.on('resize', this.onWindowResize.bind(this));
 
     // Create the Three.js Scene
@@ -411,4 +426,27 @@ var CascadeEnvironment = function (goldenContainer) {
   this.animate();
   // Initialize the view in-case we're lazy rendering...
   this.environment.renderer.render(this.environment.scene, this.environment.camera);
+  
+  // 移动端：延迟再次渲染，确保初始化完成
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    console.log('移动端：设置延迟渲染');
+    setTimeout(() => {
+      if (this.environment && this.environment.renderer) {
+        const container = this.goldenContainer.getElement().get(0);
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
+        console.log('移动端延迟渲染 - 容器尺寸:', width, 'x', height);
+        
+        if (width > 0 && height > 0) {
+          this.environment.renderer.setSize(width, height);
+          this.environment.camera.aspect = width / height;
+          this.environment.camera.updateProjectionMatrix();
+          this.environment.renderer.render(this.environment.scene, this.environment.camera);
+          this.environment.viewDirty = true;
+          console.log('移动端延迟渲染完成');
+        }
+      }
+    }, 500);
+  }
 }

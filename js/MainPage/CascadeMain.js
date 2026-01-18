@@ -8,6 +8,7 @@ var myLayout, monacoEditor, threejsViewport,
     messageHandlers = {},
     startup, file = {}, realConsoleLog, messageQueue = [], alternatingColor = true;
 window.workerWorking = false;
+window.initialCodeEvaluated = false; // 标记初始代码是否已评估
 
 let starterCode = 
 `// Define car design variables
@@ -1095,6 +1096,16 @@ function initialize(projectContent = null) {
                     threejsViewport.camera.updateProjectionMatrix();
                 }
             }
+            
+            // 移动端：确保初始代码被评估（如果还没有评估的话）
+            if (monacoEditor && monacoEditor.evaluateCode && !window.workerWorking) {
+                console.log('移动端：触发初始代码评估');
+                setTimeout(() => {
+                    if (!window.workerWorking) {
+                        monacoEditor.evaluateCode();
+                    }
+                }, 500);
+            }
         }, 100);
     } else {
         const topnavHeight = document.getElementById('topnav').offsetHeight;
@@ -1556,13 +1567,43 @@ function initialize(projectContent = null) {
                 });
             }
 
-            monacoEditor.evaluateCode();
+            // 确保 monacoEditor 已经初始化
+            if (monacoEditor && monacoEditor.evaluateCode) {
+                console.log('启动初始代码评估');
+                monacoEditor.evaluateCode();
+                window.initialCodeEvaluated = true;
+            } else {
+                console.warn('monacoEditor 尚未初始化，延迟执行');
+                // 延迟执行，等待 monacoEditor 初始化完成
+                setTimeout(() => {
+                    if (monacoEditor && monacoEditor.evaluateCode && !window.initialCodeEvaluated) {
+                        console.log('延迟启动初始代码评估');
+                        monacoEditor.evaluateCode();
+                        window.initialCodeEvaluated = true;
+                    } else {
+                        console.error('monacoEditor 初始化失败');
+                    }
+                }, 1000);
+            }
         }
         // Call the startup if we're ready when the wasm is ready
         startup();
     }
     // Otherwise, enqueue that call for when the Main Page is ready
     if (startup) { startup(); }
+    
+    // 移动端：额外的初始化检查，确保代码被评估
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        console.log('移动端：设置额外的初始化检查');
+        setTimeout(() => {
+            if (!window.initialCodeEvaluated && monacoEditor && monacoEditor.evaluateCode && !window.workerWorking) {
+                console.log('移动端：触发备用初始代码评估');
+                monacoEditor.evaluateCode();
+                window.initialCodeEvaluated = true;
+            }
+        }, 2000);
+    }
 
     // Register callbacks from the CAD Worker to add Sliders, Buttons, and Checkboxes to the UI
     // TODO: Enqueue these so the sliders are added/removed at the same time to eliminate flashing
