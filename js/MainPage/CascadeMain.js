@@ -850,30 +850,75 @@ function initialize(projectContent = null) {
                 }
             });
             
-            // 强制修复 lm_items 容器尺寸
-            if (lmItems && lmStack) {
-                const headerHeight = lmHeader ? lmHeader.offsetHeight : 48;
-                const stackHeight = lmStack.offsetHeight;
-                const itemsHeight = stackHeight - headerHeight;
+            // 强制修复 lm_items 容器尺寸 - 直接从窗口计算
+            const appbody = document.getElementById('appbody');
+            if (lmItems && appbody) {
+                // 计算实际可用高度
+                const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+                const aiInputHeight = document.getElementById('aiInputWrapper')?.offsetHeight || 140;
+                const appbodyHeight = window.innerHeight - topnavHeight - aiInputHeight;
+                const headerHeight = 48; // 固定 header 高度
+                const itemsHeight = appbodyHeight - headerHeight;
                 
                 console.log('修复Items容器尺寸');
-                console.log('Stack高度:', stackHeight);
+                console.log('窗口高度:', window.innerHeight);
+                console.log('导航栏高度:', topnavHeight);
+                console.log('AI输入框高度:', aiInputHeight);
+                console.log('Appbody高度:', appbodyHeight);
                 console.log('Header高度:', headerHeight);
                 console.log('计算Items高度:', itemsHeight);
                 
+                // 强制设置 appbody
+                appbody.style.position = 'absolute';
+                appbody.style.top = topnavHeight + 'px';
+                appbody.style.left = '0';
+                appbody.style.right = '0';
+                appbody.style.bottom = aiInputHeight + 'px';
+                appbody.style.width = '100%';
+                appbody.style.height = 'auto';
+                
+                // 强制设置 Golden Layout 根容器
+                const lmRoot = document.querySelector('.lm_root');
+                if (lmRoot) {
+                    lmRoot.style.position = 'absolute';
+                    lmRoot.style.top = '0';
+                    lmRoot.style.left = '0';
+                    lmRoot.style.width = '100%';
+                    lmRoot.style.height = '100%';
+                }
+                
+                // 强制设置 Stack 容器
+                if (lmStack) {
+                    lmStack.style.position = 'absolute';
+                    lmStack.style.top = '0';
+                    lmStack.style.left = '0';
+                    lmStack.style.width = '100%';
+                    lmStack.style.height = '100%';
+                }
+                
+                // 强制设置 Header
+                if (lmHeader) {
+                    lmHeader.style.height = headerHeight + 'px';
+                    lmHeader.style.minHeight = headerHeight + 'px';
+                    lmHeader.style.display = 'flex';
+                }
+                
+                // 强制设置 Items 容器使用绝对定位
+                lmItems.style.position = 'absolute';
+                lmItems.style.top = headerHeight + 'px';
+                lmItems.style.left = '0';
                 lmItems.style.width = '100%';
                 lmItems.style.height = itemsHeight + 'px';
-                lmItems.style.position = 'relative';
                 lmItems.style.overflow = 'hidden';
                 
-                // 修复所有 lm_item 容器
-                const items = lmItems.querySelectorAll('.lm_item');
-                items.forEach(item => {
-                    item.style.width = '100%';
-                    item.style.height = '100%';
-                    item.style.position = 'absolute';
-                    item.style.top = '0';
-                    item.style.left = '0';
+                // 修复所有 lm_item_container
+                const itemContainers = lmItems.querySelectorAll('.lm_item_container');
+                itemContainers.forEach(container => {
+                    container.style.width = '100%';
+                    container.style.height = '100%';
+                    container.style.position = 'absolute';
+                    container.style.top = '0';
+                    container.style.left = '0';
                 });
                 
                 // 修复所有 lm_content 容器
