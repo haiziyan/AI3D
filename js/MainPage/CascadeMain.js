@@ -92,15 +92,34 @@ function initialize(projectContent = null) {
             myLayout.destroy();
             myLayout = null;
         }
-        myLayout = new GoldenLayout(JSON.parse(projectContent));
+        try {
+            myLayout = new GoldenLayout(JSON.parse(projectContent));
+        } catch (error) {
+            console.error('加载项目配置失败:', error);
+            console.log('使用默认配置');
+            // 如果解析失败，使用默认配置
+            projectContent = null;
+        }
+    }
+    
+    if (!projectContent) {
 
+    }
+    
     // Else load a project from the URL or create a new one from scratch
-    } else {
+    if (!myLayout) {
         let codeStr = starterCode;
         GUIState = {};
         if (loadFromURL) {
-            codeStr  = decode(this.searchParams.get("code"));
-            GUIState = JSON.parse(decode(this.searchParams.get("gui")));
+            try {
+                codeStr  = decode(this.searchParams.get("code"));
+                GUIState = JSON.parse(decode(this.searchParams.get("gui")));
+            } catch (error) {
+                console.error('从URL加载配置失败:', error);
+                console.log('使用默认配置');
+                codeStr = starterCode;
+                GUIState = {};
+            }
         }
 
         // Define the Default Golden Layout
