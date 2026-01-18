@@ -596,8 +596,8 @@ function initialize(projectContent = null) {
                                 <span class="history-credits">-${record.credits_consumed.toFixed(2)}</span>
                             </div>
                             <div class="history-description">${escapeHtml(record.description || 'AI生成任务')}</div>
-                            ${hasCode ? `
                             <div class="history-actions">
+                                ${hasCode ? `
                                 <button class="btn-load-history-code" onclick="loadHistoryCode('${record.id}')" title="加载到编辑器">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="16 18 22 12 16 6"/>
@@ -605,8 +605,22 @@ function initialize(projectContent = null) {
                                     </svg>
                                     加载模型
                                 </button>
+                                ` : ''}
+                                <button class="btn-edit-history" onclick="editHistoryRecord('${record.id}', '${escapeHtml(record.description || '').replace(/'/g, "\\'")}', event)" title="编辑描述">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="btn-delete-history" onclick="deleteHistoryRecord('${record.id}', event)" title="删除记录">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        <line x1="10" y1="11" x2="10" y2="17"/>
+                                        <line x1="14" y1="11" x2="14" y2="17"/>
+                                    </svg>
+                                </button>
                             </div>
-                            ` : ''}
                         </div>
                     `}).join('');
                 }
@@ -672,6 +686,81 @@ function initialize(projectContent = null) {
             } catch (err) {
                 console.error('加载模型异常:', err);
                 alert('加载模型失败: ' + err.message);
+            }
+        };
+        
+        // 编辑历史记录描述
+        window.editHistoryRecord = async function(recordId, currentDescription, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (!authManager || !authManager.currentUser) {
+                alert('请先登录');
+                return;
+            }
+
+            const newDescription = prompt('编辑描述:', currentDescription);
+            if (newDescription === null || newDescription.trim() === '') {
+                return;
+            }
+
+            try {
+                const { error } = await authManager.supabase
+                    .from('ai_generations')
+                    .update({ description: newDescription.trim() })
+                    .eq('id', recordId)
+                    .eq('user_id', authManager.currentUser.id);
+
+                if (error) {
+                    console.error('更新描述失败:', error);
+                    alert('更新描述失败: ' + error.message);
+                    return;
+                }
+
+                console.log('描述已更新');
+                // 刷新历史记录列表
+                window.refreshGenerationHistory();
+            } catch (err) {
+                console.error('更新描述异常:', err);
+                alert('更新描述失败: ' + err.message);
+            }
+        };
+        
+        // 删除历史记录
+        window.deleteHistoryRecord = async function(recordId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (!authManager || !authManager.currentUser) {
+                alert('请先登录');
+                return;
+            }
+
+            if (!confirm('确定要删除这条记录吗？此操作无法撤销。')) {
+                return;
+            }
+
+            try {
+                const { error } = await authManager.supabase
+                    .from('ai_generations')
+                    .delete()
+                    .eq('id', recordId)
+                    .eq('user_id', authManager.currentUser.id);
+
+                if (error) {
+                    console.error('删除记录失败:', error);
+                    alert('删除记录失败: ' + error.message);
+                    return;
+                }
+
+                console.log('记录已删除');
+                // 刷新历史记录列表
+                window.refreshGenerationHistory();
+            } catch (err) {
+                console.error('删除记录异常:', err);
+                alert('删除记录失败: ' + err.message);
             }
         };
 
