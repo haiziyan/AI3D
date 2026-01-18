@@ -342,8 +342,12 @@ class AuthManager {
                         </div>
                     `;
                 } else {
-                    historyList.innerHTML = data.map(record => `
-                        <div class="generation-item">
+                    historyList.innerHTML = data.map(record => {
+                        const hasCode = record.generated_code && record.generated_code.trim().length > 0;
+                        const codePreview = hasCode ? record.generated_code.substring(0, 100) + (record.generated_code.length > 100 ? '...' : '') : '';
+                        
+                        return `
+                        <div class="generation-item" data-record-id="${record.id}">
                             <div class="gen-header">
                                 <span class="gen-date">${new Date(record.created_at).toLocaleString('zh-CN', {
                                     year: 'numeric',
@@ -354,7 +358,12 @@ class AuthManager {
                                 })}</span>
                                 <span class="gen-credits">-${record.credits_consumed.toFixed(2)} 积分</span>
                             </div>
-                            <div class="gen-description">${record.description || 'AI生成任务'}</div>
+                            <div class="gen-description">${this.escapeHtml(record.description || 'AI生成任务')}</div>
+                            ${hasCode ? `
+                            <div class="gen-code-preview">
+                                <code>${this.escapeHtml(codePreview)}</code>
+                            </div>
+                            ` : ''}
                             <div class="gen-footer">
                                 <span class="gen-tokens">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -363,13 +372,71 @@ class AuthManager {
                                     </svg>
                                     ${record.tokens_used || 0} tokens
                                 </span>
+                                ${hasCode ? `
+                                <button class="btn-load-code" onclick="authManager.loadGeneratedCode('${record.id}')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    加载代码
+                                </button>
+                                ` : ''}
                             </div>
                         </div>
-                    `).join('');
+                    `}).join('');
                 }
             }
         } catch (err) {
             console.error('加载生成记录异常:', err);
+        }
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async loadGeneratedCode(recordId) {
+        if (!this.supabase || !this.currentUser) return;
+
+        try {
+            const { data, error } = await this.supabase
+                .from('ai_generations')
+                .select('generated_code, description')
+                .eq('id', recordId)
+                .eq('user_id', this.currentUser.id)
+                .single();
+
+            if (error) {
+                console.error('加载代码失败:', error);
+                alert('加载代码失败: ' + error.message);
+                return;
+            }
+
+            if (data && data.generated_code) {
+                // 将代码加载到编辑器
+                if (window.monacoEditor) {
+                    window.monacoEditor.setValue(data.generated_code);
+                    console.log('代码已加载到编辑器');
+                    
+                    // 关闭用户中心模态框
+                    document.getElementById('userCenterModal').style.display = 'none';
+                    
+                    // 自动评估代码
+                    setTimeout(() => {
+                        window.monacoEditor.evaluateCode(true);
+                    }, 500);
+                } else {
+                    alert('编辑器未初始化');
+                }
+            } else {
+                alert('未找到生成的代码');
+            }
+        } catch (err) {
+            console.error('加载代码异常:', err);
+            alert('加载代码失败: ' + err.message);
         }
     }
 }

@@ -421,7 +421,7 @@ function initialize(projectContent = null) {
         });
     });
 
-    // Set up the AI Module Component (with integrated console)
+    // Set up the AI Module Component (with generation history)
     myLayout.registerComponent('aiModule', function (container) {
         consoleGolden = container;
         
@@ -442,15 +442,20 @@ function initialize(projectContent = null) {
         aiModuleContainer.className = "ai-module-container";
         aiModuleContainer.innerHTML = `
             <div class="ai-module-content">
-                <div class="console-output">
-                    <div class="console-header">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="4 17 10 11 4 5"/>
-                            <line x1="12" y1="19" x2="20" y2="19"/>
+                <div class="generation-history-panel">
+                    <div class="history-header">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
                         </svg>
-                        控制台输出
+                        <span>AI 生成历史</span>
+                        <button class="btn-refresh-history" onclick="window.refreshGenerationHistory()" title="刷新">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                                <path d="M21 3v5h-5"/>
+                            </svg>
+                        </button>
                     </div>
-                    <div id="consoleOutputContent" class="console-content"></div>
+                    <div id="generationHistoryContent" class="history-content"></div>
                 </div>
                 
                 <div class="ai-input-wrapper" id="aiInputWrapper">
@@ -486,6 +491,176 @@ function initialize(projectContent = null) {
             }, 100);
         }
         
+        // 加载生成历史记录
+        window.refreshGenerationHistory = async function() {
+            if (!authManager || !authManager.currentUser) {
+                const historyContent = document.getElementById('generationHistoryContent');
+                if (historyContent) {
+                    historyContent.innerHTML = `
+                        <div class="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            <p>请先登录</p>
+                            <span>登录后可查看AI生成历史记录</span>
+                            <button class="btn-login-prompt" onclick="authManager.showAuthModal()">立即登录</button>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            const historyContent = document.getElementById('generationHistoryContent');
+            if (!historyContent) return;
+
+            // 显示加载状态
+            historyContent.innerHTML = `
+                <div class="loading-state">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="loading-spinner">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    <p>加载中...</p>
+                </div>
+            `;
+
+            try {
+                const { data, error } = await authManager.supabase
+                    .from('ai_generations')
+                    .select('*')
+                    .eq('user_id', authManager.currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) {
+                    console.error('加载生成记录失败:', error);
+                    historyContent.innerHTML = `
+                        <div class="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <p>加载失败</p>
+                            <span>${error.message}</span>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    historyContent.innerHTML = `
+                        <div class="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            <p>暂无生成记录</p>
+                            <span>开始使用AI生成功能后，历史记录将显示在这里</span>
+                        </div>
+                    `;
+                } else {
+                    historyContent.innerHTML = data.map(record => {
+                        const hasCode = record.generated_code && record.generated_code.trim().length > 0;
+                        const codePreview = hasCode ? record.generated_code.substring(0, 80) + (record.generated_code.length > 80 ? '...' : '') : '';
+                        
+                        return `
+                        <div class="history-item" data-record-id="${record.id}">
+                            <div class="history-item-header">
+                                <span class="history-date">${new Date(record.created_at).toLocaleString('zh-CN', {
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</span>
+                                <span class="history-credits">-${record.credits_consumed.toFixed(2)}</span>
+                            </div>
+                            <div class="history-description">${escapeHtml(record.description || 'AI生成任务')}</div>
+                            ${hasCode ? `
+                            <div class="history-actions">
+                                <button class="btn-load-history-code" onclick="loadHistoryCode('${record.id}')" title="加载到编辑器">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="16 18 22 12 16 6"/>
+                                        <polyline points="8 6 2 12 8 18"/>
+                                    </svg>
+                                    加载代码
+                                </button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `}).join('');
+                }
+            } catch (err) {
+                console.error('加载生成记录异常:', err);
+                historyContent.innerHTML = `
+                    <div class="empty-state">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <p>加载失败</p>
+                        <span>${err.message}</span>
+                    </div>
+                `;
+            }
+        };
+
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 加载历史代码到编辑器
+        window.loadHistoryCode = async function(recordId) {
+            if (!authManager || !authManager.currentUser) {
+                alert('请先登录');
+                return;
+            }
+
+            try {
+                const { data, error } = await authManager.supabase
+                    .from('ai_generations')
+                    .select('generated_code, description')
+                    .eq('id', recordId)
+                    .eq('user_id', authManager.currentUser.id)
+                    .single();
+
+                if (error) {
+                    console.error('加载代码失败:', error);
+                    alert('加载代码失败: ' + error.message);
+                    return;
+                }
+
+                if (data && data.generated_code) {
+                    if (window.monacoEditor) {
+                        window.monacoEditor.setValue(data.generated_code);
+                        console.log('代码已加载到编辑器:', data.description);
+                        
+                        // 自动评估代码
+                        setTimeout(() => {
+                            window.monacoEditor.evaluateCode(true);
+                        }, 500);
+                    } else {
+                        alert('编辑器未初始化');
+                    }
+                } else {
+                    alert('未找到生成的代码');
+                }
+            } catch (err) {
+                console.error('加载代码异常:', err);
+                alert('加载代码失败: ' + err.message);
+            }
+        };
+
+        // 初始加载历史记录
+        setTimeout(() => {
+            window.refreshGenerationHistory();
+        }, 500);
+        
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {
             let seen = new WeakSet();
@@ -498,80 +673,22 @@ function initialize(projectContent = null) {
             };
         };
 
-        // Overwrite the existing logging/error behaviour to print messages to the Console window
+        // 保留控制台日志功能（输出到浏览器控制台）
         if (!realConsoleLog) {
             realConsoleLog = console.log;
             
             console.log = function (message) {
                 realConsoleLog.apply(console, arguments);
-                
-                // 如果控制台容器未初始化，将消息加入队列
-                if (!consoleContainer) {
-                    messageQueue.push({ type: 'log', message: message });
-                    return;
-                }
-                
-                let newline = document.createElement("div");
-                newline.style.fontFamily = "monospace";
-                newline.style.color = (alternatingColor = !alternatingColor) ? "LightGray" : "white";
-                newline.style.fontSize = "1.2em";
-                if (message !== undefined) {
-                    let messageText = JSON.stringify(message, getCircularReplacer());
-                    if (messageText.startsWith('"')) { messageText = messageText.slice(1, -1); }
-                    newline.innerHTML = "&gt;  " + messageText;
-                } else {
-                    newline.innerHTML = "undefined";
-                }
-                consoleContainer.appendChild(newline);
-                consoleContainer.scrollTop = consoleContainer.scrollHeight;
-            };
-            
-            // 刷新消息队列到控制台
-            window.flushConsoleQueue = function() {
-                if (consoleContainer && messageQueue.length > 0) {
-                    messageQueue.forEach(item => {
-                        if (item.type === 'log') {
-                            console.log(item.message);
-                        } else if (item.type === 'error') {
-                            // 处理错误消息
-                            let newline = document.createElement("div");
-                            newline.style.color = "red";
-                            newline.style.fontFamily = "monospace";
-                            newline.style.fontSize = "1.2em";
-                            newline.innerHTML = item.message;
-                            consoleContainer.appendChild(newline);
-                        }
-                    });
-                    messageQueue = [];
-                    consoleContainer.scrollTop = consoleContainer.scrollHeight;
-                }
+                // 不再输出到页面上的控制台，只输出到浏览器控制台
             };
             
             // Call this console.log when triggered from the WASM
             messageHandlers["log"  ] = (payload) => { console.log(payload); };
             messageHandlers["error"] = (payload) => { window.workerWorking = false; console.error(payload); };
 
-            // Print Errors in Red
+            // Print Errors in Red (只输出到浏览器控制台)
             window.onerror = function (err, url, line, colno, errorObj) {
                 realConsoleLog.call(console, "Error:", err);
-                
-                // 如果控制台容器未初始化，将错误加入队列
-                if (!consoleContainer) {
-                    let errorText = JSON.stringify(err, getCircularReplacer());
-                    if (errorText.startsWith('"')) { errorText = errorText.slice(1, -1); }
-                    messageQueue.push({ type: 'error', message: "Line " + line + ": " + errorText });
-                    return;
-                }
-                
-                let newline = document.createElement("div");
-                newline.style.color = "red";
-                newline.style.fontFamily = "monospace";
-                newline.style.fontSize = "1.2em";
-                let errorText = JSON.stringify(err, getCircularReplacer());
-                if (errorText.startsWith('"')) { errorText = errorText.slice(1, -1); }
-                newline.innerHTML = "Line " + line + ": " + errorText;
-                consoleContainer.appendChild(newline);
-                consoleContainer.scrollTop = consoleContainer.scrollHeight;
 
                 // Highlight the error'd code in the editor
                 if (!errorObj || !(errorObj.stack.includes("wasm-function"))) {
@@ -588,38 +705,15 @@ function initialize(projectContent = null) {
                 }
             };
 
-            // If we've received a progress update from the Worker Thread, append it to our previous message
+            // If we've received a progress update from the Worker Thread, log it
             messageHandlers["Progress"] = (payload) => {
-                // Add a dot to the progress indicator for each progress message we find in the queue
-                if (consoleContainer && consoleContainer.lastElementChild) {
-                    consoleContainer.lastElementChild.innerText =
-                        "> Generating Model" + ".".repeat(payload.opNumber) + ((payload.opType)? " ("+payload.opType+")" : "");
-                }
+                console.log("Generating Model" + ".".repeat(payload.opNumber) + ((payload.opType)? " ("+payload.opType+")" : ""));
             };
 
             // Print friendly welcoming messages
             console.log("Welcome to AI 3D Studio!");
             console.log("Loading CAD Kernel...");
         }
-        
-        // 设置控制台容器（在 console.log 重写之后）
-        consoleContainer = document.getElementById('consoleOutputContent');
-        
-        // 调试：验证控制台容器是否正确初始化
-        if (consoleContainer) {
-            realConsoleLog("控制台容器已初始化:", consoleContainer);
-        } else {
-            realConsoleLog("错误：控制台容器未找到！");
-        }
-        
-        // 立即刷新消息队列（如果有缓存的消息）
-        if (window.flushConsoleQueue) {
-            realConsoleLog("刷新消息队列，队列长度:", messageQueue.length);
-            window.flushConsoleQueue();
-        }
-        
-        // 测试：直接输出一条消息
-        console.log("控制台测试消息 - 如果你看到这条消息，说明控制台工作正常！");
         
         // 绑定AI生成按钮事件
         setTimeout(() => {

@@ -138,19 +138,19 @@ let final = Translate([0, 0, 10], result);
             const totalTokens = data.usage.total_tokens;
             const creditsUsed = totalTokens * CONFIG.CREDITS_PER_TOKEN;
 
-            // 扣除积分
-            await authManager.deductCredits(creditsUsed);
-
-            // 记录生成历史到数据库
-            await this.logGeneration(prompt, creditsUsed, totalTokens);
-
-            console.log(`AI 生成完成，消耗 ${totalTokens} tokens，扣除 ${creditsUsed.toFixed(2)} 积分`);
-
             // 提取生成的代码
             let generatedCode = data.choices[0].message.content;
             
             // 清理代码（移除可能的 markdown 标记）
             generatedCode = generatedCode.replace(/```javascript\n?/g, '').replace(/```\n?/g, '').trim();
+
+            // 扣除积分
+            await authManager.deductCredits(creditsUsed);
+
+            // 记录生成历史到数据库（包含生成的代码）
+            await this.logGeneration(prompt, creditsUsed, totalTokens, generatedCode);
+
+            console.log(`AI 生成完成，消耗 ${totalTokens} tokens，扣除 ${creditsUsed.toFixed(2)} 积分`);
 
             return {
                 code: generatedCode,
@@ -164,23 +164,31 @@ let final = Translate([0, 0, 10], result);
         }
     }
 
-    async logGeneration(description, creditsConsumed, tokensUsed) {
+    async logGeneration(description, creditsConsumed, tokensUsed, generatedCode = '') {
         if (!authManager.supabase || !authManager.currentUser) return;
 
         try {
-            const { error } = await authManager.supabase
+            const { data, error } = await authManager.supabase
                 .from('ai_generations')
                 .insert([
                     {
                         user_id: authManager.currentUser.id,
                         description: description,
                         credits_consumed: creditsConsumed,
-                        tokens_used: tokensUsed
+                        tokens_used: tokensUsed,
+                        generated_code: generatedCode
                     }
-                ]);
+                ])
+                .select();
 
             if (error) {
                 console.error('记录生成历史失败:', error);
+            } else {
+                console.log('生成历史已保存到数据库');
+                // 刷新历史记录显示
+                if (window.refreshGenerationHistory) {
+                    window.refreshGenerationHistory();
+                }
             }
         } catch (err) {
             console.error('记录生成历史异常:', err);
