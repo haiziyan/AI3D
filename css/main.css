@@ -953,8 +953,15 @@
     overflow: hidden !important;
   }
   
-  /* 确保Monaco编辑器和Canvas填满容器 */
-  .monaco-editor, canvas {
+  /* 确保Monaco编辑器填满容器 */
+  .monaco-editor {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+  }
+  
+  /* 只针对3D视图的主Canvas（不影响Monaco编辑器内部的canvas） */
+  .lm_content > canvas {
     width: 100% !important;
     height: 100% !important;
     display: block !important;
