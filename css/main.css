@@ -25,11 +25,21 @@
   body {
     margin: 0;
     padding: 0;
-    padding-top: 56px;
     font-family: var(--font-main);
     background-color: var(--primary-bg);
     color: var(--text-primary);
     overflow: hidden;
+  }
+  
+  /* 为固定导航栏预留空间 */
+  #appbody {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: calc(100vh - 56px);
   }
   
   /* ==================== 顶部导航栏 ==================== */
@@ -986,11 +996,6 @@
   
   /* ==================== 移动端适配 ==================== */
   @media (max-width: 768px) {
-    /* 修复Bug 2: 确保body的padding-top与导航栏高度一致 */
-    body {
-      padding-top: 56px;
-    }
-    
     /* 导航栏 */
     .topnav {
       height: 56px;
@@ -1237,7 +1242,6 @@
       width: 100%;
       margin: 0;
       padding: 0;
-      padding-top: 56px;
     }
     
     #appbody {
@@ -1477,11 +1481,6 @@
   }
   
   @media (max-width: 480px) {
-    /* 修复Bug 2: 小屏幕设备的导航栏定位 */
-    body {
-      padding-top: 48px;
-    }
-    
     .topnav {
       height: 48px;
       padding: 6px 8px;
