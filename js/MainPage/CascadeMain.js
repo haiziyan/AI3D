@@ -1564,6 +1564,50 @@ function initialize(projectContent = null) {
                         }
                         
                         console.log('=== 移动端初始化完成 ===');
+                        
+                        // 移动端关键修复：主动激活3D视图的tab
+                        setTimeout(() => {
+                            console.log('移动端：主动激活3D视图tab');
+                            // 查找3D视图的tab并点击激活
+                            const tabs = document.querySelectorAll('.lm_tab');
+                            tabs.forEach(tab => {
+                                const title = tab.querySelector('.lm_title');
+                                if (title && title.textContent.includes('3D 视图')) {
+                                    console.log('找到3D视图tab，触发点击激活');
+                                    tab.click();
+                                    
+                                    // 确保3D视图容器可见
+                                    setTimeout(() => {
+                                        const cascadeViewContainer = document.querySelector('[title="3D 视图"]');
+                                        if (cascadeViewContainer) {
+                                            const lmItemContainer = cascadeViewContainer.closest('.lm_item_container');
+                                            if (lmItemContainer) {
+                                                lmItemContainer.style.display = 'block';
+                                                lmItemContainer.style.visibility = 'visible';
+                                                lmItemContainer.style.opacity = '1';
+                                                console.log('3D视图容器已设置为可见');
+                                            }
+                                        }
+                                        
+                                        // 强制刷新3D视图
+                                        if (threejsViewport && threejsViewport.environment && threejsViewport.environment.renderer) {
+                                            const container = threejsViewport.goldenContainer.getElement().get(0);
+                                            const width = container.offsetWidth;
+                                            const height = container.offsetHeight;
+                                            console.log('强制刷新3D视图，尺寸:', width, 'x', height);
+                                            threejsViewport.environment.renderer.setSize(width, height);
+                                            if (threejsViewport.environment.camera) {
+                                                threejsViewport.environment.camera.aspect = width / height;
+                                                threejsViewport.environment.camera.updateProjectionMatrix();
+                                            }
+                                            threejsViewport.environment.renderer.render(threejsViewport.environment.scene, threejsViewport.environment.camera);
+                                            threejsViewport.environment.viewDirty = true;
+                                            console.log('3D视图已强制刷新');
+                                        }
+                                    }, 100);
+                                }
+                            });
+                        }, 200);
                     }
                 }, 100);
             }, 300);
