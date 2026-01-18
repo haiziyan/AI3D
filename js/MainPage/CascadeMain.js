@@ -1117,13 +1117,19 @@ function initialize(projectContent = null) {
                         // 检查父容器
                         console.log('Stack容器尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
                         console.log('Stack computed style:', window.getComputedStyle(lmStack).width, 'x', window.getComputedStyle(lmStack).height);
+                        console.log('Stack display:', window.getComputedStyle(lmStack).display);
+                        console.log('Stack visibility:', window.getComputedStyle(lmStack).visibility);
+                        console.log('Stack opacity:', window.getComputedStyle(lmStack).opacity);
                         
                         console.log('Appbody尺寸:', appbody.offsetWidth, 'x', appbody.offsetHeight);
                         console.log('Appbody computed style:', window.getComputedStyle(appbody).width, 'x', window.getComputedStyle(appbody).height);
+                        console.log('Appbody display:', window.getComputedStyle(appbody).display);
                         
                         if (lmRoot) {
                             console.log('lm_root尺寸:', lmRoot.offsetWidth, 'x', lmRoot.offsetHeight);
                             console.log('lm_root computed style:', window.getComputedStyle(lmRoot).width, 'x', window.getComputedStyle(lmRoot).height);
+                            console.log('lm_root display:', window.getComputedStyle(lmRoot).display);
+                            console.log('lm_root visibility:', window.getComputedStyle(lmRoot).visibility);
                         }
                         
                         const canvas = document.querySelector('canvas');
