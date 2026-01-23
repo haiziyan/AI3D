@@ -39,9 +39,10 @@ var Environment = function (goldenContainer) {
     this.scene.background = new THREE.Color(this.backgroundColor);          
     // this.scene.fog        = new THREE.Fog  (this.backgroundColor, 1000, 10000); // 雾效已禁用
 
-    this.camera = new THREE.PerspectiveCamera (45, 1, 0.1, 50000);
+    this.camera = new THREE.PerspectiveCamera (45, 1, 0.1, 1000000);
                 //new THREE.OrthographicCamera(300 / - 2, 300 / 2, 300 / 2, 300 / - 2, 1, 1000);
                 // Consider an Orthographic Camera.  It doesn't look so hot with the Matcap Material.
+                // 远裁剪面设置为 1000000，可以看到非常远的几何实体
     this.camera.position.set(50, 100, 150);
     this.camera.lookAt(0, 45, 0);
     this.camera.aspect = this.parentWidth / this.parentHeight;
