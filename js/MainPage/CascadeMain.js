@@ -232,8 +232,13 @@ function initialize(projectContent = null) {
              *  inside the CAD Worker thread.*/
             monacoEditor.evaluateCode = (saveToURL = false) => {
                 // Don't evaluate if the `window.workerWorking` flag is true
-                if (window.workerWorking) { return; }
+                if (window.workerWorking) { 
+                    console.log('Worker正在工作中，跳过评估');
+                    return; 
+                }
 
+                console.log('开始评估代码...');
+                
                 // Set the "window.workerWorking" flag, so we don't submit 
                 // multiple jobs to the worker thread simultaneously
                 window.workerWorking = true;
@@ -291,6 +296,8 @@ function initialize(projectContent = null) {
 
                 // Send the current editor code and GUI state to the Worker thread
                 // This is where the magic happens!
+                console.log('发送代码到Worker进行评估...');
+                console.log('代码长度:', newCode.length, '字符');
                 AI3DStudioWorker.postMessage({
                     "type": "Evaluate",
                     payload: {
@@ -301,6 +308,7 @@ function initialize(projectContent = null) {
 
                 // After evaluating, assemble all of the objects in the "workspace" 
                 // and begin saving them out
+                console.log('发送渲染请求到Worker...');
                 AI3DStudioWorker.postMessage({
                     "type": "combineAndRenderShapes",
                 // TODO: GUIState[] may be referenced upon transfer and not copied (checkboxes are false after reload although the default is true
