@@ -1249,16 +1249,8 @@ function initialize(projectContent = null) {
                 threejsViewport.environment.viewDirty = true;
             }
             
-            // 移动端：确保初始代码被评估（如果还没有评估的话）
-            if (monacoEditor && monacoEditor.evaluateCode && !window.workerWorking) {
-                console.log('移动端：触发初始代码评估');
-                setTimeout(() => {
-                    if (!window.workerWorking && !window.initialCodeEvaluated) {
-                        monacoEditor.evaluateCode();
-                        window.initialCodeEvaluated = true;
-                    }
-                }, 500);
-            }
+            // 移动端：不在这里评估代码，等待 Worker 就绪后再评估
+            // 代码评估将在 startupCallback 中进行
         }, 100);
     } else {
         const topnavHeight = document.getElementById('topnav').offsetHeight;
