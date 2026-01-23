@@ -1,12 +1,12 @@
 {
   "name": "AI 3D Studio",
-  "short_name": "CascadeStudio",
+  "short_name": "AI3DStudio",
   "start_url": ".",
   "display": "standalone",
   "description": "A fully integrated Scripted CAD Kernel for the browser.",
   "related_applications": [{
     "platform": "github",
-    "url": "https://github.com/zalo/CascadeStudio"
+    "url": "https://github.com/zalo/AI3DStudio"
   }],
   "icons": [
     {

@@ -125,7 +125,7 @@ function importSTL(fileName, fileText) {
 
 /** This function returns `currentShape` `.STEP` file content.  
  * `currentShape` is set upon the successful completion of `combineAndRenderShapes()`.  */
-function saveShapeSTEP (filename = "CascadeStudioPart.step") {
+function saveShapeSTEP (filename = "AI3DStudioPart.step") {
   let writer = new oc.STEPControl_Writer();
   // Convert to a .STEP File
   let transferResult = writer.Transfer(currentShape, 0);

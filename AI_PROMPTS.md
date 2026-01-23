@@ -1,6 +1,6 @@
 # AI 提示词示例
 
-本文档基于 [AI 3D Studio 官方手册](https://github.com/raydeleu/CascadeStudioManual)，提供了有效的 AI 提示词示例，帮助你更好地使用 AI 生成 3D 模型。
+本文档基于 [AI 3D Studio 官方手册](https://github.com/raydeleu/AI3DStudioManual)，提供了有效的 AI 提示词示例，帮助你更好地使用 AI 生成 3D 模型。
 
 ## 📝 基础形状
 
@@ -498,7 +498,7 @@
 
 ## 🔗 相关资源
 
-- [AI 3D Studio 官方手册](https://github.com/raydeleu/CascadeStudioManual) - 完整的 API 文档和教程
+- [AI 3D Studio 官方手册](https://github.com/raydeleu/AI3DStudioManual) - 完整的 API 文档和教程
 - [AI 3D Studio 函数文档](README_CN.md#-支持的-cad-函数) - 本项目支持的函数列表
 - [配置说明](SETUP.md) - 环境配置和部署指南
 - [项目主页](README_CN.md) - 项目介绍和快速开始

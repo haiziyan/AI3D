@@ -1,6 +1,6 @@
-# CascadeStudio Tests
+# AI3DStudio Tests
 
-CascadeStudio uses end-to-end testing powered by playwright-test.
+AI3DStudio uses end-to-end testing powered by playwright-test.
 
 Upon each push:
  - Github Actions spins up a Windows Virtual machine

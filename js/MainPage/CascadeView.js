@@ -349,7 +349,7 @@ var CascadeEnvironment = function (goldenContainer) {
   /** Save the current shape to .stl */
   this.saveShapeSTEP = () => {
     // Ask the worker thread for a STEP file of the current space
-    cascadeStudioWorker.postMessage({"type": "saveShapeSTEP"});
+    AI3DStudioWorker.postMessage({"type": "saveShapeSTEP"});
 
     // Receive the STEP file content from the Worker Thread
     messageHandlers["saveShapeSTEP"] = async (stepContent) => {

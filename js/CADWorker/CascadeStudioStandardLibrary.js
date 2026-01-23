@@ -4,15 +4,15 @@
 // 2. Write your new function inside of AI 3D Studio, using "oc." to refer to the raw OpenCascade API.
 // 3. Add your new convenience function to this file
 // 4. Add typescript annotations to index.ts in this same directory
-// 5. Submit a PR to the main repository! https://github.com/zalo/CascadeStudio/pulls
+// 5. Submit a PR to the main repository! https://github.com/zalo/AI3DStudio/pulls
 // -
 // (Optional) If base functions appear to be missing, fork opencascade.js and add them to this file: 
 //  - https://github.com/donalffons/opencascade.js/blob/master/opencascade.idl
 //  - Upon push, Github Actions will build a new version of the library and commit it back to the repo
-//  - From there, you can graft those into CascadeStudio/node_modules/opencascade.js/dist (following its existing conventions)
+//  - From there, you can graft those into AI3DStudio/node_modules/opencascade.js/dist (following its existing conventions)
 
 /** Import Misc. Utilities that aren't part of the Exposed Library */
-importScripts('./CascadeStudioStandardUtils.js');
+importScripts('./AI3DStudioStandardUtils.js');
 
 function Box(x, y, z, centered) {
   if (!centered) { centered = false;}

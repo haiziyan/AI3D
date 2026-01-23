@@ -24,8 +24,8 @@ console.error = function (err, url, line, colno, errorObj) {
 // Import the set of scripts we'll need to perform all the CAD operations
 importScripts(
   '../../node_modules/three/build/three.min.js',
-  './CascadeStudioStandardLibrary.js',
-  './CascadeStudioShapeToMesh.js',
+  './AI3DStudioStandardLibrary.js',
+  './AI3DStudioShapeToMesh.js',
   '../../node_modules/opencascade.js/dist/opencascade.wasm.js',
   '../../node_modules/opentype.js/dist/opentype.min.js',
   '../../node_modules/potpack/index.js');
@@ -135,4 +135,4 @@ function combineAndRenderShapes(payload) {
 messageHandlers["combineAndRenderShapes"] = combineAndRenderShapes;
 
 // Import the File IO Utilities
-importScripts('./CascadeStudioFileUtils.js');
+importScripts('./AI3DStudioFileUtils.js');

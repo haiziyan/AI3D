@@ -19,11 +19,11 @@ AI3D/
 │
 ├── js/                           # JavaScript 文件
 │   ├── CADWorker/                # CAD 内核 Worker 线程
-│   │   ├── CascadeStudioFileUtils.js
-│   │   ├── CascadeStudioMainWorker.js
-│   │   ├── CascadeStudioShapeToMesh.js
-│   │   ├── CascadeStudioStandardLibrary.js
-│   │   └── CascadeStudioStandardUtils.js
+│   │   ├── AI3DStudioFileUtils.js
+│   │   ├── AI3DStudioMainWorker.js
+│   │   ├── AI3DStudioShapeToMesh.js
+│   │   ├── AI3DStudioStandardLibrary.js
+│   │   └── AI3DStudioStandardUtils.js
 │   │
 │   ├── MainPage/                 # 主页面逻辑
 │   │   ├── CascadeMain.js        # 主控制器（已修改：Tab 布局）
@@ -47,7 +47,7 @@ AI3D/
 │   └── ...
 │
 ├── test/                         # 测试文件
-│   ├── CascadeStudioTest.spec.ts
+│   ├── AI3DStudioTest.spec.ts
 │   └── ...
 │
 ├── textures/                     # 纹理资源
@@ -353,7 +353,7 @@ js/config.js
 | 用户系统 | `js/auth.js` |
 | 配置 | `js/config.js` |
 | 3D 渲染 | `js/MainPage/CascadeView.js` |
-| CAD 内核 | `js/CADWorker/CascadeStudioMainWorker.js` |
+| CAD 内核 | `js/CADWorker/AI3DStudioMainWorker.js` |
 
 ## 📝 维护建议
 

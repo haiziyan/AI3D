@@ -1,5 +1,5 @@
 {
-	"name": "CascadeStudio",
+	"name": "AI3DStudio",
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [

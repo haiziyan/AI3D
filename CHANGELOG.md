@@ -174,7 +174,7 @@
 
 ### 🙏 致谢
 
-- 感谢 [AI 3D Studio](https://github.com/zalo/CascadeStudio) 提供的优秀基础
+- 感谢 [AI 3D Studio](https://github.com/zalo/AI3DStudio) 提供的优秀基础
 - 感谢 OpenCascade.js 团队
 - 感谢 Supabase 和 DeepSeek 提供的服务
 

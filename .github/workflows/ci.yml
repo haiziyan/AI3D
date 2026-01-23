@@ -1,4 +1,4 @@
-name: CascadeStudio - End To End Test
+name: AI3DStudio - End To End Test
 
 on:
   push:
@@ -46,4 +46,4 @@ jobs:
 
       - name: Where to go from here
         if: failure()
-        run: echo "~~~*** Test failed!  See the README.md in CascadeStudio/test for more information ***~~~"
+        run: echo "~~~*** Test failed!  See the README.md in AI3DStudio/test for more information ***~~~"

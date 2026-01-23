@@ -156,7 +156,7 @@ function initialize(projectContent = null) {
 
             // Import Typescript Intellisense Definitions for the relevant libraries...
             var extraLibs = [];
-            let prefix = window.location.href.startsWith("https://zalo.github.io/") ? "/CascadeStudio/" : "";
+            let prefix = window.location.href.startsWith("https://zalo.github.io/") ? "/AI3DStudio/" : "";
             // opencascade.js Typescript Definitions...
             fetch(prefix + "node_modules/opencascade.js/dist/oc.d.ts").then((response) => {
                 response.text().then(function (text) {
@@ -171,7 +171,7 @@ function initialize(projectContent = null) {
                 });
             }).catch(error => console.log(error.message));
 
-            // CascadeStudio Typescript Definitions...
+            // AI3DStudio Typescript Definitions...
             fetch(prefix + "js/StandardLibraryIntellisense.ts").then((response) => {
                 response.text().then(function (text) {
                     extraLibs.push({ content: text, filePath: 'file://' + prefix + 'js/StandardLibraryIntellisense.d.ts' });
@@ -291,7 +291,7 @@ function initialize(projectContent = null) {
 
                 // Send the current editor code and GUI state to the Worker thread
                 // This is where the magic happens!
-                cascadeStudioWorker.postMessage({
+                AI3DStudioWorker.postMessage({
                     "type": "Evaluate",
                     payload: {
                         "code": newCode,
@@ -301,7 +301,7 @@ function initialize(projectContent = null) {
 
                 // After evaluating, assemble all of the objects in the "workspace" 
                 // and begin saving them out
-                cascadeStudioWorker.postMessage({
+                AI3DStudioWorker.postMessage({
                     "type": "combineAndRenderShapes",
                 // TODO: GUIState[] may be referenced upon transfer and not copied (checkboxes are false after reload although the default is true
                     payload: { maxDeviation: GUIState["MeshRes"], sceneOptions: { groundPlaneVisible: GUIState["GroundPlane?"], gridVisible: GUIState["Grid?"] } }
@@ -1729,7 +1729,7 @@ function initialize(projectContent = null) {
             // Reimport any previously imported STEP/IGES Files
             let curState = consoleGolden.getState();
             if (curState && Object.keys(curState).length > 0) {
-                cascadeStudioWorker.postMessage({
+                AI3DStudioWorker.postMessage({
                     "type": "loadPrexistingExternalFiles",
                     payload: consoleGolden.getState()
                 });
@@ -1983,7 +1983,7 @@ function loadFiles(fileElementID = "files") {
     // Ask the worker thread to load these files... 
     // I can already feel this not working...
     let files = document.getElementById(fileElementID).files;
-    cascadeStudioWorker.postMessage({
+    AI3DStudioWorker.postMessage({
         "type": "loadFiles",
         "payload": files
     });
@@ -1999,7 +1999,7 @@ function loadFiles(fileElementID = "files") {
 /** This function clears all Externally Loaded files 
  * from the `externalFiles` dict. */
 function clearExternalFiles() {
-    cascadeStudioWorker.postMessage({
+    AI3DStudioWorker.postMessage({
         "type": "clearExternalFiles"
     });
     consoleGolden.setState({});

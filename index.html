@@ -17,7 +17,7 @@
         <meta property="og:url" content="https://yourdomain.com/">
         <meta property="og:title" content="AI 3D Studio - AI驱动的在线3D CAD建模工具">
         <meta property="og:description" content="使用自然语言创建3D模型，支持参数化设计、STEP/STL导出。在线CAD工具，无需安装。">
-        <meta property="og:image" content="https://yourdomain.com/icon/CascadeStudioBanner-1257x519.png">
+        <meta property="og:image" content="https://yourdomain.com/icon/AI3DStudioBanner-1257x519.png">
         <meta property="og:site_name" content="AI 3D Studio">
         <meta property="og:locale" content="zh_CN">
         
@@ -26,7 +26,7 @@
         <meta name="twitter:url" content="https://yourdomain.com/">
         <meta name="twitter:title" content="AI 3D Studio - AI驱动的在线3D CAD建模工具">
         <meta name="twitter:description" content="使用自然语言创建3D模型，支持参数化设计、STEP/STL导出。在线CAD工具。">
-        <meta name="twitter:image" content="https://yourdomain.com/icon/CascadeStudioBanner-1257x519.png">
+        <meta name="twitter:image" content="https://yourdomain.com/icon/AI3DStudioBanner-1257x519.png">
         
         <!-- 移动端优化 -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -67,7 +67,7 @@
             "ratingValue": "4.8",
             "ratingCount": "1000"
           },
-          "screenshot": "https://yourdomain.com/icon/CascadeStudioScreenshot.png",
+          "screenshot": "https://yourdomain.com/icon/AI3DStudioScreenshot.png",
           "featureList": [
             "AI自然语言建模",
             "参数化设计",
@@ -94,13 +94,13 @@
 
             // Begins loading the CAD Kernel Web Worker
             if (window.Worker) {
-                var cascadeStudioWorker = new Worker('./js/CADWorker/CascadeStudioMainWorker.js');
+                var AI3DStudioWorker = new Worker('./js/CADWorker/AI3DStudioMainWorker.js');
                 // Ping Pong Messages Back and Forth based on their registration in messageHandlers
                 var messageHandlers = {};
-                cascadeStudioWorker.onmessage = function (e) {
+                AI3DStudioWorker.onmessage = function (e) {
                     if(e.data.type in messageHandlers){
                         let response = messageHandlers[e.data.type](e.data.payload);
-                        if (response) { cascadeStudioWorker.postMessage({ "type": e.data.type, payload: response }) };
+                        if (response) { AI3DStudioWorker.postMessage({ "type": e.data.type, payload: response }) };
                     }
                 }
             }
