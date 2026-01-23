@@ -1876,11 +1876,13 @@ function initialize(projectContent = null) {
                     editorReady,
                     viewportReady,
                     notEvaluated,
-                    notWorking
+                    notWorking,
+                    editorCode: monacoEditor ? monacoEditor.getValue().substring(0, 50) : 'N/A'
                 });
                 
                 if (editorReady && viewportReady && notEvaluated && notWorking) {
                     console.log('所有组件就绪，启动初始代码评估');
+                    console.log('当前编辑器代码:', monacoEditor.getValue());
                     
                     // 移动端：在评估代码前先刷新3D视图
                     const isMobile = window.innerWidth <= 768;
@@ -1891,6 +1893,7 @@ function initialize(projectContent = null) {
                     
                     setTimeout(() => {
                         if (!window.workerWorking && !window.initialCodeEvaluated) {
+                            console.log('准备评估代码...');
                             monacoEditor.evaluateCode();
                             window.initialCodeEvaluated = true;
                         }

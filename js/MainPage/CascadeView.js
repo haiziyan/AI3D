@@ -86,19 +86,6 @@ var Environment = function (goldenContainer) {
     this.time = new THREE.Clock();
     this.time.autoStart = true;
     this.lastTimeRendered = 0.0;
-    
-    // 移动端调试：添加一个测试立方体，确认Canvas正在渲染
-    const isMobile = window.innerWidth <= 768;
-    if (isMobile) {
-      console.log('移动端：添加测试立方体到场景');
-      const testGeometry = new THREE.BoxGeometry(100, 100, 100);
-      const testMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-      const testCube = new THREE.Mesh(testGeometry, testMaterial);
-      testCube.position.set(3000, 3000, 5000);
-      this.scene.add(testCube);
-      console.log('测试立方体已添加，位置:', testCube.position);
-      this.viewDirty = true;
-    }
 
     this.goldenContainer.layoutManager.eventHub.emit('Start');
   }
