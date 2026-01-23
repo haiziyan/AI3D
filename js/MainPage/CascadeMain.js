@@ -18,7 +18,6 @@ function initialize(projectContent = null) {
 
     // 检测是否为移动端
     const isMobile = window.innerWidth <= 768;
-    console.log('初始化 - 移动端检测:', isMobile, '窗口宽度:', window.innerWidth);
 
     // Load the initial Project from - "projectContent", or the URL
     let loadFromURL     = this.searchParams.has("code")
@@ -64,10 +63,8 @@ function initialize(projectContent = null) {
         // Define the Default Golden Layout
         // 移动端：只显示3D视图和代码编辑器（隐藏AI模块，AI输入框移到底部）
         // 桌面端：AI模块在最左侧栏（包含控制台输出），代码编辑器和3D视图在右侧用Tab切换
-        console.log('创建布局 - 移动端模式:', isMobile);
         
         if (isMobile) {
-            console.log('使用移动端布局配置');
             myLayout = new GoldenLayout({
                 content: [{
                     type: 'stack',
@@ -98,7 +95,6 @@ function initialize(projectContent = null) {
                 }
             });
         } else {
-            console.log('使用桌面端布局配置');
             myLayout = new GoldenLayout({
                 content: [{
                     type: 'row',
@@ -138,9 +134,7 @@ function initialize(projectContent = null) {
 
     // Set up the Dockable Monaco Code Editor
     myLayout.registerComponent('codeEditor', function (container, state) {
-        console.log('注册 codeEditor 组件');
         myLayout.on("initialised", () => {
-            console.log('codeEditor 初始化');
             // Destroy the existing editor if it exists
             if (monacoEditor) {
                 monaco.editor.getModels().forEach(model => model.dispose());
@@ -201,7 +195,6 @@ function initialize(projectContent = null) {
                 minimap: { enabled: false }//,
                 //model: null
             });
-            console.log('monacoEditor 创建完成:', monacoEditor);
 
             // Collapse all Functions in the Editor to suppress library clutter -----------------
             let codeLines = state.code.split(/\r\n|\r|\n/);
@@ -233,11 +226,8 @@ function initialize(projectContent = null) {
             monacoEditor.evaluateCode = (saveToURL = false) => {
                 // Don't evaluate if the `window.workerWorking` flag is true
                 if (window.workerWorking) { 
-                    console.log('Worker正在工作中，跳过评估');
                     return; 
                 }
-
-                console.log('开始评估代码...');
                 
                 // Set the "window.workerWorking" flag, so we don't submit 
                 // multiple jobs to the worker thread simultaneously
@@ -296,8 +286,6 @@ function initialize(projectContent = null) {
 
                 // Send the current editor code and GUI state to the Worker thread
                 // This is where the magic happens!
-                console.log('发送代码到Worker进行评估...');
-                console.log('代码长度:', newCode.length, '字符');
                 AI3DStudioWorker.postMessage({
                     "type": "Evaluate",
                     payload: {
@@ -308,7 +296,6 @@ function initialize(projectContent = null) {
 
                 // After evaluating, assemble all of the objects in the "workspace" 
                 // and begin saving them out
-                console.log('发送渲染请求到Worker...');
                 AI3DStudioWorker.postMessage({
                     "type": "combineAndRenderShapes",
                 // TODO: GUIState[] may be referenced upon transfer and not copied (checkboxes are false after reload although the default is true
@@ -368,32 +355,23 @@ function initialize(projectContent = null) {
                 const currentCode = monacoEditor.getValue();
                 if (currentCode !== window.lastSavedCode) {
                     window.codeModifiedSinceLastRender = true;
-                    console.log('代码已修改，标记需要刷新3D视图');
                 }
             });
             
             // 监听容器显示事件，更新编辑器布局
             container.on('show', function() {
-                console.log('代码编辑器显示，刷新布局');
                 if (monacoEditor) {
                     // 延迟更新，确保容器尺寸已经正确
                     setTimeout(() => {
                         monacoEditor.layout();
-                        console.log('Monaco编辑器布局已更新');
                     }, 100);
                 }
-            });
-            
-            // 监听容器隐藏事件（从代码编辑器切换到其他视图）
-            container.on('hide', function() {
-                console.log('代码编辑器隐藏');
             });
         });
     });
 
     // Set up the Dockable Three.js 3D Viewport for viewing the CAD Model
     myLayout.registerComponent('cascadeView', function (container, state) {
-        console.log('注册 cascadeView 组件');
         GUIState = state;
         container.setState(GUIState);
         
@@ -410,12 +388,10 @@ function initialize(projectContent = null) {
         
         // 移动端：立即创建3D视图，不延迟
         const isMobile = window.innerWidth <= 768;
-        console.log('创建3D视图 - 移动端:', isMobile);
         
         // 关键修复：确保容器在创建3D视图前有正确的尺寸
         if (isMobile) {
             const containerEl = container.getElement().get(0);
-            console.log('3D视图容器初始尺寸:', containerEl.offsetWidth, 'x', containerEl.offsetHeight);
             
             // 如果容器尺寸为0，强制设置尺寸
             if (containerEl.offsetWidth === 0 || containerEl.offsetHeight === 0) {
@@ -427,27 +403,22 @@ function initialize(projectContent = null) {
                 
                 containerEl.style.width = viewWidth + 'px';
                 containerEl.style.height = viewHeight + 'px';
-                console.log('强制设置容器尺寸:', viewWidth, 'x', viewHeight);
             }
         }
         
         threejsViewport = new CascadeEnvironment(container);
-        console.log('threejsViewport 创建完成:', threejsViewport);
         
         // 标记3D视图已初始化
         window.threejsViewportReady = true;
         
         // 移动端：多次尝试渲染，确保3D视图正确显示
         if (isMobile) {
-            console.log('移动端：设置多次渲染尝试');
-            
             // 第一次：立即渲染
             setTimeout(() => {
                 if (threejsViewport && threejsViewport.environment && threejsViewport.environment.renderer) {
                     const containerEl = container.getElement().get(0);
                     const width = containerEl.offsetWidth;
                     const height = containerEl.offsetHeight;
-                    console.log('第1次渲染尝试 - 容器尺寸:', width, 'x', height);
                     
                     if (width > 0 && height > 0) {
                         threejsViewport.environment.renderer.setSize(width, height);
@@ -465,7 +436,6 @@ function initialize(projectContent = null) {
                     const containerEl = container.getElement().get(0);
                     const width = containerEl.offsetWidth;
                     const height = containerEl.offsetHeight;
-                    console.log('第2次渲染尝试 - 容器尺寸:', width, 'x', height);
                     
                     if (width > 0 && height > 0) {
                         threejsViewport.environment.renderer.setSize(width, height);
@@ -480,16 +450,13 @@ function initialize(projectContent = null) {
             // 第三次：触发初始代码评估
             setTimeout(() => {
                 // 移动端：不在这里评估代码，等待 Worker 就绪后再评估
-                console.log('移动端：跳过此处的代码评估，等待Worker就绪');
             }, 800);
         }
         
         // 监听tab激活事件（Golden Layout的正确事件）
         container.on('tab', function(tab) {
-            console.log('3D视图tab对象创建');
             // 监听tab的active事件
             tab.element.on('mousedown touchstart', function() {
-                console.log('3D视图tab被点击');
                 setTimeout(() => {
                     checkAndRefresh3DView();
                 }, 100);
@@ -498,13 +465,11 @@ function initialize(projectContent = null) {
         
         // 监听容器显示事件
         container.on('show', function() {
-            console.log('3D视图显示事件触发');
             checkAndRefresh3DView();
         });
         
         // 检查并刷新3D视图的函数
         function checkAndRefresh3DView() {
-            console.log('检查是否需要刷新3D视图');
             if (threejsViewport && threejsViewport.environment && threejsViewport.environment.renderer) {
                 const containerEl = container.getElement().get(0);
                 let width = containerEl.offsetWidth;
@@ -517,10 +482,8 @@ function initialize(projectContent = null) {
                     const headerHeight = 48;
                     width = window.innerWidth;
                     height = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
-                    console.log('使用窗口尺寸:', width, 'x', height);
                 }
                 
-                console.log('刷新Canvas尺寸:', width, 'x', height);
                 threejsViewport.environment.renderer.setSize(width, height);
                 if (threejsViewport.environment.camera) {
                     threejsViewport.environment.camera.aspect = width / height;
@@ -531,7 +494,6 @@ function initialize(projectContent = null) {
                 
                 // 如果代码已修改且未保存，自动刷新3D视图
                 if (window.codeModifiedSinceLastRender && monacoEditor) {
-                    console.log('检测到代码已修改，自动刷新3D视图');
                     // 延迟执行，确保视图已完全显示
                     setTimeout(() => {
                         if (!window.workerWorking) {
@@ -547,14 +509,12 @@ function initialize(projectContent = null) {
     myLayout.registerComponent('aiModule', function (container) {
         consoleGolden = container;
         
-        // 移动端：隐藏AI模块的Tab
+        // 移动端：立即隐藏AI模块的Tab（防止闪烁）
         if (isMobile) {
-            setTimeout(() => {
-                const aiTab = container.tab;
-                if (aiTab && aiTab.element) {
-                    aiTab.element.hide();
-                }
-            }, 100);
+            const aiTab = container.tab;
+            if (aiTab && aiTab.element) {
+                aiTab.element.hide();
+            }
         }
         
         let aiModuleContainer = document.createElement("div");
@@ -774,7 +734,6 @@ function initialize(projectContent = null) {
                 if (data && data.generated_code) {
                     if (window.monacoEditor) {
                         window.monacoEditor.setValue(data.generated_code);
-                        console.log('代码已加载到编辑器:', data.description);
                         
                         // 自动评估代码
                         setTimeout(() => {
@@ -858,7 +817,6 @@ function initialize(projectContent = null) {
                     return;
                 }
 
-                console.log('记录已删除');
                 // 刷新历史记录列表
                 window.refreshGenerationHistory();
             } catch (err) {
@@ -869,7 +827,6 @@ function initialize(projectContent = null) {
 
         // 修复Bug 1: 初始加载历史记录，延迟更长时间确保authManager已初始化
         setTimeout(() => {
-            console.log('AI模块初始化完成，尝试加载历史记录');
             window.refreshGenerationHistory();
         }, 1500);
         
@@ -953,7 +910,6 @@ function initialize(projectContent = null) {
                     let originalHeight = window.innerHeight;
                     
                     aiInput.addEventListener('focus', function() {
-                        console.log('AI输入框获得焦点');
                         // 延迟执行，等待输入法弹出
                         setTimeout(() => {
                             // 滚动到输入框位置
@@ -962,7 +918,6 @@ function initialize(projectContent = null) {
                     });
                     
                     aiInput.addEventListener('blur', function() {
-                        console.log('AI输入框失去焦点');
                         // 恢复页面位置
                         window.scrollTo(0, 0);
                     });
@@ -972,7 +927,6 @@ function initialize(projectContent = null) {
                         const currentHeight = window.innerHeight;
                         if (currentHeight < originalHeight) {
                             // 输入法弹出
-                            console.log('输入法弹出，高度变化:', originalHeight, '->', currentHeight);
                         } else {
                             // 输入法收起
                             originalHeight = currentHeight;
@@ -1067,8 +1021,6 @@ function initialize(projectContent = null) {
     
     // 移动端关键修复：在Golden Layout初始化后立即修复容器尺寸
     if (isMobile) {
-        console.log('移动端：Golden Layout初始化后立即修复容器');
-        
         // 立即执行第一次修复
         setTimeout(() => {
             const lmItems = document.querySelector('.lm_items');
@@ -1082,8 +1034,6 @@ function initialize(projectContent = null) {
                 const appbodyHeight = window.innerHeight - topnavHeight - aiInputHeight;
                 const itemsHeight = appbodyHeight - headerHeight;
                 const itemsWidth = window.innerWidth;
-                
-                console.log('立即修复 - Items尺寸:', itemsWidth, 'x', itemsHeight);
                 
                 // 使用内联样式强制覆盖
                 lmItems.style.cssText = `
@@ -1148,21 +1098,16 @@ function initialize(projectContent = null) {
                         opacity: 1 !important;
                     `;
                 });
-                
-                console.log('立即修复完成');
             }
         }, 50);
     }
     
     // 方法1：监听activeContentItemChanged事件
     myLayout.on('activeContentItemChanged', function(contentItem) {
-        console.log('activeContentItemChanged事件触发:', contentItem);
         if (contentItem && contentItem.config && contentItem.config.componentName === 'cascadeView') {
-            console.log('检测到3D视图被激活');
             // 延迟执行，确保tab切换完成
             setTimeout(() => {
                 if (window.codeModifiedSinceLastRender && monacoEditor && !window.workerWorking) {
-                    console.log('代码已修改，自动刷新3D视图');
                     monacoEditor.evaluateCode(true);
                 }
             }, 200);
@@ -1176,11 +1121,9 @@ function initialize(projectContent = null) {
         activeContentItems.forEach(item => {
             if (item.isComponent && item.container && item.container.isHidden === false) {
                 if (item.config.componentName === 'cascadeView') {
-                    console.log('stateChanged: 检测到3D视图被激活');
                     // 延迟执行，确保tab切换完成
                     setTimeout(() => {
                         if (window.codeModifiedSinceLastRender && monacoEditor && !window.workerWorking) {
-                            console.log('代码已修改，自动刷新3D视图');
                             monacoEditor.evaluateCode(true);
                         }
                     }, 200);
@@ -1192,18 +1135,13 @@ function initialize(projectContent = null) {
     // 方法3：直接监听DOM上的tab点击事件（最可靠）
     setTimeout(() => {
         const tabs = document.querySelectorAll('.lm_tab');
-        console.log('找到', tabs.length, '个tab');
         tabs.forEach((tab, index) => {
             const title = tab.querySelector('.lm_title');
             if (title) {
-                console.log('Tab', index, '标题:', title.textContent);
                 if (title.textContent.includes('3D 视图') || title.textContent.includes('3D')) {
-                    console.log('为3D视图tab添加点击监听器');
                     tab.addEventListener('click', function() {
-                        console.log('3D视图tab被点击');
                         setTimeout(() => {
                             if (window.codeModifiedSinceLastRender && monacoEditor && !window.workerWorking) {
-                                console.log('代码已修改，自动刷新3D视图');
                                 monacoEditor.evaluateCode(true);
                             }
                         }, 300);
@@ -1220,7 +1158,6 @@ function initialize(projectContent = null) {
             const aiInputHeight = 140;
             const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
             
-            console.log('初始化布局尺寸:', window.innerWidth, 'x', layoutHeight);
             myLayout.updateSize(window.innerWidth, layoutHeight);
             
             // 强制刷新布局
@@ -1237,7 +1174,6 @@ function initialize(projectContent = null) {
                     const headerHeight = 48;
                     width = window.innerWidth;
                     height = layoutHeight - headerHeight;
-                    console.log('容器尺寸为0，使用计算尺寸:', width, 'x', height);
                 }
                 
                 threejsViewport.environment.renderer.setSize(width, height);
@@ -1256,30 +1192,21 @@ function initialize(projectContent = null) {
         const topnavHeight = document.getElementById('topnav').offsetHeight;
         const layoutHeight = window.innerHeight - topnavHeight;
         
-        console.log('初始化布局尺寸:', window.innerWidth, 'x', layoutHeight);
         myLayout.updateSize(window.innerWidth, layoutHeight);
     }
     
     // 移动端：全局3D视图初始化检查
     if (isMobile) {
-        console.log('移动端模式已启用');
-        console.log('窗口宽度:', window.innerWidth);
-        console.log('布局高度:', window.innerHeight - document.getElementById('topnav').offsetHeight);
-        
         // 创建全局函数用于强制刷新3D视图
         window.forceMobile3DViewRefresh = function() {
-            console.log('=== 强制刷新移动端3D视图 ===');
             
             if (!threejsViewport || !threejsViewport.environment || !threejsViewport.environment.renderer) {
-                console.error('3D视图未初始化');
                 return;
             }
             
             const container = threejsViewport.goldenContainer.getElement().get(0);
             let width = container.offsetWidth;
             let height = container.offsetHeight;
-            
-            console.log('容器尺寸:', width, 'x', height);
             
             // 如果容器尺寸为0，使用窗口尺寸
             if (width === 0 || height === 0) {
@@ -1288,7 +1215,6 @@ function initialize(projectContent = null) {
                 const headerHeight = 48;
                 width = window.innerWidth;
                 height = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
-                console.log('使用窗口尺寸:', width, 'x', height);
                 
                 // 强制设置容器尺寸
                 container.style.width = width + 'px';
@@ -1306,8 +1232,6 @@ function initialize(projectContent = null) {
                 threejsViewport.environment.camera
             );
             threejsViewport.environment.viewDirty = true;
-            
-            console.log('3D视图刷新完成');
         };
         
         // 延迟执行多次刷新尝试
@@ -1332,70 +1256,19 @@ function initialize(projectContent = null) {
             const lmTabs = document.querySelector('.lm_tabs');
             const allTabs = document.querySelectorAll('.lm_tab');
             
-            console.log('=== DOM元素检查 ===');
-            console.log('3D视图容器:', cascadeView);
-            console.log('代码编辑器容器:', codeEditor);
-            console.log('AI模块容器:', aiModule);
-            console.log('Canvas元素:', canvas);
-            console.log('Monaco编辑器元素:', monacoEditorEl);
-            console.log('Stack容器:', lmStack);
-            console.log('Items容器:', lmItems);
-            console.log('Header容器:', lmHeader);
-            console.log('Tabs容器:', lmTabs);
-            console.log('所有Tab数量:', allTabs.length);
-            
-            allTabs.forEach((tab, index) => {
-                const title = tab.querySelector('.lm_title');
-                const computedStyle = window.getComputedStyle(tab);
-                console.log(`Tab ${index + 1}:`, {
-                    title: title?.textContent,
-                    display: computedStyle.display,
-                    visibility: computedStyle.visibility,
-                    opacity: computedStyle.opacity,
-                    width: tab.offsetWidth,
-                    height: tab.offsetHeight
-                });
-            });
-            
-            if (canvas) {
-                console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
-            }
-            if (monacoEditorEl) {
-                console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
-            }
-            if (lmStack) {
-                console.log('Stack尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
-            }
-            if (lmItems) {
-                console.log('Items尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
-            }
-            if (lmHeader) {
-                const headerStyle = window.getComputedStyle(lmHeader);
-                console.log('Header样式:', {
-                    display: headerStyle.display,
-                    visibility: headerStyle.visibility,
-                    height: lmHeader.offsetHeight,
-                    width: lmHeader.offsetWidth
-                });
-            }
-            
             // 移动端：确保3D视图和代码编辑器的Tab正常显示，隐藏AI模块的Tab
             const tabs = document.querySelectorAll('.lm_tab');
-            console.log('处理Tab显示状态，共', tabs.length, '个Tab');
             tabs.forEach((tab, index) => {
                 const title = tab.querySelector('.lm_title');
                 if (title) {
                     const titleText = title.textContent.trim();
-                    console.log(`Tab ${index}: "${titleText}"`);
                     
                     if (titleText.includes('AI 生成器')) {
                         // 隐藏AI模块的Tab
-                        console.log('隐藏AI模块Tab (索引:', index, ')');
                         tab.style.display = 'none';
                         tab.style.visibility = 'hidden';
                     } else {
                         // 确保其他Tab（3D视图、代码编辑器）正常显示
-                        console.log('显示Tab (索引:', index, '):', titleText);
                         tab.style.display = '';
                         tab.style.visibility = 'visible';
                     }
@@ -1411,14 +1284,6 @@ function initialize(projectContent = null) {
                 const appbodyHeight = window.innerHeight - topnavHeight - aiInputHeight;
                 const headerHeight = 48; // 固定 header 高度
                 const itemsHeight = appbodyHeight - headerHeight;
-                
-                console.log('修复Items容器尺寸');
-                console.log('窗口高度:', window.innerHeight);
-                console.log('导航栏高度:', topnavHeight);
-                console.log('AI输入框高度:', aiInputHeight);
-                console.log('Appbody高度:', appbodyHeight);
-                console.log('Header高度:', headerHeight);
-                console.log('计算Items高度:', itemsHeight);
                 
                 // 强制设置 appbody - 使用 bottom: 0 和 padding-bottom 来避免空隙
                 appbody.style.position = 'absolute';
@@ -1546,7 +1411,6 @@ function initialize(projectContent = null) {
                         canvasParent.style.display = 'block';
                         canvasParent.style.visibility = 'visible';
                         canvasParent.style.opacity = '1';
-                        console.log('Canvas父容器尺寸已强制设置:', canvasItemsWidth, 'x', canvasItemsHeight);
                     }
                 }
             }
@@ -1555,26 +1419,20 @@ function initialize(projectContent = null) {
             const topnavHeight = document.getElementById('topnav').offsetHeight;
             const aiInputHeight = document.getElementById('aiInputWrapper')?.offsetHeight || 140;
             const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
-            console.log('计算布局高度:', layoutHeight, '= 窗口高度', window.innerHeight, '- 导航栏', topnavHeight, '- AI输入框', aiInputHeight);
             
             myLayout.updateSize(window.innerWidth, layoutHeight);
             
             // 第一次检查尺寸（立即）
             setTimeout(() => {
-                console.log('=== 第一次尺寸检查 ===');
                 if (lmItems) {
-                    console.log('Items容器尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
                 }
                 if (canvas) {
-                    console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
                 }
                 if (monacoEditorEl) {
-                    console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
                 }
                 
                 // 如果尺寸还是0，再次强制设置
                 if (lmItems && lmItems.offsetHeight === 0) {
-                    console.log('尺寸仍为0，再次强制设置...');
                     const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
                     const aiInputHeight = document.getElementById('aiInputWrapper')?.offsetHeight || 140;
                     const appbodyHeight = window.innerHeight - topnavHeight - aiInputHeight;
@@ -1614,13 +1472,11 @@ function initialize(projectContent = null) {
             
             // 第二次检查尺寸（延迟更长时间）
             setTimeout(() => {
-                console.log('=== 第二次尺寸检查 ===');
                 
                 // 强制 Golden Layout 重新计算尺寸
                 const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
                 const aiInputHeight = document.getElementById('aiInputWrapper')?.offsetHeight || 140;
                 const layoutHeight = window.innerHeight - topnavHeight - aiInputHeight;
-                console.log('强制更新 Golden Layout 尺寸:', window.innerWidth, 'x', layoutHeight);
                 myLayout.updateSize(window.innerWidth, layoutHeight);
                 
                 // Golden Layout 更新后，再次强制设置尺寸（覆盖 Golden Layout 的计算）
@@ -1636,9 +1492,6 @@ function initialize(projectContent = null) {
                         const appbodyHeight = appbody.offsetHeight || layoutHeight;
                         const itemsHeight = appbodyHeight - headerHeight;
                         const itemsWidth = window.innerWidth;
-                        
-                        console.log('Golden Layout 更新后再次修复:');
-                        console.log('Appbody尺寸:', appbody.offsetWidth, 'x', appbody.offsetHeight);
                         
                         // 强制设置 lm_root 具体像素值
                         if (lmRoot) {
@@ -1663,9 +1516,6 @@ function initialize(projectContent = null) {
                             display: block !important;
                             visibility: visible !important;
                         `);
-                        
-                        console.log('Stack尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
-                        console.log('计算Items尺寸:', itemsWidth, 'x', itemsHeight);
                         
                         // 使用 setAttribute 直接修改 style 属性
                         // 关键修复：不使用 bottom: 0，而是明确设置 height
@@ -1712,45 +1562,8 @@ function initialize(projectContent = null) {
                             `);
                         });
                         
-                        console.log('=== 最终尺寸检查 ===');
-                        console.log('Items容器尺寸:', lmItems.offsetWidth, 'x', lmItems.offsetHeight);
-                        console.log('Items容器 computed style:', window.getComputedStyle(lmItems).width, 'x', window.getComputedStyle(lmItems).height);
-                        console.log('Items容器 display:', window.getComputedStyle(lmItems).display);
-                        console.log('Items容器 visibility:', window.getComputedStyle(lmItems).visibility);
-                        
-                        // 检查父容器
-                        console.log('Stack容器尺寸:', lmStack.offsetWidth, 'x', lmStack.offsetHeight);
-                        console.log('Stack computed style:', window.getComputedStyle(lmStack).width, 'x', window.getComputedStyle(lmStack).height);
-                        console.log('Stack display:', window.getComputedStyle(lmStack).display);
-                        console.log('Stack visibility:', window.getComputedStyle(lmStack).visibility);
-                        console.log('Stack opacity:', window.getComputedStyle(lmStack).opacity);
-                        
-                        console.log('Appbody尺寸:', appbody.offsetWidth, 'x', appbody.offsetHeight);
-                        console.log('Appbody computed style:', window.getComputedStyle(appbody).width, 'x', window.getComputedStyle(appbody).height);
-                        console.log('Appbody display:', window.getComputedStyle(appbody).display);
-                        
-                        if (lmRoot) {
-                            console.log('lm_root尺寸:', lmRoot.offsetWidth, 'x', lmRoot.offsetHeight);
-                            console.log('lm_root computed style:', window.getComputedStyle(lmRoot).width, 'x', window.getComputedStyle(lmRoot).height);
-                            console.log('lm_root display:', window.getComputedStyle(lmRoot).display);
-                            console.log('lm_root visibility:', window.getComputedStyle(lmRoot).visibility);
-                        }
-                        
-                        const canvas = document.querySelector('canvas');
-                        const monacoEditorEl = document.querySelector('.monaco-editor');
-                        
-                        if (canvas) {
-                            console.log('Canvas尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight);
-                            console.log('Canvas computed style:', window.getComputedStyle(canvas).width, 'x', window.getComputedStyle(canvas).height);
-                        }
-                        if (monacoEditorEl) {
-                            console.log('Monaco编辑器尺寸:', monacoEditorEl.offsetWidth, 'x', monacoEditorEl.offsetHeight);
-                            console.log('Monaco computed style:', window.getComputedStyle(monacoEditorEl).width, 'x', window.getComputedStyle(monacoEditorEl).height);
-                        }
-                        
                         // 强制更新Monaco编辑器布局
                         if (monacoEditor) {
-                            console.log('更新Monaco编辑器布局');
                             monacoEditor.layout();
                             // 强制刷新编辑器显示
                             setTimeout(() => {
@@ -1760,7 +1573,6 @@ function initialize(projectContent = null) {
                         
                         // 强制更新Three.js视图
                         if (threejsViewport && threejsViewport.renderer) {
-                            console.log('更新Three.js渲染器');
                             threejsViewport.renderer.setSize(itemsWidth, itemsHeight);
                             if (threejsViewport.camera) {
                                 threejsViewport.camera.aspect = itemsWidth / itemsHeight;
@@ -1768,7 +1580,6 @@ function initialize(projectContent = null) {
                             }
                             // 强制渲染一帧
                             threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
-                            console.log('Three.js 渲染完成');
                             
                             // 启动动画循环（如果有的话）
                             if (threejsViewport.animate && typeof threejsViewport.animate === 'function') {
@@ -1776,17 +1587,13 @@ function initialize(projectContent = null) {
                             }
                         }
                         
-                        console.log('=== 移动端初始化完成 ===');
-                        
                         // 移动端关键修复：主动激活3D视图的tab
                         setTimeout(() => {
-                            console.log('移动端：主动激活3D视图tab');
                             // 查找3D视图的tab并点击激活
                             const tabs = document.querySelectorAll('.lm_tab');
                             tabs.forEach(tab => {
                                 const title = tab.querySelector('.lm_title');
                                 if (title && title.textContent.includes('3D 视图')) {
-                                    console.log('找到3D视图tab，触发点击激活');
                                     tab.click();
                                     
                                     // 确保3D视图容器可见
@@ -1798,7 +1605,6 @@ function initialize(projectContent = null) {
                                                 lmItemContainer.style.display = 'block';
                                                 lmItemContainer.style.visibility = 'visible';
                                                 lmItemContainer.style.opacity = '1';
-                                                console.log('3D视图容器已设置为可见');
                                             }
                                         }
                                         
@@ -1815,10 +1621,8 @@ function initialize(projectContent = null) {
                                                 const headerHeight = 48;
                                                 width = window.innerWidth;
                                                 height = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
-                                                console.log('容器尺寸为0，使用窗口尺寸:', width, 'x', height);
                                             }
                                             
-                                            console.log('强制刷新3D视图，尺寸:', width, 'x', height);
                                             threejsViewport.environment.renderer.setSize(width, height);
                                             if (threejsViewport.environment.camera) {
                                                 threejsViewport.environment.camera.aspect = width / height;
@@ -1826,7 +1630,6 @@ function initialize(projectContent = null) {
                                             }
                                             threejsViewport.environment.renderer.render(threejsViewport.environment.scene, threejsViewport.environment.camera);
                                             threejsViewport.environment.viewDirty = true;
-                                            console.log('3D视图已强制刷新');
                                         }
                                     }, 100);
                                 }
@@ -1841,8 +1644,6 @@ function initialize(projectContent = null) {
     // If the Main Page loads before the CAD Worker, register a 
     // callback to start the model evaluation when the CAD is ready.
     messageHandlers["startupCallback"] = () => {
-        console.log('✅ 收到Worker的startupCallback，CAD内核已就绪');
-        console.log('Worker加载完成，现在可以安全地评估代码了');
         
         startup = function () {
             // Reimport any previously imported STEP/IGES Files
@@ -1856,7 +1657,6 @@ function initialize(projectContent = null) {
 
             // 移动端和桌面端统一处理：等待所有组件就绪后再评估代码
             const isMobile = window.innerWidth <= 768;
-            console.log('startupCallback - 移动端:', isMobile);
             
             const checkAndEvaluate = () => {
                 const editorReady = monacoEditor && monacoEditor.evaluateCode;
@@ -1864,34 +1664,21 @@ function initialize(projectContent = null) {
                 const notEvaluated = !window.initialCodeEvaluated;
                 const notWorking = !window.workerWorking;
                 
-                console.log('检查初始化状态:', {
-                    editorReady,
-                    viewportReady,
-                    notEvaluated,
-                    notWorking,
-                    editorCode: monacoEditor ? monacoEditor.getValue().substring(0, 50) : 'N/A'
-                });
-                
                 if (editorReady && viewportReady && notEvaluated && notWorking) {
-                    console.log('✅ 所有组件就绪，启动初始代码评估');
-                    console.log('当前编辑器代码:', monacoEditor.getValue());
                     
                     // 移动端：在评估代码前先刷新3D视图
                     const isMobile = window.innerWidth <= 768;
                     if (isMobile && window.forceMobile3DViewRefresh) {
-                        console.log('移动端：评估前刷新3D视图');
                         window.forceMobile3DViewRefresh();
                     }
                     
                     setTimeout(() => {
                         if (!window.workerWorking && !window.initialCodeEvaluated) {
-                            console.log('🚀 开始评估初始代码...');
                             monacoEditor.evaluateCode();
                             window.initialCodeEvaluated = true;
                         }
                     }, 300);
                 } else if (notEvaluated) {
-                    console.log('⏳ 等待组件初始化...');
                     setTimeout(checkAndEvaluate, 200);
                 }
             };

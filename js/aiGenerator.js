@@ -150,8 +150,6 @@ let final = Translate([0, 0, 10], result);
             // 记录生成历史到数据库（包含生成的代码）
             await this.logGeneration(prompt, creditsUsed, totalTokens, generatedCode);
 
-            console.log(`AI 生成完成，消耗 ${totalTokens} tokens，扣除 ${creditsUsed.toFixed(2)} 积分`);
-
             return {
                 code: generatedCode,
                 tokensUsed: totalTokens,
@@ -184,7 +182,6 @@ let final = Translate([0, 0, 10], result);
             if (error) {
                 console.error('记录生成历史失败:', error);
             } else {
-                console.log('生成历史已保存到数据库');
                 // 刷新历史记录显示
                 if (window.refreshGenerationHistory) {
                     window.refreshGenerationHistory();
@@ -203,7 +200,6 @@ let final = Translate([0, 0, 10], result);
                 return await this.generateCode(prompt);
             } catch (error) {
                 lastError = error;
-                console.log(`生成失败，重试 ${i + 1}/${maxRetries}...`);
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
@@ -250,7 +246,6 @@ if (typeof window !== 'undefined') {
                 // 将生成的代码插入到编辑器
                 if (monacoEditor) {
                     monacoEditor.setValue(result.code);
-                    console.log(`代码已生成！消耗 ${result.tokensUsed} tokens，${result.creditsUsed.toFixed(2)} 积分`);
                     
                     // 自动评估代码
                     setTimeout(() => {

@@ -11,8 +11,6 @@ var Environment = function (goldenContainer) {
     this.parentWidth  = this.goldenContainer.width;
     this.parentHeight = this.goldenContainer.height;
     
-    console.log('Environment 初始化 - 容器尺寸:', this.parentWidth, 'x', this.parentHeight);
-    
     // 如果容器尺寸为0，使用窗口尺寸作为后备
     if (this.parentWidth === 0 || this.parentHeight === 0) {
       const isMobile = window.innerWidth <= 768;
@@ -21,7 +19,6 @@ var Environment = function (goldenContainer) {
       const headerHeight = 48;
       this.parentWidth = window.innerWidth;
       this.parentHeight = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
-      console.warn('容器尺寸为0，使用窗口尺寸:', this.parentWidth, 'x', this.parentHeight);
     }
 
     // Create the Canvas and WebGL Renderer
@@ -30,9 +27,6 @@ var Environment = function (goldenContainer) {
     this.renderer = new THREE.WebGLRenderer({ canvas: this.curCanvas, antialias: true, webgl2: false });
     this.renderer.setPixelRatio(window.devicePixelRatio); 
     this.renderer.setSize(this.parentWidth, this.parentHeight);
-    console.log('WebGL 渲染器已创建，尺寸:', this.parentWidth, 'x', this.parentHeight);
-    console.log('Canvas DOM元素:', this.curCanvas);
-    console.log('Canvas父容器:', this.goldenContainer.getElement().get(0));
     this.goldenContainer.on('resize', this.onWindowResize.bind(this));
 
     // Create the Three.js Scene
@@ -108,9 +102,6 @@ var Environment = function (goldenContainer) {
   const isMobile = window.innerWidth <= 768;
   if (isMobile) {
     setTimeout(() => {
-      console.log('移动端Environment额外检查 - Canvas尺寸:', this.curCanvas.width, 'x', this.curCanvas.height);
-      console.log('移动端Environment额外检查 - 渲染器尺寸:', this.renderer.domElement.width, 'x', this.renderer.domElement.height);
-      
       // 如果Canvas尺寸不正确，强制修复
       if (this.curCanvas.width === 0 || this.curCanvas.height === 0) {
         const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
@@ -119,7 +110,6 @@ var Environment = function (goldenContainer) {
         const viewWidth = window.innerWidth;
         const viewHeight = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
         
-        console.log('强制修复Canvas尺寸:', viewWidth, 'x', viewHeight);
         this.renderer.setSize(viewWidth, viewHeight);
         this.camera.aspect = viewWidth / viewHeight;
         this.camera.updateProjectionMatrix();
@@ -328,8 +318,6 @@ var CascadeEnvironment = function (goldenContainer) {
       // 更新控制器目标
       this.environment.controls.target.copy(center);
       this.environment.controls.update();
-      
-      console.log('模型已自适应居中显示，中心点:', center, '尺寸:', size);
     }
     
     this.environment.viewDirty = true;
@@ -337,15 +325,12 @@ var CascadeEnvironment = function (goldenContainer) {
     // 移动端：模型生成后强制刷新视图
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
-      console.log('移动端：模型生成完成，强制刷新视图');
       setTimeout(() => {
         if (window.forceMobile3DViewRefresh) {
           window.forceMobile3DViewRefresh();
         }
       }, 100);
     }
-    
-    console.log("Generation Complete!");
   }
 
   /** Save the current shape to .stl */
@@ -471,8 +456,6 @@ var CascadeEnvironment = function (goldenContainer) {
   // 移动端：多次尝试渲染，确保3D视图正确显示
   const isMobile = window.innerWidth <= 768;
   if (isMobile) {
-    console.log('移动端CascadeEnvironment：设置多次渲染尝试');
-    
     // 强制持续渲染前5秒（确保模型加载完成后能看到）
     let renderCount = 0;
     const maxRenders = 50; // 5秒内渲染50次
@@ -481,7 +464,6 @@ var CascadeEnvironment = function (goldenContainer) {
       renderCount++;
       if (renderCount >= maxRenders) {
         clearInterval(renderInterval);
-        console.log('移动端：停止强制渲染');
       }
     }, 100);
     
@@ -509,8 +491,6 @@ var CascadeEnvironment = function (goldenContainer) {
     let width = container.offsetWidth;
     let height = container.offsetHeight;
     
-    console.log(`移动端${label} - 容器尺寸:`, width, 'x', height);
-    
     // 如果容器尺寸为0，使用窗口尺寸
     if (width === 0 || height === 0) {
       const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
@@ -518,7 +498,6 @@ var CascadeEnvironment = function (goldenContainer) {
       const headerHeight = 48;
       width = window.innerWidth;
       height = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
-      console.log(`移动端${label} - 使用窗口尺寸:`, width, 'x', height);
     }
     
     if (width > 0 && height > 0) {
@@ -527,7 +506,6 @@ var CascadeEnvironment = function (goldenContainer) {
       this.environment.camera.updateProjectionMatrix();
       this.environment.renderer.render(this.environment.scene, this.environment.camera);
       this.environment.viewDirty = true;
-      console.log(`移动端${label} - 渲染完成`);
     }
   }.bind(this);
 }
