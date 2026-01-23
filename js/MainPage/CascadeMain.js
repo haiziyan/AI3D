@@ -459,8 +459,32 @@ function initialize(projectContent = null) {
         floatingGUIContainer.className = 'gui-panel';
         floatingGUIContainer.id = "guiPanel";
         container.getElement().get(0).appendChild(floatingGUIContainer);
-        threejsViewport = new CascadeEnvironment(container);
-        console.log('threejsViewport 创建完成:', threejsViewport);
+        
+        // 移动端：延迟创建3D视图，确保容器尺寸正确
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            console.log('移动端：延迟创建3D视图');
+            setTimeout(() => {
+                threejsViewport = new CascadeEnvironment(container);
+                console.log('threejsViewport 创建完成（移动端延迟）:', threejsViewport);
+                
+                // 标记3D视图已初始化
+                window.threejsViewportReady = true;
+                
+                // 如果初始代码还未评估，现在评估
+                if (!window.initialCodeEvaluated && monacoEditor && monacoEditor.evaluateCode && !window.workerWorking) {
+                    console.log('3D视图初始化完成，触发初始代码评估');
+                    setTimeout(() => {
+                        monacoEditor.evaluateCode();
+                        window.initialCodeEvaluated = true;
+                    }, 500);
+                }
+            }, 300);
+        } else {
+            threejsViewport = new CascadeEnvironment(container);
+            console.log('threejsViewport 创建完成:', threejsViewport);
+            window.threejsViewportReady = true;
+        }
         
         // 监听tab激活事件（Golden Layout的正确事件）
         container.on('tab', function(tab) {
@@ -1628,23 +1652,44 @@ function initialize(projectContent = null) {
                 });
             }
 
-            // 确保 monacoEditor 已经初始化
-            if (monacoEditor && monacoEditor.evaluateCode) {
-                console.log('启动初始代码评估');
-                monacoEditor.evaluateCode();
-                window.initialCodeEvaluated = true;
-            } else {
-                console.warn('monacoEditor 尚未初始化，延迟执行');
-                // 延迟执行，等待 monacoEditor 初始化完成
-                setTimeout(() => {
-                    if (monacoEditor && monacoEditor.evaluateCode && !window.initialCodeEvaluated) {
-                        console.log('延迟启动初始代码评估');
-                        monacoEditor.evaluateCode();
-                        window.initialCodeEvaluated = true;
-                    } else {
-                        console.error('monacoEditor 初始化失败');
+            // 移动端：等待3D视图初始化完成
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                console.log('移动端：等待3D视图初始化');
+                const checkAndEvaluate = () => {
+                    if (window.threejsViewportReady && monacoEditor && monacoEditor.evaluateCode && !window.initialCodeEvaluated) {
+                        console.log('移动端：3D视图和编辑器都已就绪，启动初始代码评估');
+                        setTimeout(() => {
+                            if (!window.workerWorking) {
+                                monacoEditor.evaluateCode();
+                                window.initialCodeEvaluated = true;
+                            }
+                        }, 500);
+                    } else if (!window.initialCodeEvaluated) {
+                        console.log('移动端：等待中... threejsViewportReady:', window.threejsViewportReady, 'monacoEditor:', !!monacoEditor);
+                        setTimeout(checkAndEvaluate, 300);
                     }
-                }, 1000);
+                };
+                checkAndEvaluate();
+            } else {
+                // 桌面端：确保 monacoEditor 已经初始化
+                if (monacoEditor && monacoEditor.evaluateCode) {
+                    console.log('启动初始代码评估');
+                    monacoEditor.evaluateCode();
+                    window.initialCodeEvaluated = true;
+                } else {
+                    console.warn('monacoEditor 尚未初始化，延迟执行');
+                    // 延迟执行，等待 monacoEditor 初始化完成
+                    setTimeout(() => {
+                        if (monacoEditor && monacoEditor.evaluateCode && !window.initialCodeEvaluated) {
+                            console.log('延迟启动初始代码评估');
+                            monacoEditor.evaluateCode();
+                            window.initialCodeEvaluated = true;
+                        } else {
+                            console.error('monacoEditor 初始化失败');
+                        }
+                    }, 1000);
+                }
             }
         }
         // Call the startup if we're ready when the wasm is ready
