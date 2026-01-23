@@ -1060,6 +1060,95 @@ function initialize(projectContent = null) {
     // Initialize the Layout
     myLayout.init();
     
+    // 移动端关键修复：在Golden Layout初始化后立即修复容器尺寸
+    if (isMobile) {
+        console.log('移动端：Golden Layout初始化后立即修复容器');
+        
+        // 立即执行第一次修复
+        setTimeout(() => {
+            const lmItems = document.querySelector('.lm_items');
+            const lmStack = document.querySelector('.lm_stack');
+            const lmRoot = document.querySelector('.lm_root');
+            
+            if (lmItems && lmStack) {
+                const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+                const aiInputHeight = 140;
+                const headerHeight = 48;
+                const appbodyHeight = window.innerHeight - topnavHeight - aiInputHeight;
+                const itemsHeight = appbodyHeight - headerHeight;
+                const itemsWidth = window.innerWidth;
+                
+                console.log('立即修复 - Items尺寸:', itemsWidth, 'x', itemsHeight);
+                
+                // 使用内联样式强制覆盖
+                lmItems.style.cssText = `
+                    position: absolute !important;
+                    top: ${headerHeight}px !important;
+                    left: 0 !important;
+                    width: ${itemsWidth}px !important;
+                    height: ${itemsHeight}px !important;
+                    overflow: hidden !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                `;
+                
+                lmStack.style.cssText = `
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: ${itemsWidth}px !important;
+                    height: ${appbodyHeight}px !important;
+                    display: block !important;
+                    visibility: visible !important;
+                `;
+                
+                if (lmRoot) {
+                    lmRoot.style.cssText = `
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: ${itemsWidth}px !important;
+                        height: ${appbodyHeight}px !important;
+                        display: block !important;
+                        visibility: visible !important;
+                    `;
+                }
+                
+                // 修复所有子容器
+                const allContainers = lmItems.querySelectorAll('.lm_item_container');
+                allContainers.forEach((container, index) => {
+                    container.style.cssText = `
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: ${itemsWidth}px !important;
+                        height: ${itemsHeight}px !important;
+                        display: ${index === 0 ? 'block' : 'none'} !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    `;
+                });
+                
+                const allContents = lmItems.querySelectorAll('.lm_content');
+                allContents.forEach(content => {
+                    content.style.cssText = `
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: ${itemsWidth}px !important;
+                        height: ${itemsHeight}px !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    `;
+                });
+                
+                console.log('立即修复完成');
+            }
+        }, 50);
+    }
+    
     // 方法1：监听activeContentItemChanged事件
     myLayout.on('activeContentItemChanged', function(contentItem) {
         console.log('activeContentItemChanged事件触发:', contentItem);
@@ -1394,6 +1483,8 @@ function initialize(projectContent = null) {
                 lmItems.style.width = '100%';
                 lmItems.style.height = itemsHeight + 'px';
                 lmItems.style.overflow = 'hidden';
+                lmItems.style.display = 'block';
+                lmItems.style.visibility = 'visible';
                 
                 // 强制浏览器重排（触发样式生效）
                 void lmItems.offsetHeight;
@@ -1406,7 +1497,9 @@ function initialize(projectContent = null) {
                     container.style.position = 'absolute';
                     container.style.top = '0';
                     container.style.left = '0';
-                    container.style.display = ''; // 移除 display:none
+                    container.style.display = 'block'; // 确保显示
+                    container.style.visibility = 'visible';
+                    container.style.opacity = '1';
                 });
                 
                 // 强制浏览器重排
@@ -1422,6 +1515,9 @@ function initialize(projectContent = null) {
                     content.style.position = 'absolute';
                     content.style.top = '0';
                     content.style.left = '0';
+                    content.style.display = 'block';
+                    content.style.visibility = 'visible';
+                    content.style.opacity = '1';
                 });
                 
                 // 强制浏览器重排
@@ -1435,6 +1531,23 @@ function initialize(projectContent = null) {
                     activeItem.style.display = 'block';
                     activeItem.style.visibility = 'visible';
                     activeItem.style.opacity = '1';
+                }
+                
+                // 关键修复：强制设置Canvas的父容器尺寸
+                const canvas = document.querySelector('canvas');
+                if (canvas) {
+                    let canvasParent = canvas.parentElement;
+                    while (canvasParent && !canvasParent.classList.contains('lm_content')) {
+                        canvasParent = canvasParent.parentElement;
+                    }
+                    if (canvasParent) {
+                        canvasParent.style.width = itemsWidth + 'px';
+                        canvasParent.style.height = itemsHeight + 'px';
+                        canvasParent.style.display = 'block';
+                        canvasParent.style.visibility = 'visible';
+                        canvasParent.style.opacity = '1';
+                        console.log('Canvas父容器尺寸已强制设置:', itemsWidth, 'x', itemsHeight);
+                    }
                 }
             }
             
@@ -1555,15 +1668,16 @@ function initialize(projectContent = null) {
                         console.log('计算Items尺寸:', itemsWidth, 'x', itemsHeight);
                         
                         // 使用 setAttribute 直接修改 style 属性
+                        // 关键修复：不使用 bottom: 0，而是明确设置 height
                         lmItems.setAttribute('style', `
                             position: absolute !important;
                             top: ${headerHeight}px !important;
                             left: 0 !important;
-                            right: 0 !important;
-                            bottom: 0 !important;
                             width: ${itemsWidth}px !important;
                             height: ${itemsHeight}px !important;
                             overflow: hidden !important;
+                            display: block !important;
+                            visibility: visible !important;
                         `);
                         
                         // 修复所有子容器
@@ -1579,6 +1693,7 @@ function initialize(projectContent = null) {
                                 height: ${itemsHeight}px !important;
                                 display: ${display} !important;
                                 visibility: visible !important;
+                                opacity: 1 !important;
                             `);
                         });
                         
@@ -1593,6 +1708,7 @@ function initialize(projectContent = null) {
                                 height: ${itemsHeight}px !important;
                                 display: block !important;
                                 visibility: visible !important;
+                                opacity: 1 !important;
                             `);
                         });
                         

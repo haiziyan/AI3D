@@ -1317,6 +1317,8 @@ body {
     min-height: 400px !important;
     height: auto !important;
     overflow: hidden !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   /* 强制修复：确保Items容器有实际高度 */
@@ -1327,7 +1329,10 @@ body {
     right: 0 !important;
     bottom: 0 !important;
     width: 100% !important;
-    height: auto !important;
+    height: calc(100% - 48px) !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   /* Item */
@@ -1354,6 +1359,8 @@ body {
     left: 0 !important;
     overflow: hidden !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   /* Item容器 */
@@ -1365,6 +1372,8 @@ body {
     left: 0 !important;
     overflow: hidden !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   /* Canvas */
@@ -1376,6 +1385,14 @@ body {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* 确保Canvas的父容器也有正确的尺寸 */
+  .lm_content canvas {
+    min-width: 100vw !important;
+    min-height: 400px !important;
   }
   
   /* Monaco编辑器 */
