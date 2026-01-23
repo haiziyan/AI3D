@@ -1296,6 +1296,31 @@ body {
     height: 48px !important;
   }
   
+  /* 移动端：强制隐藏AI模块的所有内容（防止闪烁） */
+  .lm_item_container:has([title="AI 生成器"]),
+  .lm_item:has([title="AI 生成器"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  /* 确保AI模块的内容容器也被隐藏 */
+  .ai-module-container {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* 确保生成历史面板在移动端不显示 */
+  .generation-history-panel {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
   /* Stack容器 - 使用绝对定位填满整个容器 */
   .lm_stack {
     position: absolute !important;
