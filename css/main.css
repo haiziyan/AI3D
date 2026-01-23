@@ -81,6 +81,12 @@ body {
   background-color: var(--secondary-bg);
 }
 
+.logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
 .menu-toggle {
   display: none;
   flex-direction: column;
@@ -1174,6 +1180,10 @@ body {
   
   .logo span {
     display: none;
+  }
+  
+  .logo-img {
+    height: 28px;
   }
   
   .user-email {
