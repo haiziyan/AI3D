@@ -509,31 +509,12 @@ function initialize(projectContent = null) {
     myLayout.registerComponent('aiModule', function (container) {
         consoleGolden = container;
         
-        // 移动端：立即隐藏整个AI模块容器（防止闪烁）
+        // 移动端：立即隐藏AI模块的Tab（防止闪烁）
         if (isMobile) {
-            // 隐藏容器本身
-            const containerElement = container.getElement().get(0);
-            if (containerElement) {
-                containerElement.style.display = 'none';
-                containerElement.style.visibility = 'hidden';
-                containerElement.style.opacity = '0';
-            }
-            
-            // 隐藏Tab
             const aiTab = container.tab;
             if (aiTab && aiTab.element) {
                 aiTab.element.hide();
-                aiTab.element.css('display', 'none');
             }
-            
-            // 隐藏父级 item 容器
-            setTimeout(() => {
-                const itemContainer = containerElement?.closest('.lm_item_container');
-                if (itemContainer) {
-                    itemContainer.style.display = 'none';
-                    itemContainer.style.visibility = 'hidden';
-                }
-            }, 0);
         }
         
         let aiModuleContainer = document.createElement("div");
@@ -579,7 +560,7 @@ function initialize(projectContent = null) {
         container.getElement().get(0).appendChild(aiModuleContainer);
         container.getElement().get(0).style.overflow = 'hidden';
         
-        // 如果是移动端，将AI输入框移到body底部，并且不加载历史记录
+        // 如果是移动端，将AI输入框移到body底部
         if (isMobile) {
             setTimeout(() => {
                 const aiInputWrapper = document.getElementById('aiInputWrapper');
@@ -587,11 +568,7 @@ function initialize(projectContent = null) {
                     document.body.appendChild(aiInputWrapper);
                 }
             }, 100);
-            
-            // 移动端：不加载历史记录，直接返回
-            return;
         }
-        
         
         // 加载生成历史记录
         window.refreshGenerationHistory = async function() {
@@ -848,12 +825,10 @@ function initialize(projectContent = null) {
             }
         };
 
-        // 桌面端：初始加载历史记录
-        if (!isMobile) {
-            setTimeout(() => {
-                window.refreshGenerationHistory();
-            }, 1500);
-        }
+        // 修复Bug 1: 初始加载历史记录，延迟更长时间确保authManager已初始化
+        setTimeout(() => {
+            window.refreshGenerationHistory();
+        }, 1500);
         
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {
