@@ -1852,6 +1852,7 @@ function initialize(projectContent = null) {
     // If the Main Page loads before the CAD Worker, register a 
     // callback to start the model evaluation when the CAD is ready.
     messageHandlers["startupCallback"] = () => {
+        console.log('收到Worker的startupCallback，CAD内核已就绪');
         startup = function () {
             // Reimport any previously imported STEP/IGES Files
             let curState = consoleGolden.getState();
@@ -1912,6 +1913,21 @@ function initialize(projectContent = null) {
     }
     // Otherwise, enqueue that call for when the Main Page is ready
     if (startup) { startup(); }
+    
+    // 添加Worker超时检测
+    setTimeout(() => {
+        if (!startup) {
+            console.error('⚠️ CAD Worker 加载超时（30秒）');
+            console.error('可能的原因：');
+            console.error('1. WebAssembly 文件加载失败');
+            console.error('2. 网络连接问题');
+            console.error('3. 浏览器不支持 WebAssembly');
+            console.error('请检查浏览器控制台的 Network 面板');
+            
+            // 显示友好的错误提示
+            alert('CAD 内核加载失败\n\n可能原因：\n1. 网络连接问题\n2. WebAssembly 文件加载失败\n\n请刷新页面重试，或检查网络连接。');
+        }
+    }, 30000); // 30秒超时
 
     // Register callbacks from the CAD Worker to add Sliders, Buttons, and Checkboxes to the UI
     // TODO: Enqueue these so the sliders are added/removed at the same time to eliminate flashing
