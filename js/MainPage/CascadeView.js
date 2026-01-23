@@ -99,6 +99,31 @@ var Environment = function (goldenContainer) {
 
   // Initialize the Environment!
   this.initEnvironment();
+  
+  // 移动端：额外的初始化检查和修复
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    setTimeout(() => {
+      console.log('移动端Environment额外检查 - Canvas尺寸:', this.curCanvas.width, 'x', this.curCanvas.height);
+      console.log('移动端Environment额外检查 - 渲染器尺寸:', this.renderer.domElement.width, 'x', this.renderer.domElement.height);
+      
+      // 如果Canvas尺寸不正确，强制修复
+      if (this.curCanvas.width === 0 || this.curCanvas.height === 0) {
+        const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+        const aiInputHeight = 140;
+        const headerHeight = 48;
+        const viewWidth = window.innerWidth;
+        const viewHeight = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
+        
+        console.log('强制修复Canvas尺寸:', viewWidth, 'x', viewHeight);
+        this.renderer.setSize(viewWidth, viewHeight);
+        this.camera.aspect = viewWidth / viewHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.render(this.scene, this.camera);
+        this.viewDirty = true;
+      }
+    }, 200);
+  }
 }
 
 /** This "inherits" from Environment (by including it as a sub object) */
@@ -304,6 +329,18 @@ var CascadeEnvironment = function (goldenContainer) {
     }
     
     this.environment.viewDirty = true;
+    
+    // 移动端：模型生成后强制刷新视图
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      console.log('移动端：模型生成完成，强制刷新视图');
+      setTimeout(() => {
+        if (window.forceMobile3DViewRefresh) {
+          window.forceMobile3DViewRefresh();
+        }
+      }, 100);
+    }
+    
     console.log("Generation Complete!");
   }
 
@@ -427,40 +464,54 @@ var CascadeEnvironment = function (goldenContainer) {
   // Initialize the view in-case we're lazy rendering...
   this.environment.renderer.render(this.environment.scene, this.environment.camera);
   
-  // 移动端：延迟再次渲染，确保初始化完成
+  // 移动端：多次尝试渲染，确保3D视图正确显示
   const isMobile = window.innerWidth <= 768;
   if (isMobile) {
-    console.log('移动端：设置延迟渲染');
+    console.log('移动端CascadeEnvironment：设置多次渲染尝试');
+    
+    // 尝试1：200ms后
     setTimeout(() => {
-      if (this.environment && this.environment.renderer) {
-        const container = this.goldenContainer.getElement().get(0);
-        const width = container.offsetWidth;
-        const height = container.offsetHeight;
-        console.log('移动端延迟渲染 - 容器尺寸:', width, 'x', height);
-        
-        if (width > 0 && height > 0) {
-          this.environment.renderer.setSize(width, height);
-          this.environment.camera.aspect = width / height;
-          this.environment.camera.updateProjectionMatrix();
-          this.environment.renderer.render(this.environment.scene, this.environment.camera);
-          this.environment.viewDirty = true;
-          console.log('移动端延迟渲染完成');
-        } else {
-          console.warn('移动端容器尺寸仍为0，使用窗口尺寸');
-          const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
-          const aiInputHeight = 140;
-          const headerHeight = 48;
-          const viewWidth = window.innerWidth;
-          const viewHeight = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
-          
-          this.environment.renderer.setSize(viewWidth, viewHeight);
-          this.environment.camera.aspect = viewWidth / viewHeight;
-          this.environment.camera.updateProjectionMatrix();
-          this.environment.renderer.render(this.environment.scene, this.environment.camera);
-          this.environment.viewDirty = true;
-          console.log('移动端使用窗口尺寸渲染完成:', viewWidth, 'x', viewHeight);
-        }
-      }
+      this.forceRenderMobile('尝试1 (200ms)');
+    }, 200);
+    
+    // 尝试2：500ms后
+    setTimeout(() => {
+      this.forceRenderMobile('尝试2 (500ms)');
     }, 500);
+    
+    // 尝试3：1000ms后
+    setTimeout(() => {
+      this.forceRenderMobile('尝试3 (1000ms)');
+    }, 1000);
   }
+  
+  // 移动端强制渲染方法
+  this.forceRenderMobile = function(label) {
+    if (!this.environment || !this.environment.renderer) return;
+    
+    const container = this.goldenContainer.getElement().get(0);
+    let width = container.offsetWidth;
+    let height = container.offsetHeight;
+    
+    console.log(`移动端${label} - 容器尺寸:`, width, 'x', height);
+    
+    // 如果容器尺寸为0，使用窗口尺寸
+    if (width === 0 || height === 0) {
+      const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+      const aiInputHeight = 140;
+      const headerHeight = 48;
+      width = window.innerWidth;
+      height = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
+      console.log(`移动端${label} - 使用窗口尺寸:`, width, 'x', height);
+    }
+    
+    if (width > 0 && height > 0) {
+      this.environment.renderer.setSize(width, height);
+      this.environment.camera.aspect = width / height;
+      this.environment.camera.updateProjectionMatrix();
+      this.environment.renderer.render(this.environment.scene, this.environment.camera);
+      this.environment.viewDirty = true;
+      console.log(`移动端${label} - 渲染完成`);
+    }
+  }.bind(this);
 }

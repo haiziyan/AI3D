@@ -11,68 +11,7 @@ window.workerWorking = false;
 window.initialCodeEvaluated = false; // 标记初始代码是否已评估
 
 let starterCode = 
-`// Define car design variables
-let car_length      = 50;
-let car_width       = 20;
-let overhang_front  = 8;
-let overhang_rear   = 9;
-let cabin_width     = 16;
-let cabin_length    = 25; // 33 = station, 25=sedan, 15=pickup
-let car_height      = 14;
-let bonnet_height   = 8;
-let bonnet_rounding = 4;
-let bonnet_length   = 15;
-let wheel_radius    = 5;
-let tire_width      = 3;
-let tire_protrude   = 1;
-let rim_height      = 1;
-let tire_compression= 1;
-let road_clearance  = 3; 
-
-// Derived properties
-let wheel_base      = car_length - overhang_front - overhang_rear;
-let cabin_narrowing = (car_width - cabin_width)/2;
-let cabin_base      = road_clearance + bonnet_height
-let cabin_height    = car_height-bonnet_height
-
-// Draw car body and passenger cabin
-let car_body        = Translate([0,0,road_clearance],Box(car_length,car_width,bonnet_height))
-let car_cabin       = Translate([bonnet_length,cabin_narrowing,cabin_base-0.5],
-                            Box(cabin_length, cabin_width, cabin_height))
-
-// Sculpt the car body more aerodynamically
-let car_body_rounded = FilletEdges(car_body,bonnet_rounding,[1,5])
-let cabin_aero       = ChamferEdges(car_cabin, cabin_height-0.5 , [1,5])
-
-// Round all edges
-let cabin_rounded   = Offset(cabin_aero,1.5);
-let car_shrunk = Offset(car_body_rounded,-1);
-let car_rounded = Offset(car_shrunk,2); 
-
-// Define wheels and wheel wells (Front/Rear - Left/Right)
-let rim              = Rotate([1,0,0],-90, Translate(
-                        [overhang_front,
-                                   -(wheel_radius-tire_compression),
-                                  -(tire_width - tire_protrude)]
-                                  , Cylinder(wheel_radius-rim_height,tire_width,true)))
-let wheel            = Rotate([1,0,0],-90, Translate( [overhang_front,
-                                   -(wheel_radius-tire_compression),
-                                  (0.5*tire_protrude)], 
-                                  Cylinder(wheel_radius,tire_width,true)));
-let wheel_FL         = Difference(wheel,[rim]);
-let wheel_well_FL    = Offset(wheel,0.8,0.01,true)
-let wheel_RL         = Translate([wheel_base,0,0], wheel_FL, true)
-let wheel_well_RL    = Translate([wheel_base,0,0], wheel_well_FL, true)
-let wheel_FR         = Rotate([0,0,1],180,Translate([-(2*overhang_front),-car_width ,0], wheel_FL, true))
-let wheel_well_FR    = Translate([0,car_width-1,0], wheel_well_FL, true)
-let wheel_RR         = Translate([wheel_base,0,0], wheel_FR, true)
-let wheel_well_RR    = Translate([wheel_base,0,0], wheel_well_FR, true)
-
-// Subtract the wheel wells from the car-body
-Difference(car_rounded,[wheel_well_FL, 
-                        wheel_well_RL, 
-                        wheel_well_FR, 
-                        wheel_well_RR])`;
+`Text3D("AI 3D Studio", 70, 0.2, 'Consolas')`;
 
 function initialize(projectContent = null) {
     this.searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
@@ -465,15 +404,72 @@ function initialize(projectContent = null) {
         const isMobile = window.innerWidth <= 768;
         console.log('创建3D视图 - 移动端:', isMobile);
         
+        // 关键修复：确保容器在创建3D视图前有正确的尺寸
+        if (isMobile) {
+            const containerEl = container.getElement().get(0);
+            console.log('3D视图容器初始尺寸:', containerEl.offsetWidth, 'x', containerEl.offsetHeight);
+            
+            // 如果容器尺寸为0，强制设置尺寸
+            if (containerEl.offsetWidth === 0 || containerEl.offsetHeight === 0) {
+                const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+                const aiInputHeight = 140;
+                const headerHeight = 48;
+                const viewWidth = window.innerWidth;
+                const viewHeight = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
+                
+                containerEl.style.width = viewWidth + 'px';
+                containerEl.style.height = viewHeight + 'px';
+                console.log('强制设置容器尺寸:', viewWidth, 'x', viewHeight);
+            }
+        }
+        
         threejsViewport = new CascadeEnvironment(container);
         console.log('threejsViewport 创建完成:', threejsViewport);
         
         // 标记3D视图已初始化
         window.threejsViewportReady = true;
         
-        // 移动端：延迟触发初始代码评估，确保所有组件都已就绪
+        // 移动端：多次尝试渲染，确保3D视图正确显示
         if (isMobile) {
-            console.log('移动端：设置延迟代码评估');
+            console.log('移动端：设置多次渲染尝试');
+            
+            // 第一次：立即渲染
+            setTimeout(() => {
+                if (threejsViewport && threejsViewport.environment && threejsViewport.environment.renderer) {
+                    const containerEl = container.getElement().get(0);
+                    const width = containerEl.offsetWidth;
+                    const height = containerEl.offsetHeight;
+                    console.log('第1次渲染尝试 - 容器尺寸:', width, 'x', height);
+                    
+                    if (width > 0 && height > 0) {
+                        threejsViewport.environment.renderer.setSize(width, height);
+                        threejsViewport.environment.camera.aspect = width / height;
+                        threejsViewport.environment.camera.updateProjectionMatrix();
+                        threejsViewport.environment.renderer.render(threejsViewport.environment.scene, threejsViewport.environment.camera);
+                        threejsViewport.environment.viewDirty = true;
+                    }
+                }
+            }, 100);
+            
+            // 第二次：延迟渲染
+            setTimeout(() => {
+                if (threejsViewport && threejsViewport.environment && threejsViewport.environment.renderer) {
+                    const containerEl = container.getElement().get(0);
+                    const width = containerEl.offsetWidth;
+                    const height = containerEl.offsetHeight;
+                    console.log('第2次渲染尝试 - 容器尺寸:', width, 'x', height);
+                    
+                    if (width > 0 && height > 0) {
+                        threejsViewport.environment.renderer.setSize(width, height);
+                        threejsViewport.environment.camera.aspect = width / height;
+                        threejsViewport.environment.camera.updateProjectionMatrix();
+                        threejsViewport.environment.renderer.render(threejsViewport.environment.scene, threejsViewport.environment.camera);
+                        threejsViewport.environment.viewDirty = true;
+                    }
+                }
+            }, 500);
+            
+            // 第三次：触发初始代码评估
             setTimeout(() => {
                 if (!window.initialCodeEvaluated && monacoEditor && monacoEditor.evaluateCode && !window.workerWorking) {
                     console.log('移动端：触发初始代码评估');
@@ -504,17 +500,29 @@ function initialize(projectContent = null) {
         // 检查并刷新3D视图的函数
         function checkAndRefresh3DView() {
             console.log('检查是否需要刷新3D视图');
-            if (threejsViewport && threejsViewport.renderer) {
+            if (threejsViewport && threejsViewport.environment && threejsViewport.environment.renderer) {
                 const containerEl = container.getElement().get(0);
-                const width = containerEl.offsetWidth;
-                const height = containerEl.offsetHeight;
-                console.log('刷新Canvas尺寸:', width, 'x', height);
-                threejsViewport.renderer.setSize(width, height);
-                if (threejsViewport.camera) {
-                    threejsViewport.camera.aspect = width / height;
-                    threejsViewport.camera.updateProjectionMatrix();
+                let width = containerEl.offsetWidth;
+                let height = containerEl.offsetHeight;
+                
+                // 移动端：如果容器尺寸为0，使用窗口尺寸
+                if ((width === 0 || height === 0) && window.innerWidth <= 768) {
+                    const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+                    const aiInputHeight = 140;
+                    const headerHeight = 48;
+                    width = window.innerWidth;
+                    height = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
+                    console.log('使用窗口尺寸:', width, 'x', height);
                 }
-                threejsViewport.renderer.render(threejsViewport.scene, threejsViewport.camera);
+                
+                console.log('刷新Canvas尺寸:', width, 'x', height);
+                threejsViewport.environment.renderer.setSize(width, height);
+                if (threejsViewport.environment.camera) {
+                    threejsViewport.environment.camera.aspect = width / height;
+                    threejsViewport.environment.camera.updateProjectionMatrix();
+                }
+                threejsViewport.environment.renderer.render(threejsViewport.environment.scene, threejsViewport.environment.camera);
+                threejsViewport.environment.viewDirty = true;
                 
                 // 如果代码已修改且未保存，自动刷新3D视图
                 if (window.codeModifiedSinceLastRender && monacoEditor) {
@@ -1125,21 +1133,35 @@ function initialize(projectContent = null) {
             if (monacoEditor) {
                 monacoEditor.layout();
             }
-            if (threejsViewport && threejsViewport.renderer) {
-                const container = threejsViewport.container.getElement().get(0);
-                threejsViewport.renderer.setSize(container.offsetWidth, container.offsetHeight);
-                if (threejsViewport.camera) {
-                    threejsViewport.camera.aspect = container.offsetWidth / container.offsetHeight;
-                    threejsViewport.camera.updateProjectionMatrix();
+            if (threejsViewport && threejsViewport.environment && threejsViewport.environment.renderer) {
+                const container = threejsViewport.goldenContainer.getElement().get(0);
+                let width = container.offsetWidth;
+                let height = container.offsetHeight;
+                
+                // 如果容器尺寸为0，使用计算的尺寸
+                if (width === 0 || height === 0) {
+                    const headerHeight = 48;
+                    width = window.innerWidth;
+                    height = layoutHeight - headerHeight;
+                    console.log('容器尺寸为0，使用计算尺寸:', width, 'x', height);
                 }
+                
+                threejsViewport.environment.renderer.setSize(width, height);
+                if (threejsViewport.environment.camera) {
+                    threejsViewport.environment.camera.aspect = width / height;
+                    threejsViewport.environment.camera.updateProjectionMatrix();
+                }
+                threejsViewport.environment.renderer.render(threejsViewport.environment.scene, threejsViewport.environment.camera);
+                threejsViewport.environment.viewDirty = true;
             }
             
             // 移动端：确保初始代码被评估（如果还没有评估的话）
             if (monacoEditor && monacoEditor.evaluateCode && !window.workerWorking) {
                 console.log('移动端：触发初始代码评估');
                 setTimeout(() => {
-                    if (!window.workerWorking) {
+                    if (!window.workerWorking && !window.initialCodeEvaluated) {
                         monacoEditor.evaluateCode();
+                        window.initialCodeEvaluated = true;
                     }
                 }, 500);
             }
@@ -1152,11 +1174,64 @@ function initialize(projectContent = null) {
         myLayout.updateSize(window.innerWidth, layoutHeight);
     }
     
-    // 移动端调试：确保布局正确显示
+    // 移动端：全局3D视图初始化检查
     if (isMobile) {
         console.log('移动端模式已启用');
         console.log('窗口宽度:', window.innerWidth);
         console.log('布局高度:', window.innerHeight - document.getElementById('topnav').offsetHeight);
+        
+        // 创建全局函数用于强制刷新3D视图
+        window.forceMobile3DViewRefresh = function() {
+            console.log('=== 强制刷新移动端3D视图 ===');
+            
+            if (!threejsViewport || !threejsViewport.environment || !threejsViewport.environment.renderer) {
+                console.error('3D视图未初始化');
+                return;
+            }
+            
+            const container = threejsViewport.goldenContainer.getElement().get(0);
+            let width = container.offsetWidth;
+            let height = container.offsetHeight;
+            
+            console.log('容器尺寸:', width, 'x', height);
+            
+            // 如果容器尺寸为0，使用窗口尺寸
+            if (width === 0 || height === 0) {
+                const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+                const aiInputHeight = 140;
+                const headerHeight = 48;
+                width = window.innerWidth;
+                height = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
+                console.log('使用窗口尺寸:', width, 'x', height);
+                
+                // 强制设置容器尺寸
+                container.style.width = width + 'px';
+                container.style.height = height + 'px';
+            }
+            
+            // 更新渲染器和相机
+            threejsViewport.environment.renderer.setSize(width, height);
+            threejsViewport.environment.camera.aspect = width / height;
+            threejsViewport.environment.camera.updateProjectionMatrix();
+            
+            // 强制渲染
+            threejsViewport.environment.renderer.render(
+                threejsViewport.environment.scene, 
+                threejsViewport.environment.camera
+            );
+            threejsViewport.environment.viewDirty = true;
+            
+            console.log('3D视图刷新完成');
+        };
+        
+        // 延迟执行多次刷新尝试
+        setTimeout(() => window.forceMobile3DViewRefresh(), 500);
+        setTimeout(() => window.forceMobile3DViewRefresh(), 1000);
+        setTimeout(() => window.forceMobile3DViewRefresh(), 1500);
+    }
+    
+    // 移动端调试：确保布局正确显示
+    if (isMobile) {
         
         // 延迟执行，确保DOM完全加载
         setTimeout(() => {
@@ -1614,8 +1689,19 @@ function initialize(projectContent = null) {
                                         // 强制刷新3D视图
                                         if (threejsViewport && threejsViewport.environment && threejsViewport.environment.renderer) {
                                             const container = threejsViewport.goldenContainer.getElement().get(0);
-                                            const width = container.offsetWidth;
-                                            const height = container.offsetHeight;
+                                            let width = container.offsetWidth;
+                                            let height = container.offsetHeight;
+                                            
+                                            // 如果容器尺寸为0，使用窗口尺寸
+                                            if (width === 0 || height === 0) {
+                                                const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+                                                const aiInputHeight = 140;
+                                                const headerHeight = 48;
+                                                width = window.innerWidth;
+                                                height = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
+                                                console.log('容器尺寸为0，使用窗口尺寸:', width, 'x', height);
+                                            }
+                                            
                                             console.log('强制刷新3D视图，尺寸:', width, 'x', height);
                                             threejsViewport.environment.renderer.setSize(width, height);
                                             if (threejsViewport.environment.camera) {
@@ -1668,6 +1754,14 @@ function initialize(projectContent = null) {
                 
                 if (editorReady && viewportReady && notEvaluated && notWorking) {
                     console.log('所有组件就绪，启动初始代码评估');
+                    
+                    // 移动端：在评估代码前先刷新3D视图
+                    const isMobile = window.innerWidth <= 768;
+                    if (isMobile && window.forceMobile3DViewRefresh) {
+                        console.log('移动端：评估前刷新3D视图');
+                        window.forceMobile3DViewRefresh();
+                    }
+                    
                     setTimeout(() => {
                         if (!window.workerWorking && !window.initialCodeEvaluated) {
                             monacoEditor.evaluateCode();
