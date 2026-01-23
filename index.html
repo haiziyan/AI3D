@@ -100,6 +100,16 @@
                 // Ping Pong Messages Back and Forth based on their registration in messageHandlers
                 var messageHandlers = {};
                 AI3DStudioWorker.onmessage = function (e) {
+                    // 静默处理Progress和resetWorking消息（不输出日志）
+                    if (e.data.type === 'Progress' || e.data.type === 'resetWorking') {
+                        if(e.data.type in messageHandlers){
+                            let response = messageHandlers[e.data.type](e.data.payload);
+                            if (response) { AI3DStudioWorker.postMessage({ "type": e.data.type, payload: response }) };
+                        }
+                        return;
+                    }
+                    
+                    // 其他消息类型输出日志
                     console.log('收到Worker消息:', e.data.type, e.data.payload);
                     if(e.data.type in messageHandlers){
                         let response = messageHandlers[e.data.type](e.data.payload);
