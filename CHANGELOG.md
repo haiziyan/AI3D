@@ -4,7 +4,7 @@
 
 ### 🎉 重大更新
 
-这是 AI 3D Studio 的首个正式版本，基于 Cascade Studio 进行了全面升级。
+这是 AI 3D Studio 的首个正式版本，基于 AI 3D Studio 进行了全面升级。
 
 ### ✨ 新增功能
 
@@ -133,7 +133,7 @@
 
 ### 🔄 迁移指南
 
-从原版 Cascade Studio 迁移：
+从原版 AI 3D Studio 迁移：
 
 1. **备份项目** - 保存现有的 .json 项目文件
 2. **安装依赖** - 运行 `npm install`
@@ -174,7 +174,7 @@
 
 ### 🙏 致谢
 
-- 感谢 [Cascade Studio](https://github.com/zalo/CascadeStudio) 提供的优秀基础
+- 感谢 [AI 3D Studio](https://github.com/zalo/CascadeStudio) 提供的优秀基础
 - 感谢 OpenCascade.js 团队
 - 感谢 Supabase 和 DeepSeek 提供的服务
 

@@ -213,7 +213,7 @@ cylinder;
 
 ## 📊 功能对比
 
-| 功能 | Cascade Studio | AI 3D Studio |
+| 功能 | AI 3D Studio | AI 3D Studio |
 |------|---------------|------------------|
 | 代码编辑 | ✅ | ✅ |
 | 3D 渲染 | ✅ | ✅ |
@@ -302,7 +302,7 @@ cylinder;
 
 ## 🙏 致谢
 
-- [Cascade Studio](https://github.com/zalo/CascadeStudio) - 提供优秀的基础框架
+- [AI 3D Studio](https://github.com/zalo/CascadeStudio) - 提供优秀的基础框架
 - [OpenCascade.js](https://github.com/donalffons/opencascade.js) - 强大的 CAD 内核
 - [Supabase](https://supabase.com/) - 便捷的后端服务
 - [DeepSeek](https://www.deepseek.com/) - 高质量的 AI 服务
@@ -311,7 +311,7 @@ cylinder;
 
 本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
 
-基于 [Cascade Studio](https://github.com/zalo/CascadeStudio) 开发
+基于 [AI 3D Studio](https://github.com/zalo/CascadeStudio) 开发
 
 ## 🌐 链接
 

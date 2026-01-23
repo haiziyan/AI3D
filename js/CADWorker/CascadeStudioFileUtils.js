@@ -118,7 +118,7 @@ function importSTL(fileName, fileText) {
     return externalShapes[fileName];
   } else {
     console.log("Something in OCCT went wrong trying to read " + fileName + ".  \n" +
-      "Cascade Studio only imports small ASCII stl files for now!");
+      "AI 3D Studio only imports small ASCII stl files for now!");
     return null;
   }
 }

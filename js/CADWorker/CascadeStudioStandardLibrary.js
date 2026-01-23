@@ -1,7 +1,7 @@
-// Cascade Studio Standard Library
+// AI 3D Studio Standard Library
 // Adding new standard library features and functions:
 // 1. Research the OpenCascade API: https://www.opencascade.com/doc/occt-7.4.0/refman/html/annotated.html
-// 2. Write your new function inside of Cascade Studio, using "oc." to refer to the raw OpenCascade API.
+// 2. Write your new function inside of AI 3D Studio, using "oc." to refer to the raw OpenCascade API.
 // 3. Add your new convenience function to this file
 // 4. Add typescript annotations to index.ts in this same directory
 // 5. Submit a PR to the main repository! https://github.com/zalo/CascadeStudio/pulls

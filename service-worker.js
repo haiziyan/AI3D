@@ -57,7 +57,7 @@ var offlineFundamentals = [
    You can use this event to prepare the service worker to be able to serve
    files while visitors are offline.*/
 self.addEventListener("install", function(event) {
-  console.log('Installing Cascade Studio Resources for Offline Retrieval...');
+  console.log('Installing AI 3D Studio Resources for Offline Retrieval...');
   /* Using event.waitUntil(p) blocks the installation process on the provided
      promise. If the promise is rejected, the service worker won't be installed.*/
   event.waitUntil(
@@ -75,7 +75,7 @@ self.addEventListener("install", function(event) {
         return cache.addAll(offlineFundamentals);
       })
       .then(function() {
-        console.log('Install Complete!  Cascade Studio is ready to be used offline!');
+        console.log('Install Complete!  AI 3D Studio is ready to be used offline!');
       })
   );
 });

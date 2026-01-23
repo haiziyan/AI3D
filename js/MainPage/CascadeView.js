@@ -66,7 +66,7 @@ var Environment = function (goldenContainer) {
     this.renderer.shadowMap.type       = THREE.PCFSoftShadowMap;
     //this.scene.add(new THREE.CameraHelper(this.light2.shadow.camera));
 
-    // Set up the orbit controls used for Cascade Studio
+    // Set up the orbit controls used for AI 3D Studio
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 45, 0);
     this.controls.panSpeed  = 2;

@@ -355,7 +355,7 @@ npm start
 
 感谢以下开源项目和服务：
 
-- **Cascade Studio** - 优秀的基础框架
+- **AI 3D Studio** - 优秀的基础框架
 - **OpenCascade.js** - 强大的 CAD 内核
 - **Supabase** - 便捷的后端服务
 - **DeepSeek** - 高质量的 AI 服务
