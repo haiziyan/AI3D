@@ -479,11 +479,8 @@ function initialize(projectContent = null) {
             
             // 第三次：触发初始代码评估
             setTimeout(() => {
-                if (!window.initialCodeEvaluated && monacoEditor && monacoEditor.evaluateCode && !window.workerWorking) {
-                    console.log('移动端：触发初始代码评估');
-                    monacoEditor.evaluateCode();
-                    window.initialCodeEvaluated = true;
-                }
+                // 移动端：不在这里评估代码，等待 Worker 就绪后再评估
+                console.log('移动端：跳过此处的代码评估，等待Worker就绪');
             }, 800);
         }
         
@@ -1852,7 +1849,9 @@ function initialize(projectContent = null) {
     // If the Main Page loads before the CAD Worker, register a 
     // callback to start the model evaluation when the CAD is ready.
     messageHandlers["startupCallback"] = () => {
-        console.log('收到Worker的startupCallback，CAD内核已就绪');
+        console.log('✅ 收到Worker的startupCallback，CAD内核已就绪');
+        console.log('Worker加载完成，现在可以安全地评估代码了');
+        
         startup = function () {
             // Reimport any previously imported STEP/IGES Files
             let curState = consoleGolden.getState();
@@ -1882,7 +1881,7 @@ function initialize(projectContent = null) {
                 });
                 
                 if (editorReady && viewportReady && notEvaluated && notWorking) {
-                    console.log('所有组件就绪，启动初始代码评估');
+                    console.log('✅ 所有组件就绪，启动初始代码评估');
                     console.log('当前编辑器代码:', monacoEditor.getValue());
                     
                     // 移动端：在评估代码前先刷新3D视图
@@ -1894,13 +1893,13 @@ function initialize(projectContent = null) {
                     
                     setTimeout(() => {
                         if (!window.workerWorking && !window.initialCodeEvaluated) {
-                            console.log('准备评估代码...');
+                            console.log('🚀 开始评估初始代码...');
                             monacoEditor.evaluateCode();
                             window.initialCodeEvaluated = true;
                         }
                     }, 300);
                 } else if (notEvaluated) {
-                    console.log('等待组件初始化...');
+                    console.log('⏳ 等待组件初始化...');
                     setTimeout(checkAndEvaluate, 200);
                 }
             };
@@ -1914,20 +1913,8 @@ function initialize(projectContent = null) {
     // Otherwise, enqueue that call for when the Main Page is ready
     if (startup) { startup(); }
     
-    // 添加Worker超时检测
-    setTimeout(() => {
-        if (!startup) {
-            console.error('⚠️ CAD Worker 加载超时（30秒）');
-            console.error('可能的原因：');
-            console.error('1. WebAssembly 文件加载失败');
-            console.error('2. 网络连接问题');
-            console.error('3. 浏览器不支持 WebAssembly');
-            console.error('请检查浏览器控制台的 Network 面板');
-            
-            // 显示友好的错误提示
-            alert('CAD 内核加载失败\n\n可能原因：\n1. 网络连接问题\n2. WebAssembly 文件加载失败\n\n请刷新页面重试，或检查网络连接。');
-        }
-    }, 30000); // 30秒超时
+    // 移除Worker超时检测（因为WebAssembly加载可能需要较长时间）
+    // 用户可以通过控制台日志看到加载进度
 
     // Register callbacks from the CAD Worker to add Sliders, Buttons, and Checkboxes to the UI
     // TODO: Enqueue these so the sliders are added/removed at the same time to eliminate flashing
