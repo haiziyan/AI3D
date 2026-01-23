@@ -48,7 +48,7 @@ new opencascade({
   locateFile(path) {
     if (path.endsWith('.wasm')) {
       //return "../../node_modules/opencascade.js/dist/opencascade.wasm.wasm";
-      return "caxkernel.com/dist/opencascade.wasm.wasm";
+      return "https://caxkernel.com/dist/opencascade.wasm.wasm";
     }
     return path;
   }
