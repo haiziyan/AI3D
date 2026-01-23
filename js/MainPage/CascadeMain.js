@@ -318,13 +318,14 @@ function initialize(projectContent = null) {
                 }
 
                 gui = new Tweakpane.Pane({
-                    title: 'AI 3D Control Panel',
+                    title: 'AI 3D 控制面板',
                     container: document.getElementById('guiPanel')
                 });
                 guiSeparatorAdded = false;
                 userGui = false;
-                messageHandlers["addButton"]({ name: "Evaluate", label: "Function", callback: () => { monacoEditor.evaluateCode(true) } });
-                messageHandlers["addSlider"]({ name: "MeshRes", default: 0.1, min: 0.01, max: 2, step: 0.01, dp: 2 });
+                messageHandlers["addButton"]({ name: "刷新模型", label: "功能", callback: () => { monacoEditor.evaluateCode(true) } });
+                // 移除 MeshRes 滑块，但保留默认值供后端使用
+                if (!('MeshRes' in GUIState)) { GUIState['MeshRes'] = 0.1; }
                 // 移除 Cache、GroundPlane、Grid 选项，默认设置为 false
                 if (!('Cache?' in GUIState)) { GUIState['Cache?'] = false; }
                 if (!('GroundPlane?' in GUIState)) { GUIState['GroundPlane?'] = false; }

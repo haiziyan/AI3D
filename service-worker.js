@@ -124,11 +124,20 @@ self.addEventListener("fetch", function(event) {
       .then(function (response) {
         //console.log("Using network for: " + request.url);
         let cacheCopy = response.clone();
-        caches
-          .open(version + 'pages')
-          .then(function add(cache) {
-            return cache.put(request, cacheCopy);
-          });
+        
+        // 只缓存http/https协议的请求，过滤掉chrome-extension等不支持的协议
+        const url = new URL(request.url);
+        if (url.protocol === 'http:' || url.protocol === 'https:') {
+          caches
+            .open(version + 'pages')
+            .then(function add(cache) {
+              return cache.put(request, cacheCopy);
+            })
+            .catch(function(error) {
+              // 静默处理缓存错误，不影响正常请求
+              console.warn('Failed to cache:', request.url, error);
+            });
+        }
         return response;
       }, function (rejected) {
         return failureCallback(event.request, failureResponse);
