@@ -1535,18 +1535,21 @@ function initialize(projectContent = null) {
                 
                 // 关键修复：强制设置Canvas的父容器尺寸
                 const canvas = document.querySelector('canvas');
-                if (canvas) {
+                if (canvas && lmItems) {
+                    const canvasItemsWidth = lmItems.offsetWidth || window.innerWidth;
+                    const canvasItemsHeight = lmItems.offsetHeight || (window.innerHeight - topnavHeight - aiInputHeight - headerHeight);
+                    
                     let canvasParent = canvas.parentElement;
                     while (canvasParent && !canvasParent.classList.contains('lm_content')) {
                         canvasParent = canvasParent.parentElement;
                     }
                     if (canvasParent) {
-                        canvasParent.style.width = itemsWidth + 'px';
-                        canvasParent.style.height = itemsHeight + 'px';
+                        canvasParent.style.width = canvasItemsWidth + 'px';
+                        canvasParent.style.height = canvasItemsHeight + 'px';
                         canvasParent.style.display = 'block';
                         canvasParent.style.visibility = 'visible';
                         canvasParent.style.opacity = '1';
-                        console.log('Canvas父容器尺寸已强制设置:', itemsWidth, 'x', itemsHeight);
+                        console.log('Canvas父容器尺寸已强制设置:', canvasItemsWidth, 'x', canvasItemsHeight);
                     }
                 }
             }

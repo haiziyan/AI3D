@@ -471,6 +471,18 @@ var CascadeEnvironment = function (goldenContainer) {
   if (isMobile) {
     console.log('移动端CascadeEnvironment：设置多次渲染尝试');
     
+    // 强制持续渲染前5秒（确保模型加载完成后能看到）
+    let renderCount = 0;
+    const maxRenders = 50; // 5秒内渲染50次
+    const renderInterval = setInterval(() => {
+      this.environment.viewDirty = true;
+      renderCount++;
+      if (renderCount >= maxRenders) {
+        clearInterval(renderInterval);
+        console.log('移动端：停止强制渲染');
+      }
+    }, 100);
+    
     // 尝试1：200ms后
     setTimeout(() => {
       this.forceRenderMobile('尝试1 (200ms)');
