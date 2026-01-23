@@ -95,14 +95,26 @@
             // Begins loading the CAD Kernel Web Worker
             if (window.Worker) {
                 var AI3DStudioWorker = new Worker('./js/CADWorker/AI3DStudioMainWorker.js');
+                console.log('Worker已创建:', AI3DStudioWorker);
+                
                 // Ping Pong Messages Back and Forth based on their registration in messageHandlers
                 var messageHandlers = {};
                 AI3DStudioWorker.onmessage = function (e) {
+                    console.log('收到Worker消息:', e.data.type, e.data.payload);
                     if(e.data.type in messageHandlers){
                         let response = messageHandlers[e.data.type](e.data.payload);
                         if (response) { AI3DStudioWorker.postMessage({ "type": e.data.type, payload: response }) };
+                    } else {
+                        console.warn('未注册的消息类型:', e.data.type);
                     }
                 }
+                
+                // 监听Worker错误
+                AI3DStudioWorker.onerror = function(error) {
+                    console.error('Worker错误:', error);
+                };
+            } else {
+                console.error('浏览器不支持Web Worker');
             }
         </script>
 
