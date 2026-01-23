@@ -26,7 +26,7 @@ importScripts(
   '../../node_modules/three/build/three.min.js',
   './AI3DStudioStandardLibrary.js',
   './AI3DStudioShapeToMesh.js',
-  '../../node_modules/opencascade.js/dist/opencascade.wasm.js',
+  'https://caxkernel.com/dist/opencascade.wasm.js',
   '../../node_modules/opentype.js/dist/opentype.min.js',
   '../../node_modules/potpack/index.js');
 
@@ -47,11 +47,11 @@ var messageHandlers = {};
 new opencascade({
   locateFile(path) {
     if (path.endsWith('.wasm')) {
-      //return "../../node_modules/opencascade.js/dist/opencascade.wasm.wasm";
       return "https://caxkernel.com/dist/opencascade.wasm.wasm";
     }
     return path;
-  }
+  },
+  mainScriptUrlOrBlob: "https://caxkernel.com/dist/opencascade.wasm.js"
 }).then((openCascade) => {
   // Register the "OpenCascade" WebAssembly Module under the shorthand "oc"
   oc = openCascade;
