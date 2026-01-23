@@ -445,6 +445,20 @@ var CascadeEnvironment = function (goldenContainer) {
           this.environment.renderer.render(this.environment.scene, this.environment.camera);
           this.environment.viewDirty = true;
           console.log('移动端延迟渲染完成');
+        } else {
+          console.warn('移动端容器尺寸仍为0，使用窗口尺寸');
+          const topnavHeight = document.getElementById('topnav')?.offsetHeight || 48;
+          const aiInputHeight = 140;
+          const headerHeight = 48;
+          const viewWidth = window.innerWidth;
+          const viewHeight = window.innerHeight - topnavHeight - aiInputHeight - headerHeight;
+          
+          this.environment.renderer.setSize(viewWidth, viewHeight);
+          this.environment.camera.aspect = viewWidth / viewHeight;
+          this.environment.camera.updateProjectionMatrix();
+          this.environment.renderer.render(this.environment.scene, this.environment.camera);
+          this.environment.viewDirty = true;
+          console.log('移动端使用窗口尺寸渲染完成:', viewWidth, 'x', viewHeight);
         }
       }
     }, 500);
