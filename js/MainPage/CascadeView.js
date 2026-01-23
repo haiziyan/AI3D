@@ -43,21 +43,22 @@ var Environment = function (goldenContainer) {
                 //new THREE.OrthographicCamera(300 / - 2, 300 / 2, 300 / 2, 300 / - 2, 1, 1000);
                 // Consider an Orthographic Camera.  It doesn't look so hot with the Matcap Material.
                 // 远裁剪面设置为 1000000，可以看到非常远的几何实体
-    this.camera.position.set(50, 100, 150);
-    this.camera.lookAt(0, 45, 0);
+    // 调整相机位置以适配大型建筑模型（如PKPM框架结构）
+    this.camera.position.set(8000, 10000, 15000);
+    this.camera.lookAt(3000, 3000, 5000);
     this.camera.aspect = this.parentWidth / this.parentHeight;
     this.camera.updateProjectionMatrix();
 
     // Create two lights to evenly illuminate the model and cast shadows
     this.light  = new THREE.HemisphereLight (0xffffff, 0x444444);
-    this.light .position.set(0, 200, 0);
+    this.light .position.set(0, 20000, 0);
     this.light2 = new THREE.DirectionalLight(0xbbbbbb);
-    this.light2.position.set(6, 50, -12);
+    this.light2.position.set(6000, 15000, -8000);
     this.light2.castShadow = true;
-    this.light2.shadow.camera.top      =  200;
-    this.light2.shadow.camera.bottom   = -200;
-    this.light2.shadow.camera.left     = -200;
-    this.light2.shadow.camera.right    =  200;
+    this.light2.shadow.camera.top      =  20000;
+    this.light2.shadow.camera.bottom   = -20000;
+    this.light2.shadow.camera.left     = -20000;
+    this.light2.shadow.camera.right    =  20000;
     //this.light2.shadow.radius        =  32;
     this.light2.shadow.mapSize.width   =  128;
     this.light2.shadow.mapSize.height  =  128;
@@ -69,7 +70,7 @@ var Environment = function (goldenContainer) {
 
     // Set up the orbit controls used for AI 3D Studio
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.target.set(0, 45, 0);
+    this.controls.target.set(3000, 3000, 5000);
     this.controls.panSpeed  = 2;
     this.controls.zoomSpeed = 1;
     this.controls.screenSpacePanning = true;
