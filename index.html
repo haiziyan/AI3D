@@ -358,17 +358,24 @@
                         <div class="dropdown-divider"></div>
                         
                         <!-- 移动端语言切换 -->
-                        <div class="mobile-language-section">
-                            <div class="mobile-language-header">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <line x1="2" y1="12" x2="22" y2="12"/>
-                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        <div class="mobile-language-dropdown">
+                            <button class="mobile-language-trigger" onclick="toggleMobileLanguage(event)">
+                                <div class="mobile-language-trigger-content">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="2" y1="12" x2="22" y2="12"/>
+                                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                    </svg>
+                                    <span data-i18n="nav.selectLanguage">选择语言</span>
+                                </div>
+                                <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"/>
                                 </svg>
-                                <span data-i18n="nav.selectLanguage">选择语言</span>
-                            </div>
-                            <div class="mobile-language-grid" id="mobileLanguageGrid">
-                                <!-- 语言网格将由 JavaScript 动态生成 -->
+                            </button>
+                            <div class="mobile-language-content">
+                                <div class="mobile-language-grid" id="mobileLanguageGrid">
+                                    <!-- 语言网格将由 JavaScript 动态生成 -->
+                                </div>
                             </div>
                         </div>
                         
@@ -619,15 +626,41 @@
                     document.querySelectorAll('.menu-dropdown').forEach(d => {
                         d.classList.remove('active');
                     });
+                    // 关闭移动端语言选择器
+                    const mobileLangDropdown = document.querySelector('.mobile-language-dropdown');
+                    if (mobileLangDropdown) {
+                        mobileLangDropdown.classList.remove('active');
+                    }
                 }
             }
             
-            // 切换语言菜单
+            // 切换语言菜单（PC端）
             function toggleLanguageMenu() {
                 const dropdown = document.getElementById('languageDropdown');
                 const btn = document.getElementById('languageBtn');
                 dropdown.classList.toggle('active');
                 btn.classList.toggle('active');
+            }
+            
+            // 切换移动端语言选择器
+            function toggleMobileLanguage(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const dropdown = event.currentTarget.closest('.mobile-language-dropdown');
+                const wasActive = dropdown.classList.contains('active');
+                
+                // 关闭所有其他下拉菜单
+                document.querySelectorAll('.menu-dropdown').forEach(d => {
+                    d.classList.remove('active');
+                });
+                
+                // 切换当前语言选择器
+                if (!wasActive) {
+                    dropdown.classList.add('active');
+                } else {
+                    dropdown.classList.remove('active');
+                }
             }
             
             // 初始化语言选择器

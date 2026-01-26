@@ -1126,6 +1126,72 @@ body {
   gap: 8px;
 }
 
+/* 移动端语言下拉菜单（可展开收缩） */
+.mobile-language-dropdown {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.mobile-language-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--tertiary-bg);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-main);
+}
+
+.mobile-language-trigger:hover {
+  background: var(--secondary-bg);
+  color: var(--text-primary);
+}
+
+.mobile-language-trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-language-dropdown .dropdown-arrow {
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.mobile-language-dropdown.active .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.mobile-language-content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+  margin-top: 0;
+}
+
+.mobile-language-dropdown.active .mobile-language-content {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 8px;
+}
+
+.mobile-language-content .mobile-language-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 8px;
+  background: var(--primary-bg);
+  border-radius: 0 8px 8px 8px;
+  border-left: 3px solid var(--accent-color);
+}
+
 .mobile-language-item {
   display: flex;
   align-items: center;
@@ -1763,8 +1829,13 @@ body {
   }
   
   /* 移动端语言选择区域显示 */
-  .mobile-language-section {
+  .mobile-language-dropdown {
     display: block;
+  }
+  
+  /* 旧版移动端语言选择器隐藏 */
+  .mobile-language-section {
+    display: none !important;
   }
 }
 
