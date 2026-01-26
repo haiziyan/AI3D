@@ -71,19 +71,19 @@ function initialize(projectContent = null) {
                     content: [{
                         type: 'component',
                         componentName: 'cascadeView',
-                        title: '3D 视图',
+                        title: window.i18n ? window.i18n.t('tab.3dView') : '3D 视图',
                         componentState: GUIState,
                         isClosable: false
                     }, {
                         type: 'component',
                         componentName: 'codeEditor',
-                        title: '代码编辑器',
+                        title: window.i18n ? window.i18n.t('tab.codeEditor') : '代码编辑器',
                         componentState: { code: codeStr },
                         isClosable: false
                     }, {
                         type: 'component',
                         componentName: 'aiModule',
-                        title: 'AI 生成器',
+                        title: window.i18n ? window.i18n.t('tab.aiGenerator') : 'AI 生成器',
                         componentState: {},
                         isClosable: false
                     }]
@@ -526,8 +526,8 @@ function initialize(projectContent = null) {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
                         </svg>
-                        <span>AI 生成历史</span>
-                        <button class="btn-refresh-history" onclick="window.refreshGenerationHistory()" title="刷新">
+                        <span data-i18n="ai.historyTitle">AI 生成历史</span>
+                        <button class="btn-refresh-history" onclick="window.refreshGenerationHistory()" data-i18n="ai.refresh" title="刷新">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
                                 <path d="M21 3v5h-5"/>
@@ -544,15 +544,15 @@ function initialize(projectContent = null) {
                             <path d="M2 17l10 5 10-5"/>
                             <path d="M2 12l10 5 10-5"/>
                         </svg>
-                        AI 模型描述
+                        <span data-i18n="ai.title">AI 模型描述</span>
                     </div>
-                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" placeholder="用自然语言描述你想要的 3D 模型，例如：创建一个边长100的立方体，中间挖一个半径30的球形孔"></textarea>
+                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" data-i18n-placeholder="ai.placeholder" placeholder="用自然语言描述你想要的 3D 模型，例如：创建一个边长100的立方体，中间挖一个半径30的球形孔"></textarea>
                     <button id="aiGenerateBtnModule" class="ai-generate-btn-module">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
                             <polyline points="12 6 12 12 16 14"/>
                         </svg>
-                        生成模型
+                        <span data-i18n="ai.generate">生成模型</span>
                     </button>
                 </div>
             </div>
@@ -584,9 +584,9 @@ function initialize(projectContent = null) {
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                                 <circle cx="12" cy="7" r="4"/>
                             </svg>
-                            <p>请先登录</p>
-                            <span>登录后可查看AI生成历史记录</span>
-                            <button class="btn-login-prompt" onclick="authManager.showAuthModal()">立即登录</button>
+                            <p data-i18n="ai.pleaseLogin">请先登录</p>
+                            <span data-i18n="ai.loginDesc">登录后可查看AI生成历史记录</span>
+                            <button class="btn-login-prompt" onclick="authManager.showAuthModal()" data-i18n="ai.loginNow">立即登录</button>
                         </div>
                     `;
                 }
@@ -603,9 +603,10 @@ function initialize(projectContent = null) {
                         <circle cx="12" cy="12" r="10"/>
                         <path d="M12 6v6l4 2"/>
                     </svg>
-                    <p>加载中...</p>
+                    <p data-i18n="ai.loading">加载中...</p>
                 </div>
             `;
+            if (window.i18n) window.i18n.updatePageLanguage();
 
             try {
                 const { data, error } = await authManager.supabase
@@ -638,10 +639,11 @@ function initialize(projectContent = null) {
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                 <polyline points="14 2 14 8 20 8"/>
                             </svg>
-                            <p>暂无生成记录</p>
-                            <span>开始使用AI生成功能后，历史记录将显示在这里</span>
+                            <p data-i18n="ai.noHistory">暂无生成记录</p>
+                            <span data-i18n="ai.noHistoryDesc">开始使用AI生成功能后，历史记录将显示在这里</span>
                         </div>
                     `;
+                    if (window.i18n) window.i18n.updatePageLanguage();
                 } else {
                     historyContent.innerHTML = data.map(record => {
                         const hasCode = record.generated_code && record.generated_code.trim().length > 0;
@@ -661,7 +663,7 @@ function initialize(projectContent = null) {
                             <div class="history-description">${escapeHtml(record.description || 'AI生成任务')}</div>
                             <div class="history-actions">
                                 ${hasCode ? `
-                                <button class="btn-load-history-code" onclick="loadHistoryCode('${record.id}')" title="加载到编辑器">
+                                <button class="btn-load-history-code" onclick="loadHistoryCode('${record.id}')" data-i18n="ai.loadModel" title="加载到编辑器">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="16 18 22 12 16 6"/>
                                         <polyline points="8 6 2 12 8 18"/>
@@ -669,13 +671,13 @@ function initialize(projectContent = null) {
                                     加载模型
                                 </button>
                                 ` : ''}
-                                <button class="btn-edit-history" onclick="editHistoryRecord('${record.id}', '${escapeHtml(record.description || '').replace(/'/g, "\\'")}', event)" title="编辑描述">
+                                <button class="btn-edit-history" onclick="editHistoryRecord('${record.id}', '${escapeHtml(record.description || '').replace(/'/g, "\\'")}', event)" data-i18n="ai.edit" title="编辑描述">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                     </svg>
                                 </button>
-                                <button class="btn-delete-history" onclick="deleteHistoryRecord('${record.id}', event)" title="删除记录">
+                                <button class="btn-delete-history" onclick="deleteHistoryRecord('${record.id}', event)" data-i18n="ai.delete" title="删除记录">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="3 6 5 6 21 6"/>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -686,6 +688,7 @@ function initialize(projectContent = null) {
                             </div>
                         </div>
                     `}).join('');
+                    if (window.i18n) window.i18n.updatePageLanguage();
                 }
             } catch (err) {
                 console.error('加载生成记录异常:', err);
@@ -1018,6 +1021,13 @@ function initialize(projectContent = null) {
 
     // Initialize the Layout
     myLayout.init();
+    
+    // 初始化多语言后更新页面
+    setTimeout(() => {
+        if (window.i18n) {
+            window.i18n.updatePageLanguage();
+        }
+    }, 100);
     
     // 移动端关键修复：在Golden Layout初始化后立即修复容器尺寸
     if (isMobile) {

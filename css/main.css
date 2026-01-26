@@ -956,6 +956,71 @@ body {
   display: none;
 }
 
+/* ==================== 语言选择器 ==================== */
+.language-selector-dropdown {
+  position: relative;
+}
+
+.language-selector-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.current-lang {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.language-options {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  background: var(--secondary-bg);
+  min-width: 180px;
+  box-shadow: var(--shadow-lg);
+  border-radius: 8px;
+  padding: 8px 0;
+  margin-left: 8px;
+  border: 1px solid var(--divider-color);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.language-selector-dropdown:hover .language-options {
+  display: block;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.lang-option:hover {
+  background-color: var(--tertiary-bg);
+  color: var(--text-primary);
+}
+
+.lang-option.active {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.lang-option svg {
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
 /* ==================== 移动端适配 ==================== */
 @media (max-width: 768px) {
   /* 导航栏 */
@@ -1461,6 +1526,25 @@ body {
   .modal-content {
     width: 95%;
     padding: 24px;
+  }
+  
+  /* 移动端语言选择器 */
+  .language-options {
+    position: static;
+    display: none;
+    margin: 8px 0;
+    border-left: 3px solid var(--accent-color);
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .language-selector-dropdown.active .language-options {
+    display: block;
+  }
+  
+  .language-selector-trigger {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--tertiary-bg);
   }
 }
 

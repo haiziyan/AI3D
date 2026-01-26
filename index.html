@@ -145,6 +145,7 @@
         
         <!-- 配置和认证 -->
         <script type="text/javascript" src="./js/config.js"></script>
+        <script type="text/javascript" src="./js/i18n.js"></script>
         <script type="text/javascript" src="./js/auth.js"></script>
         <script type="text/javascript" src="./js/aiGenerator.js"></script>
         
@@ -172,7 +173,7 @@
                                 <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
                                 <polyline points="13 2 13 9 20 9"/>
                             </svg>
-                            文件
+                            <span data-i18n="nav.file">文件</span>
                             <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="6 9 12 15 18 9"/>
                             </svg>
@@ -185,7 +186,7 @@
                                     <line x1="12" y1="18" x2="12" y2="12"/>
                                     <line x1="9" y1="15" x2="15" y2="15"/>
                                 </svg>
-                                新建项目
+                                <span data-i18n="nav.newProject">新建项目</span>
                             </a>
                             <a href="#" onclick="loadProject(); return false;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -193,7 +194,7 @@
                                     <polyline points="17 8 12 3 7 8"/>
                                     <line x1="12" y1="3" x2="12" y2="15"/>
                                 </svg>
-                                打开文件
+                                <span data-i18n="nav.openFile">打开文件</span>
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="#" onclick="saveProject(); return false;">
@@ -202,7 +203,7 @@
                                     <polyline points="17 21 17 13 7 13 7 21"/>
                                     <polyline points="7 3 7 8 15 8"/>
                                 </svg>
-                                保存项目
+                                <span data-i18n="nav.saveProject">保存项目</span>
                                 <span class="shortcut">Ctrl+S</span>
                             </a>
                             <a href="#" onclick="saveProjectAs(); return false;">
@@ -211,7 +212,7 @@
                                     <polyline points="17 21 17 13 7 13 7 21"/>
                                     <polyline points="7 3 7 8 15 8"/>
                                 </svg>
-                                另存为
+                                <span data-i18n="nav.saveAs">另存为</span>
                             </a>
                         </div>
                     </div>
@@ -224,7 +225,7 @@
                                 <polyline points="7 10 12 15 17 10"/>
                                 <line x1="12" y1="15" x2="12" y2="3"/>
                             </svg>
-                            导出
+                            <span data-i18n="nav.export">导出</span>
                             <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="6 9 12 15 18 9"/>
                             </svg>
@@ -236,23 +237,23 @@
                                     <path d="M2 17l10 5 10-5"/>
                                     <path d="M2 12l10 5 10-5"/>
                                 </svg>
-                                STEP (.step)
-                                <span class="format-desc">工业标准</span>
+                                <span data-i18n="nav.exportSTEP">STEP (.step)</span>
+                                <span class="format-desc" data-i18n="nav.formatIndustrial">工业标准</span>
                             </a>
                             <a href="#" onclick="threejsViewport.saveShapeSTL(); return false;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                                 </svg>
-                                STL (.stl)
-                                <span class="format-desc">3D打印</span>
+                                <span data-i18n="nav.exportSTL">STL (.stl)</span>
+                                <span class="format-desc" data-i18n="nav.format3DPrint">3D打印</span>
                             </a>
                             <a href="#" onclick="threejsViewport.saveShapeOBJ(); return false;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                                     <path d="M2 17l10 5 10-5"/>
                                 </svg>
-                                OBJ (.obj)
-                                <span class="format-desc">通用格式</span>
+                                <span data-i18n="nav.exportOBJ">OBJ (.obj)</span>
+                                <span class="format-desc" data-i18n="nav.formatGeneral">通用格式</span>
                             </a>
                         </div>
                     </div>
@@ -265,7 +266,7 @@
                                 <polyline points="17 8 12 3 7 8"/>
                                 <line x1="12" y1="3" x2="12" y2="15"/>
                             </svg>
-                            导入
+                            <span data-i18n="nav.import">导入</span>
                             <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="6 9 12 15 18 9"/>
                             </svg>
@@ -277,14 +278,14 @@
                                     <path d="M2 17l10 5 10-5"/>
                                     <path d="M2 12l10 5 10-5"/>
                                 </svg>
-                                STEP/IGES (.step, .igs)
+                                <span data-i18n="nav.importSTEP">STEP/IGES (.step, .igs)</span>
                                 <input id="files" name="files" type="file" accept=".iges,.step,.igs,.stp,.stl,.obj" multiple style="display:none;" oninput="loadFiles();"/>
                             </label>
                             <label for="filesSTL" class="dropdown-item-label">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                                 </svg>
-                                STL (.stl)
+                                <span data-i18n="nav.importSTL">STL (.stl)</span>
                                 <input id="filesSTL" type="file" accept=".stl" multiple style="display:none;" oninput="loadFiles('filesSTL');"/>
                             </label>
                             <div class="dropdown-divider"></div>
@@ -293,7 +294,7 @@
                                     <polyline points="3 6 5 6 21 6"/>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                                 </svg>
-                                清除所有导入
+                                <span data-i18n="nav.clearImports">清除所有导入</span>
                             </a>
                         </div>
                     </div>
@@ -305,7 +306,7 @@
                                 <circle cx="12" cy="12" r="3"/>
                                 <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l4.2 4.2M23 12h-6m-6 0H1m18.2 5.2l-4.2-4.2m0-6l4.2-4.2"/>
                             </svg>
-                            设置
+                            <span data-i18n="nav.settings">设置</span>
                             <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="6 9 12 15 18 9"/>
                             </svg>
@@ -316,7 +317,7 @@
                                     <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
                                     <path d="M21 3v5h-5"/>
                                 </svg>
-                                恢复界面布局
+                                <span data-i18n="nav.resetLayout">恢复界面布局</span>
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="#" onclick="toggleTheme(); return false;">
@@ -331,14 +332,14 @@
                                     <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
                                     <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
                                 </svg>
-                                主题设置
+                                <span data-i18n="nav.themeSettings">主题设置</span>
                             </a>
                             <a href="#" onclick="showPreferences(); return false;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="3"/>
                                     <path d="M12 1v6m0 6v6"/>
                                 </svg>
-                                偏好设置
+                                <span data-i18n="nav.preferences">偏好设置</span>
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="#" onclick="showAbout(); return false;">
@@ -347,7 +348,7 @@
                                     <line x1="12" y1="16" x2="12" y2="12"/>
                                     <line x1="12" y1="8" x2="12.01" y2="8"/>
                                 </svg>
-                                关于
+                                <span data-i18n="nav.about">关于</span>
                             </a>
                         </div>
                     </div>
@@ -393,7 +394,7 @@
                             <polyline points="10 17 15 12 10 7"/>
                             <line x1="15" y1="12" x2="3" y2="12"/>
                         </svg>
-                        登录
+                        <span data-i18n="auth.login">登录</span>
                     </button>
                     <button class="auth-tab-btn" onclick="switchAuthTab('signup')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -402,43 +403,43 @@
                             <line x1="20" y1="8" x2="20" y2="14"/>
                             <line x1="23" y1="11" x2="17" y2="11"/>
                         </svg>
-                        注册
+                        <span data-i18n="auth.signup">注册</span>
                     </button>
                 </div>
                 
                 <!-- 登录表单 -->
                 <div id="loginForm" class="auth-form-content active">
-                    <h2>登录账户</h2>
+                    <h2 data-i18n="auth.loginTitle">登录账户</h2>
                     <form id="loginFormElement">
                         <div class="form-group">
-                            <label for="loginEmail">邮箱</label>
-                            <input type="email" id="loginEmail" required placeholder="请输入邮箱地址" />
+                            <label for="loginEmail" data-i18n="auth.email">邮箱</label>
+                            <input type="email" id="loginEmail" required data-i18n-placeholder="auth.emailPlaceholder" placeholder="请输入邮箱地址" />
                         </div>
                         <div class="form-group">
-                            <label for="loginPassword">密码</label>
-                            <input type="password" id="loginPassword" required placeholder="请输入密码" />
+                            <label for="loginPassword" data-i18n="auth.password">密码</label>
+                            <input type="password" id="loginPassword" required data-i18n-placeholder="auth.passwordPlaceholder" placeholder="请输入密码" />
                         </div>
-                        <button type="submit" class="btn-primary">登录</button>
+                        <button type="submit" class="btn-primary" data-i18n="auth.login">登录</button>
                     </form>
                 </div>
                 
                 <!-- 注册表单 -->
                 <div id="signupForm" class="auth-form-content">
-                    <h2>创建账户</h2>
+                    <h2 data-i18n="auth.signupTitle">创建账户</h2>
                     <form id="signupFormElement">
                         <div class="form-group">
-                            <label for="signupEmail">邮箱</label>
-                            <input type="email" id="signupEmail" required placeholder="请输入邮箱地址" />
+                            <label for="signupEmail" data-i18n="auth.email">邮箱</label>
+                            <input type="email" id="signupEmail" required data-i18n-placeholder="auth.emailPlaceholder" placeholder="请输入邮箱地址" />
                         </div>
                         <div class="form-group">
-                            <label for="signupPassword">密码</label>
-                            <input type="password" id="signupPassword" required placeholder="至少6位字符" minlength="6" />
+                            <label for="signupPassword" data-i18n="auth.password">密码</label>
+                            <input type="password" id="signupPassword" required data-i18n-placeholder="auth.passwordMinPlaceholder" placeholder="至少6位字符" minlength="6" />
                         </div>
                         <div class="form-group">
-                            <label for="signupPasswordConfirm">确认密码</label>
-                            <input type="password" id="signupPasswordConfirm" required placeholder="再次输入密码" minlength="6" />
+                            <label for="signupPasswordConfirm" data-i18n="auth.confirmPassword">确认密码</label>
+                            <input type="password" id="signupPasswordConfirm" required data-i18n-placeholder="auth.confirmPasswordPlaceholder" placeholder="再次输入密码" minlength="6" />
                         </div>
-                        <button type="submit" class="btn-primary">注册</button>
+                        <button type="submit" class="btn-primary" data-i18n="auth.signup">注册</button>
                     </form>
                 </div>
             </div>
@@ -453,7 +454,7 @@
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                         <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    用户中心
+                    <span data-i18n="user.center">用户中心</span>
                 </h2>
                 
                 <!-- Tab导航 -->
@@ -463,20 +464,20 @@
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        个人信息
+                        <span data-i18n="user.info">个人信息</span>
                     </button>
                     <button class="tab-btn" onclick="switchUserTab('credits')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
                             <path d="M12 6v6l4 2"/>
                         </svg>
-                        我的积分
+                        <span data-i18n="user.credits">我的积分</span>
                     </button>
                     <button class="tab-btn" onclick="switchUserTab('history')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
                         </svg>
-                        生成记录
+                        <span data-i18n="user.history">生成记录</span>
                     </button>
                 </div>
                 
@@ -497,7 +498,7 @@
                                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                                         <polyline points="22,6 12,13 2,6"/>
                                     </svg>
-                                    <span class="detail-label">邮箱</span>
+                                    <span class="detail-label" data-i18n="user.emailLabel">邮箱</span>
                                     <span class="detail-value" id="userCenterEmail">-</span>
                                 </div>
                                 <div class="user-detail-item">
@@ -505,7 +506,7 @@
                                         <circle cx="12" cy="12" r="10"/>
                                         <polyline points="12 6 12 12 16 14"/>
                                     </svg>
-                                    <span class="detail-label">注册时间</span>
+                                    <span class="detail-label" data-i18n="user.registeredAt">注册时间</span>
                                     <span class="detail-value" id="userCreatedAt">-</span>
                                 </div>
                             </div>
@@ -517,14 +518,14 @@
                         <div class="credits-info">
                             <div class="credits-display">
                                 <span class="credits-amount" id="creditsAmount">0</span>
-                                <span class="credits-label">可用积分</span>
+                                <span class="credits-label" data-i18n="user.availableCredits">可用积分</span>
                             </div>
                             <button class="btn-recharge" onclick="alert('充值功能开发中...')">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
                                     <path d="M21 3v5h-5"/>
                                 </svg>
-                                充值积分
+                                <span data-i18n="user.recharge">充值积分</span>
                             </button>
                         </div>
                     </div>
@@ -547,7 +548,7 @@
                             <polyline points="16 17 21 12 16 7"/>
                             <line x1="21" y1="12" x2="9" y2="12"/>
                         </svg>
-                        退出登录
+                        <span data-i18n="user.logout">退出登录</span>
                     </button>
                 </div>
             </div>
