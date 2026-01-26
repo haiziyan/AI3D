@@ -666,18 +666,18 @@
             // 初始化语言选择器
             function initLanguageSelector() {
                 const languages = [
-                    { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' },
-                    { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' },
-                    { code: 'en', name: 'English', flag: '🇺🇸' },
-                    { code: 'ja', name: '日本語', flag: '🇯🇵' },
-                    { code: 'ko', name: '한국어', flag: '🇰🇷' },
-                    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-                    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-                    { code: 'es', name: 'Español', flag: '🇪🇸' },
-                    { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-                    { code: 'pt', name: 'Português', flag: '🇵🇹' },
-                    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-                    { code: 'ar', name: 'العربية', flag: '🇸🇦' }
+                    { code: 'zh-CN', name: '简体中文' },
+                    { code: 'zh-TW', name: '繁體中文' },
+                    { code: 'en', name: 'English' },
+                    { code: 'ja', name: '日本語' },
+                    { code: 'ko', name: '한국어' },
+                    { code: 'de', name: 'Deutsch' },
+                    { code: 'fr', name: 'Français' },
+                    { code: 'es', name: 'Español' },
+                    { code: 'it', name: 'Italiano' },
+                    { code: 'pt', name: 'Português' },
+                    { code: 'vi', name: 'Tiếng Việt' },
+                    { code: 'ar', name: 'العربية' }
                 ];
                 
                 const currentLang = window.i18nManager.getCurrentLanguage();
@@ -692,7 +692,6 @@
                         <div class="language-item ${lang.code === currentLang ? 'active' : ''}" 
                              onclick="changeLanguage('${lang.code}')">
                             <div class="language-item-content">
-                                <span class="language-flag">${lang.flag}</span>
                                 <span class="language-name">${lang.name}</span>
                             </div>
                             <svg class="language-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -708,7 +707,6 @@
                     mobileLanguageGrid.innerHTML = languages.map(lang => `
                         <div class="mobile-language-item ${lang.code === currentLang ? 'active' : ''}" 
                              onclick="changeLanguage('${lang.code}'); toggleMenu();">
-                            <span class="language-flag">${lang.flag}</span>
                             <span class="language-name">${lang.name}</span>
                         </div>
                     `).join('');

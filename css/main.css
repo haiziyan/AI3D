@@ -1082,11 +1082,6 @@ body {
   gap: 10px;
 }
 
-.language-flag {
-  font-size: 20px;
-  line-height: 1;
-}
-
 .language-name {
   font-weight: 500;
 }
@@ -1217,10 +1212,6 @@ body {
   background: var(--accent-color);
   border-color: var(--accent-color);
   color: white;
-}
-
-.mobile-language-item .language-flag {
-  font-size: 18px;
 }
 
 .mobile-language-item .language-name {
