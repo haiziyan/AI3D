@@ -73,6 +73,7 @@ class I18n {
                 'nav.formatIndustrial': '工业标准',
                 'nav.format3DPrint': '3D打印',
                 'nav.formatGeneral': '通用格式',
+                'nav.selectLanguage': '选择语言',
                 
                 // 标签页
                 'tab.3dView': '3D 视图',
@@ -160,9 +161,10 @@ class I18n {
                 'nav.themeSettings': '主題設定',
                 'nav.preferences': '偏好設定',
                 'nav.about': '關於',
-                'nav.formatIndustrial': '工業標準',
+                'nav.formatIndustrial': '產業標準',
                 'nav.format3DPrint': '3D列印',
                 'nav.formatGeneral': '通用格式',
+                'nav.selectLanguage': '選擇語言',
                 
                 // 標籤頁
                 'tab.3dView': '3D 視圖',
@@ -252,6 +254,7 @@ class I18n {
                 'nav.formatIndustrial': 'Industrial Standard',
                 'nav.format3DPrint': '3D Printing',
                 'nav.formatGeneral': 'General Format',
+                'nav.selectLanguage': 'Select Language',
                 'tab.3dView': '3D View',
                 'tab.codeEditor': 'Code Editor',
                 'tab.aiGenerator': 'AI Generator',
@@ -294,6 +297,7 @@ class I18n {
                 'nav.formatIndustrial': '産業標準',
                 'nav.format3DPrint': '3Dプリント',
                 'nav.formatGeneral': '汎用フォーマット',
+                'nav.selectLanguage': '言語を選択',
                 
                 // タブ
                 'tab.3dView': '3D ビュー',
@@ -384,6 +388,7 @@ class I18n {
                 'nav.formatIndustrial': '산업 표준',
                 'nav.format3DPrint': '3D 프린팅',
                 'nav.formatGeneral': '일반 형식',
+                'nav.selectLanguage': '언어 선택',
                 
                 // 탭
                 'tab.3dView': '3D 뷰',
@@ -474,6 +479,7 @@ class I18n {
                 'nav.formatIndustrial': 'Industriestandard',
                 'nav.format3DPrint': '3D-Druck',
                 'nav.formatGeneral': 'Allgemeines Format',
+                'nav.selectLanguage': 'Sprache wählen',
                 
                 // Tabs
                 'tab.3dView': '3D-Ansicht',
@@ -564,6 +570,7 @@ class I18n {
                 'nav.formatIndustrial': 'Standard industriel',
                 'nav.format3DPrint': 'Impression 3D',
                 'nav.formatGeneral': 'Format général',
+                'nav.selectLanguage': 'Sélectionner la langue',
                 
                 // Onglets
                 'tab.3dView': 'Vue 3D',
@@ -654,6 +661,7 @@ class I18n {
                 'nav.formatIndustrial': 'Estándar industrial',
                 'nav.format3DPrint': 'Impresión 3D',
                 'nav.formatGeneral': 'Formato general',
+                'nav.selectLanguage': 'Seleccionar idioma',
                 
                 // Pestañas
                 'tab.3dView': 'Vista 3D',
@@ -744,6 +752,7 @@ class I18n {
                 'nav.formatIndustrial': 'Standard industriale',
                 'nav.format3DPrint': 'Stampa 3D',
                 'nav.formatGeneral': 'Formato generale',
+                'nav.selectLanguage': 'Seleziona lingua',
                 
                 // Schede
                 'tab.3dView': 'Vista 3D',
@@ -834,6 +843,7 @@ class I18n {
                 'nav.formatIndustrial': 'Padrão industrial',
                 'nav.format3DPrint': 'Impressão 3D',
                 'nav.formatGeneral': 'Formato geral',
+                'nav.selectLanguage': 'Selecionar idioma',
                 
                 // Abas
                 'tab.3dView': 'Visualização 3D',
@@ -924,6 +934,7 @@ class I18n {
                 'nav.formatIndustrial': 'Tiêu chuẩn công nghiệp',
                 'nav.format3DPrint': 'In 3D',
                 'nav.formatGeneral': 'Định dạng chung',
+                'nav.selectLanguage': 'Chọn ngôn ngữ',
                 
                 // Tab
                 'tab.3dView': 'Chế độ xem 3D',
@@ -1014,6 +1025,7 @@ class I18n {
                 'nav.formatIndustrial': 'معيار صناعي',
                 'nav.format3DPrint': 'طباعة ثلاثية الأبعاد',
                 'nav.formatGeneral': 'تنسيق عام',
+                'nav.selectLanguage': 'اختر اللغة',
                 
                 // علامات التبويب
                 'tab.3dView': 'عرض ثلاثي الأبعاد',
@@ -1208,4 +1220,5 @@ class I18n {
 }
 
 // 创建全局实例
-window.i18n = new I18n();
+window.i18nManager = new I18n();
+window.i18n = window.i18nManager; // 保持向后兼容
