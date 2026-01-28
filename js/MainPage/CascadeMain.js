@@ -747,7 +747,7 @@ function initialize(projectContent = null) {
                                 <polyline points="16 18 22 12 16 6"/>
                                 <polyline points="8 6 2 12 8 18"/>
                             </svg>
-                            加载此代码
+                            加载此模型
                         </button>
                         ` : ''}
                     </div>
@@ -782,6 +782,118 @@ function initialize(projectContent = null) {
                 }
             } catch (error) {
                 alert('加载对话失败: ' + error.message);
+            }
+        };
+
+        // 切换移动端对话详情显示
+        window.toggleMobileConversationDetail = async function(conversationId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            const detailDiv = document.getElementById('convDetail-' + conversationId);
+            if (!detailDiv) return;
+            
+            // 如果已经显示，则隐藏
+            if (detailDiv.style.display !== 'none') {
+                detailDiv.style.display = 'none';
+                return;
+            }
+            
+            // 显示并加载对话详情
+            detailDiv.style.display = 'block';
+            detailDiv.innerHTML = '<div class="conversation-detail-loading">加载中...</div>';
+            
+            try {
+                // 加载对话历史
+                const { data, error } = await authManager.supabase
+                    .from('ai_generations')
+                    .select('*')
+                    .eq('conversation_id', conversationId)
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    detailDiv.innerHTML = '<div class="conversation-detail-empty">暂无对话记录</div>';
+                    return;
+                }
+
+                // 渲染对话详情
+                detailDiv.innerHTML = data.map((msg, index) => {
+                    if (msg.role === 'user') {
+                        return `
+                        <div class="conversation-message user-message" style="margin-bottom: 10px; padding: 8px; background: rgba(36, 36, 36, 0.6); border-radius: 8px; border-left: 3px solid var(--accent-color);">
+                            <div class="message-header" style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 10px; color: var(--text-secondary);">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span>用户</span>
+                            </div>
+                            <div class="message-content" style="font-size: 11px; color: var(--text-primary);">${escapeHtml(msg.description)}</div>
+                        </div>
+                        `;
+                    } else {
+                        return `
+                        <div class="conversation-message assistant-message" style="margin-bottom: 10px; padding: 8px; background: rgba(26, 26, 26, 0.6); border-radius: 8px; border-left: 3px solid #4a9eff;">
+                            <div class="message-header" style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 10px; color: var(--text-secondary);">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                <span>AI助手</span>
+                                ${msg.tokens_used ? `<span style="margin-left: auto; font-size: 9px; padding: 2px 6px; background: rgba(107, 107, 107, 0.2); border-radius: 8px;">${msg.tokens_used} tokens</span>` : ''}
+                            </div>
+                            <div class="message-content" style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); background: rgba(15, 15, 15, 0.6); padding: 8px; border-radius: 6px; overflow-x: auto; max-height: 100px; overflow-y: auto;">${escapeHtml(msg.generated_code ? msg.generated_code.substring(0, 200) + (msg.generated_code.length > 200 ? '...' : '') : '生成中...')}</div>
+                        </div>
+                        `;
+                    }
+                }).join('');
+            } catch (error) {
+                console.error('加载对话详情失败:', error);
+                detailDiv.innerHTML = '<div class="conversation-detail-error">加载失败: ' + error.message + '</div>';
+            }
+        };
+
+        // 加载对话模型（加载最后一次生成的代码并关闭模态框）
+        window.loadConversationModel = async function(conversationId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            try {
+                // 加载对话历史
+                const { data, error } = await authManager.supabase
+                    .from('ai_generations')
+                    .select('*')
+                    .eq('conversation_id', conversationId)
+                    .eq('role', 'assistant')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (error) throw error;
+
+                if (data && data.generated_code && monacoEditor) {
+                    monacoEditor.setValue(data.generated_code);
+                    
+                    // 自动评估代码
+                    setTimeout(() => {
+                        monacoEditor.evaluateCode(true);
+                    }, 500);
+                    
+                    // 关闭模态框
+                    const modal = document.getElementById('mobileHistoryModal');
+                    if (modal) {
+                        modal.classList.remove('active');
+                    }
+                } else {
+                    alert('未找到生成的代码');
+                }
+            } catch (error) {
+                console.error('加载模型失败:', error);
+                alert('加载模型失败: ' + error.message);
             }
         };
 
@@ -1171,8 +1283,8 @@ function initialize(projectContent = null) {
                                 modalContent.innerHTML = conversations.map(conv => {
                                     const isActive = aiGenerator.currentConversationId === conv.id;
                                     return `
-                                    <div class="conversation-item ${isActive ? 'active' : ''}" onclick="loadConversationById('${conv.id}'); document.getElementById('mobileHistoryModal').classList.remove('active')">
-                                        <div class="conversation-item-header">
+                                    <div class="conversation-item ${isActive ? 'active' : ''}" data-conv-id="${conv.id}">
+                                        <div class="conversation-item-header" onclick="toggleMobileConversationDetail('${conv.id}', event)">
                                             <span class="conversation-title">${escapeHtml(conv.title || '未命名对话')}</span>
                                             <button class="btn-delete-conversation" onclick="deleteConversationById('${conv.id}', event)" title="删除">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1188,6 +1300,26 @@ function initialize(projectContent = null) {
                                             hour: '2-digit',
                                             minute: '2-digit'
                                         })}</div>
+                                        <div class="conversation-detail" id="convDetail-${conv.id}" style="display: none;">
+                                            <div class="conversation-detail-loading">加载中...</div>
+                                        </div>
+                                        <div class="conversation-actions" style="margin-top: 10px; display: flex; gap: 8px;">
+                                            <button class="btn-view-conversation" onclick="toggleMobileConversationDetail('${conv.id}', event)" title="查看对话">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                    <circle cx="12" cy="12" r="3"/>
+                                                </svg>
+                                                <span>查看对话</span>
+                                            </button>
+                                            <button class="btn-load-conversation-model" onclick="loadConversationModel('${conv.id}', event)" title="加载模型">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="7 10 12 15 17 10"/>
+                                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                                <span>加载模型</span>
+                                            </button>
+                                        </div>
                                     </div>
                                     `;
                                 }).join('');
@@ -1213,19 +1345,28 @@ function initialize(projectContent = null) {
             if (mobileNewChatBtn && window.innerWidth <= 768) {
                 mobileNewChatBtn.onclick = () => {
                     if (window.aiGenerator) {
-                        if (confirm('确定要开始新对话吗？当前对话将被保存。')) {
-                            window.aiGenerator.clearCurrentConversation();
-                            // 清空输入框
-                            if (aiInput) {
-                                aiInput.value = '';
-                            }
-                            // 刷新显示
-                            if (window.refreshConversationList) {
-                                window.refreshConversationList();
-                            }
-                            if (window.refreshConversationHistory) {
-                                window.refreshConversationHistory();
-                            }
+                        // 移动端不显示确认提示框，直接执行
+                        window.aiGenerator.clearCurrentConversation();
+                        
+                        // 清空输入框
+                        if (aiInput) {
+                            aiInput.value = '';
+                        }
+                        
+                        // 恢复3D视图到初始状态
+                        if (monacoEditor) {
+                            monacoEditor.setValue(starterCode);
+                            setTimeout(() => {
+                                monacoEditor.evaluateCode(true);
+                            }, 500);
+                        }
+                        
+                        // 刷新显示
+                        if (window.refreshConversationList) {
+                            window.refreshConversationList();
+                        }
+                        if (window.refreshConversationHistory) {
+                            window.refreshConversationHistory();
                         }
                     }
                 };

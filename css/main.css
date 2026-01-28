@@ -2359,6 +2359,86 @@ body {
   border-radius: 3px;
 }
 
+/* 对话详情区域 */
+.conversation-detail {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(15, 15, 15, 0.6);
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.conversation-detail::-webkit-scrollbar {
+  width: 4px;
+}
+
+.conversation-detail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.conversation-detail::-webkit-scrollbar-thumb {
+  background: rgba(107, 107, 107, 0.3);
+  border-radius: 2px;
+}
+
+.conversation-detail-loading,
+.conversation-detail-empty,
+.conversation-detail-error {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.conversation-detail-error {
+  color: #ff6b6b;
+}
+
+/* 对话操作按钮 */
+.conversation-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn-view-conversation,
+.btn-load-conversation-model {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(107, 107, 107, 0.15);
+  border: 1px solid rgba(107, 107, 107, 0.2);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-view-conversation:hover,
+.btn-load-conversation-model:hover {
+  background: rgba(107, 107, 107, 0.25);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.btn-load-conversation-model {
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.btn-load-conversation-model:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 107, 107, 0.3);
+}
+
 /* 新对话按钮 */
 .btn-new-conversation {
   display: flex;
