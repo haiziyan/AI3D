@@ -505,7 +505,7 @@ function initialize(projectContent = null) {
         }
     });
 
-    // Set up the AI Module Component (with generation history)
+    // Set up the AI Module Component (支持多轮对话)
     myLayout.registerComponent('aiModule', function (container) {
         consoleGolden = container;
         
@@ -521,22 +521,36 @@ function initialize(projectContent = null) {
         aiModuleContainer.className = "ai-module-container";
         aiModuleContainer.innerHTML = `
             <div class="ai-module-content">
-                <div class="generation-history-panel">
-                    <div class="history-header">
+                <!-- 对话列表面板 -->
+                <div class="conversation-list-panel">
+                    <div class="conversation-header">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
-                        <span data-i18n="ai.historyTitle">AI 生成历史</span>
-                        <button class="btn-refresh-history" onclick="window.refreshGenerationHistory()" data-i18n="ai.refresh" title="刷新">
+                        <span data-i18n="ai.conversations">对话列表</span>
+                        <button class="btn-new-conversation" onclick="window.aiGenerator.clearCurrentConversation()" title="新建对话">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
-                                <path d="M21 3v5h-5"/>
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
                             </svg>
                         </button>
                     </div>
-                    <div id="generationHistoryContent" class="history-content"></div>
+                    <div id="conversationListContent" class="conversation-list-content"></div>
                 </div>
                 
+                <!-- 当前对话历史面板 -->
+                <div class="current-conversation-panel">
+                    <div class="conversation-history-header">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span data-i18n="ai.currentConversation">当前对话</span>
+                        <span class="conversation-status" id="conversationStatus">新对话</span>
+                    </div>
+                    <div id="conversationHistoryContent" class="conversation-history-content"></div>
+                </div>
+                
+                <!-- AI输入区域 -->
                 <div class="ai-input-wrapper" id="aiInputWrapper">
                     <div class="ai-section-title">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -546,7 +560,7 @@ function initialize(projectContent = null) {
                         </svg>
                         <span data-i18n="ai.title">AI 模型描述</span>
                     </div>
-                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" data-i18n-placeholder="ai.placeholder" placeholder="用自然语言描述你想要的 3D 模型，例如：创建一个边长100的立方体，中间挖一个半径30的球形孔"></textarea>
+                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" data-i18n-placeholder="ai.placeholder" placeholder="描述你想要的3D模型，或对当前模型提出修改建议..."></textarea>
                     <button id="aiGenerateBtnModule" class="ai-generate-btn-module">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
@@ -570,83 +584,209 @@ function initialize(projectContent = null) {
             }, 100);
         }
         
-        // 加载生成历史记录
-        window.refreshGenerationHistory = async function() {
-            // 修复Bug 1: 增加更严格的登录状态检查
+        // 刷新对话列表
+        window.refreshConversationList = async function() {
             const isLoggedIn = authManager && authManager.currentUser && authManager.supabase;
             
             if (!isLoggedIn) {
-                const historyContent = document.getElementById('generationHistoryContent');
-                if (historyContent) {
-                    historyContent.innerHTML = `
-                        <div class="empty-state">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                <circle cx="12" cy="7" r="4"/>
-                            </svg>
+                const listContent = document.getElementById('conversationListContent');
+                if (listContent) {
+                    listContent.innerHTML = `
+                        <div class="empty-state-small">
                             <p data-i18n="ai.pleaseLogin">请先登录</p>
-                            <span data-i18n="ai.loginDesc">登录后可查看AI生成历史记录</span>
-                            <button class="btn-login-prompt" onclick="authManager.showAuthModal()" data-i18n="ai.loginNow">立即登录</button>
                         </div>
                     `;
                 }
                 return;
             }
 
-            const historyContent = document.getElementById('generationHistoryContent');
-            if (!historyContent) return;
-
-            // 显示加载状态
-            historyContent.innerHTML = `
-                <div class="loading-state">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="loading-spinner">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 6v6l4 2"/>
-                    </svg>
-                    <p data-i18n="ai.loading">加载中...</p>
-                </div>
-            `;
-            if (window.i18n) window.i18n.updatePageLanguage();
+            const listContent = document.getElementById('conversationListContent');
+            if (!listContent) return;
 
             try {
-                const { data, error } = await authManager.supabase
-                    .from('ai_generations')
-                    .select('*')
-                    .eq('user_id', authManager.currentUser.id)
-                    .order('created_at', { ascending: false })
-                    .limit(10);
+                const conversations = await aiGenerator.getConversationList(20);
 
-                if (error) {
-                    console.error('加载生成记录失败:', error);
-                    historyContent.innerHTML = `
-                        <div class="empty-state">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <line x1="12" y1="8" x2="12" y2="12"/>
-                                <line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
-                            <p>加载失败</p>
-                            <span>${error.message}</span>
+                if (!conversations || conversations.length === 0) {
+                    listContent.innerHTML = `
+                        <div class="empty-state-small">
+                            <p data-i18n="ai.noConversations">暂无对话</p>
                         </div>
                     `;
-                    return;
-                }
-
-                if (!data || data.length === 0) {
-                    historyContent.innerHTML = `
-                        <div class="empty-state">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14 2 14 8 20 8"/>
-                            </svg>
-                            <p data-i18n="ai.noHistory">暂无生成记录</p>
-                            <span data-i18n="ai.noHistoryDesc">开始使用AI生成功能后，历史记录将显示在这里</span>
-                        </div>
-                    `;
-                    if (window.i18n) window.i18n.updatePageLanguage();
                 } else {
-                    historyContent.innerHTML = data.map(record => {
-                        const hasCode = record.generated_code && record.generated_code.trim().length > 0;
+                    listContent.innerHTML = conversations.map(conv => {
+                        const isActive = aiGenerator.currentConversationId === conv.id;
+                        return `
+                        <div class="conversation-item ${isActive ? 'active' : ''}" onclick="loadConversationById('${conv.id}')">
+                            <div class="conversation-item-header">
+                                <span class="conversation-title">${escapeHtml(conv.title || '未命名对话')}</span>
+                                <button class="btn-delete-conversation" onclick="deleteConversationById('${conv.id}', event)" title="删除">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="conversation-date">${new Date(conv.updated_at).toLocaleString('zh-CN', {
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</div>
+                        </div>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('加载对话列表失败:', err);
+                listContent.innerHTML = `
+                    <div class="empty-state-small">
+                        <p>加载失败</p>
+                    </div>
+                `;
+            }
+        };
+
+        // 刷新当前对话历史
+        window.refreshConversationHistory = function() {
+            const historyContent = document.getElementById('conversationHistoryContent');
+            const statusSpan = document.getElementById('conversationStatus');
+            
+            if (!historyContent) return;
+
+            if (!aiGenerator.currentConversationId) {
+                if (statusSpan) statusSpan.textContent = '新对话';
+                historyContent.innerHTML = `
+                    <div class="empty-state-small">
+                        <p data-i18n="ai.newConversation">开始新对话</p>
+                        <span data-i18n="ai.newConversationDesc">输入描述开始生成3D模型</span>
+                    </div>
+                `;
+                return;
+            }
+
+            if (statusSpan) statusSpan.textContent = `对话中 (${aiGenerator.conversationHistory.length / 2} 轮)`;
+
+            if (aiGenerator.conversationHistory.length === 0) {
+                historyContent.innerHTML = `
+                    <div class="empty-state-small">
+                        <p data-i18n="ai.emptyConversation">对话为空</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyContent.innerHTML = aiGenerator.conversationHistory.map((msg, index) => {
+                if (msg.role === 'user') {
+                    return `
+                    <div class="conversation-message user-message">
+                        <div class="message-header">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            <span>用户</span>
+                        </div>
+                        <div class="message-content">${escapeHtml(msg.content)}</div>
+                    </div>
+                    `;
+                } else {
+                    return `
+                    <div class="conversation-message assistant-message">
+                        <div class="message-header">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                            <span>AI助手</span>
+                            ${msg.tokensUsed ? `<span class="message-tokens">${msg.tokensUsed} tokens</span>` : ''}
+                        </div>
+                        <div class="message-content code-preview">${escapeHtml(msg.code ? msg.code.substring(0, 200) + (msg.code.length > 200 ? '...' : '') : '生成中...')}</div>
+                        ${msg.code ? `
+                        <button class="btn-load-message-code" onclick="loadMessageCode(${index})" title="加载到编辑器">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="16 18 22 12 16 6"/>
+                                <polyline points="8 6 2 12 8 18"/>
+                            </svg>
+                            加载此代码
+                        </button>
+                        ` : ''}
+                    </div>
+                    `;
+                }
+            }).join('');
+
+            // 滚动到底部
+            historyContent.scrollTop = historyContent.scrollHeight;
+        };
+
+        // 加载对话
+        window.loadConversationById = async function(conversationId) {
+            try {
+                await aiGenerator.loadConversation(conversationId);
+                window.refreshConversationList();
+                window.refreshConversationHistory();
+                
+                // 如果对话历史中有代码，加载最后一次生成的代码
+                const lastAssistantMsg = aiGenerator.conversationHistory
+                    .filter(msg => msg.role === 'assistant' && msg.code)
+                    .pop();
+                
+                if (lastAssistantMsg && lastAssistantMsg.code && monacoEditor) {
+                    monacoEditor.setValue(lastAssistantMsg.code);
+                }
+            } catch (error) {
+                alert('加载对话失败: ' + error.message);
+            }
+        };
+
+        // 删除对话
+        window.deleteConversationById = async function(conversationId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (!confirm('确定要删除这个对话吗？')) {
+                return;
+            }
+
+            try {
+                await aiGenerator.deleteConversation(conversationId);
+                window.refreshConversationList();
+                window.refreshConversationHistory();
+            } catch (error) {
+                alert('删除对话失败: ' + error.message);
+            }
+        };
+
+        // 加载消息中的代码
+        window.loadMessageCode = function(messageIndex) {
+            const msg = aiGenerator.conversationHistory[messageIndex];
+            if (msg && msg.code && monacoEditor) {
+                monacoEditor.setValue(msg.code);
+                setTimeout(() => {
+                    monacoEditor.evaluateCode(true);
+                }, 500);
+            }
+        };
+
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 初始加载对话列表和历史
+        if (authManager && authManager.currentUser) {
+            window.refreshConversationList();
+            window.refreshConversationHistory();
+        }
+        
+        // 监听登录状态变化
+        document.addEventListener('authStateChanged', function() {
+            window.refreshConversationList();
+            window.refreshConversationHistory();
+        });
                         const codePreview = hasCode ? record.generated_code.substring(0, 80) + (record.generated_code.length > 80 ? '...' : '') : '';
                         
                         return `

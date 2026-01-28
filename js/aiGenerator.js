@@ -1,28 +1,15 @@
-// AI 代码生成器
+// AI 代码生成器 - 支持多轮对话的Agent模式
 class AIGenerator {
     constructor() {
         this.apiKey = CONFIG.DEEPSEEK_API_KEY;
         this.apiUrl = CONFIG.DEEPSEEK_API_URL;
-    }
-
-    async generateCode(prompt) {
-        if (!authManager.currentUser) {
-            throw new Error('请先登录');
-        }
-
-        try {
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
-                body: JSON.stringify({
-                    model: 'deepseek-chat',
-                    messages: [
-                        {
-                            role: 'system',
-                            content: `你是一个专业的 CAD 建模助手，精通 AI 3D Studio（基于 OpenCascade.js）。用户会用自然语言描述 3D 模型，你需要生成可执行的 JavaScript 代码。
+        
+        // 当前对话会话
+        this.currentConversationId = null;
+        this.conversationHistory = []; // 对话历史 [{role: 'user'/'assistant', content: '...', code: '...'}]
+        
+        // 系统提示词
+        this.systemPrompt = `你是一个专业的 CAD 建模助手，精通 AI 3D Studio（基于 OpenCascade.js）。你支持多轮对话，可以根据用户的反馈逐步修改和完善 3D 模型。
 
 ## 核心 API 参考
 
@@ -72,6 +59,14 @@ class AIGenerator {
 - LinearArray(shape, direction, count, spacing) - 线性阵列
 - CircularArray(shape, axis, count, angle=360) - 环形阵列
 
+## 多轮对话模式
+
+当用户提出修改请求时（如"把它变大一点"、"改成红色"、"添加一个孔"等），你需要：
+1. 理解用户的修改意图
+2. 基于之前生成的代码进行修改
+3. 保持代码的连贯性和可读性
+4. 只修改需要改变的部分
+
 ## 重要规则
 
 1. **坐标系统**: Z 轴向上，右手坐标系
@@ -79,35 +74,7 @@ class AIGenerator {
 3. **形状组合**: 使用 sceneShapes.push() 或直接返回形状
 4. **变量命名**: 使用有意义的英文变量名
 5. **注释**: 添加简洁的中文注释说明关键步骤
-
-## 代码模板
-
-\`\`\`javascript
-// 1. 定义参数（可选，用于参数化设计）
-let radius = Slider("半径", 30, 10, 50);
-
-// 2. 创建基础形状
-let base = Box(100, 100, 20);
-
-// 3. 创建辅助形状
-let hole = Cylinder(radius, 30, true);
-
-// 4. 布尔运算
-let result = Difference(base, [hole]);
-
-// 5. 变换和定位
-let final = Translate([0, 0, 10], result);
-
-\`\`\`
-
-## 最佳实践
-
-1. **简洁优先**: 生成简洁、可读的代码
-2. **参数化**: 复杂模型使用 Slider 等控件
-3. **分步构建**: 复杂形状分步骤创建
-4. **合理命名**: 变量名反映其用途
-5. **添加注释**: 关键步骤添加注释
-6. **错误处理**: 确保参数合理（如半径 > 0）
+6. **增量修改**: 在多轮对话中，基于之前的代码进行修改，而不是重新生成
 
 ## 输出要求
 
@@ -116,13 +83,143 @@ let final = Translate([0, 0, 10], result);
 - 不要添加额外的解释文字
 - 代码必须可以直接在 AI 3D Studio 中执行
 
-现在，请根据用户的描述生成相应的 AI 3D Studio 代码。`
-                        },
-                        {
-                            role: 'user',
-                            content: prompt
-                        }
-                    ],
+现在，请根据用户的描述和对话历史生成相应的 AI 3D Studio 代码。`;
+    }
+
+    // 创建新的对话会话
+    async createNewConversation(title = null) {
+        if (!authManager.currentUser || !authManager.supabase) {
+            throw new Error('请先登录');
+        }
+
+        try {
+            // 如果没有提供标题，使用默认标题
+            if (!title) {
+                const now = new Date();
+                title = `对话 ${now.toLocaleString('zh-CN')}`;
+            }
+
+            const { data, error } = await authManager.supabase
+                .from('ai_conversations')
+                .insert([{
+                    user_id: authManager.currentUser.id,
+                    title: title
+                }])
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            this.currentConversationId = data.id;
+            this.conversationHistory = [];
+            
+            console.log('创建新对话会话:', data.id);
+            return data;
+        } catch (error) {
+            console.error('创建对话会话失败:', error);
+            throw error;
+        }
+    }
+
+    // 加载现有对话会话
+    async loadConversation(conversationId) {
+        if (!authManager.currentUser || !authManager.supabase) {
+            throw new Error('请先登录');
+        }
+
+        try {
+            // 加载对话历史
+            const { data, error } = await authManager.supabase
+                .from('ai_generations')
+                .select('*')
+                .eq('conversation_id', conversationId)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+
+            this.currentConversationId = conversationId;
+            this.conversationHistory = data.map(record => ({
+                role: record.role,
+                content: record.description,
+                code: record.generated_code,
+                tokensUsed: record.tokens_used,
+                creditsConsumed: record.credits_consumed
+            }));
+
+            console.log('加载对话会话:', conversationId, '历史记录数:', this.conversationHistory.length);
+            return this.conversationHistory;
+        } catch (error) {
+            console.error('加载对话会话失败:', error);
+            throw error;
+        }
+    }
+
+    // 清空当前对话
+    clearConversation() {
+        this.currentConversationId = null;
+        this.conversationHistory = [];
+        console.log('已清空对话历史');
+    }
+
+    // 生成代码（支持多轮对话）
+    async generateCode(prompt, currentCode = null) {
+        if (!authManager.currentUser) {
+            throw new Error('请先登录');
+        }
+
+        try {
+            // 如果没有当前对话会话，创建一个新的
+            if (!this.currentConversationId) {
+                // 使用用户输入的前20个字符作为标题
+                const title = prompt.length > 20 ? prompt.substring(0, 20) + '...' : prompt;
+                await this.createNewConversation(title);
+            }
+
+            // 构建消息历史
+            const messages = [
+                {
+                    role: 'system',
+                    content: this.systemPrompt
+                }
+            ];
+
+            // 添加对话历史
+            for (const msg of this.conversationHistory) {
+                messages.push({
+                    role: 'user',
+                    content: msg.content
+                });
+                if (msg.code) {
+                    messages.push({
+                        role: 'assistant',
+                        content: msg.code
+                    });
+                }
+            }
+
+            // 如果有当前代码，添加上下文
+            if (currentCode && this.conversationHistory.length > 0) {
+                messages.push({
+                    role: 'user',
+                    content: `当前代码：\n\`\`\`javascript\n${currentCode}\n\`\`\`\n\n用户新的需求：${prompt}`
+                });
+            } else {
+                messages.push({
+                    role: 'user',
+                    content: prompt
+                });
+            }
+
+            // 调用 DeepSeek API
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: messages,
                     temperature: 0.7,
                     max_tokens: 2000
                 })
@@ -147,13 +244,28 @@ let final = Translate([0, 0, 10], result);
             // 扣除积分
             await authManager.deductCredits(creditsUsed);
 
-            // 记录生成历史到数据库（包含生成的代码）
-            await this.logGeneration(prompt, creditsUsed, totalTokens, generatedCode);
+            // 记录到对话历史（内存）
+            this.conversationHistory.push({
+                role: 'user',
+                content: prompt,
+                code: null
+            });
+            this.conversationHistory.push({
+                role: 'assistant',
+                content: generatedCode,
+                code: generatedCode,
+                tokensUsed: totalTokens,
+                creditsConsumed: creditsUsed
+            });
+
+            // 记录到数据库
+            await this.logGenerationToConversation(prompt, generatedCode, creditsUsed, totalTokens);
 
             return {
                 code: generatedCode,
                 tokensUsed: totalTokens,
-                creditsUsed: creditsUsed
+                creditsUsed: creditsUsed,
+                conversationId: this.currentConversationId
             };
 
         } catch (error) {
@@ -162,42 +274,108 @@ let final = Translate([0, 0, 10], result);
         }
     }
 
-    async logGeneration(description, creditsConsumed, tokensUsed, generatedCode = '') {
-        if (!authManager.supabase || !authManager.currentUser) return;
+    // 记录生成到对话会话
+    async logGenerationToConversation(userPrompt, generatedCode, creditsConsumed, tokensUsed) {
+        if (!authManager.supabase || !authManager.currentUser || !this.currentConversationId) return;
 
         try {
-            const { data, error } = await authManager.supabase
+            // 记录用户消息
+            await authManager.supabase
                 .from('ai_generations')
-                .insert([
-                    {
-                        user_id: authManager.currentUser.id,
-                        description: description,
-                        credits_consumed: creditsConsumed,
-                        tokens_used: tokensUsed,
-                        generated_code: generatedCode
-                    }
-                ])
-                .select();
+                .insert([{
+                    user_id: authManager.currentUser.id,
+                    conversation_id: this.currentConversationId,
+                    description: userPrompt,
+                    generated_code: null,
+                    credits_consumed: 0,
+                    tokens_used: 0,
+                    role: 'user'
+                }]);
 
-            if (error) {
-                console.error('记录生成历史失败:', error);
-            } else {
-                // 刷新历史记录显示
-                if (window.refreshGenerationHistory) {
-                    window.refreshGenerationHistory();
-                }
+            // 记录AI响应
+            await authManager.supabase
+                .from('ai_generations')
+                .insert([{
+                    user_id: authManager.currentUser.id,
+                    conversation_id: this.currentConversationId,
+                    description: '生成的代码',
+                    generated_code: generatedCode,
+                    credits_consumed: creditsConsumed,
+                    tokens_used: tokensUsed,
+                    role: 'assistant'
+                }]);
+
+            // 更新对话会话的更新时间
+            await authManager.supabase
+                .from('ai_conversations')
+                .update({ updated_at: new Date().toISOString() })
+                .eq('id', this.currentConversationId);
+
+            // 刷新历史记录显示
+            if (window.refreshConversationList) {
+                window.refreshConversationList();
             }
         } catch (err) {
             console.error('记录生成历史异常:', err);
         }
     }
 
-    async generateCodeWithRetry(prompt, maxRetries = 2) {
+    // 获取对话列表
+    async getConversationList(limit = 10) {
+        if (!authManager.currentUser || !authManager.supabase) {
+            throw new Error('请先登录');
+        }
+
+        try {
+            const { data, error } = await authManager.supabase
+                .from('ai_conversations')
+                .select('*')
+                .eq('user_id', authManager.currentUser.id)
+                .order('updated_at', { ascending: false })
+                .limit(limit);
+
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('获取对话列表失败:', error);
+            throw error;
+        }
+    }
+
+    // 删除对话会话
+    async deleteConversation(conversationId) {
+        if (!authManager.currentUser || !authManager.supabase) {
+            throw new Error('请先登录');
+        }
+
+        try {
+            const { error } = await authManager.supabase
+                .from('ai_conversations')
+                .delete()
+                .eq('id', conversationId)
+                .eq('user_id', authManager.currentUser.id);
+
+            if (error) throw error;
+
+            // 如果删除的是当前对话，清空当前对话
+            if (this.currentConversationId === conversationId) {
+                this.clearConversation();
+            }
+
+            console.log('删除对话会话:', conversationId);
+        } catch (error) {
+            console.error('删除对话会话失败:', error);
+            throw error;
+        }
+    }
+
+    // 带重试的生成方法
+    async generateCodeWithRetry(prompt, currentCode = null, maxRetries = 2) {
         let lastError;
         
         for (let i = 0; i < maxRetries; i++) {
             try {
-                return await this.generateCode(prompt);
+                return await this.generateCode(prompt, currentCode);
             } catch (error) {
                 lastError = error;
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -223,7 +401,7 @@ if (typeof window !== 'undefined') {
 
             if (!authManager.currentUser) {
                 alert('请先登录');
-                authManager.showLoginModal();
+                authManager.showAuthModal();
                 return;
             }
 
@@ -241,7 +419,10 @@ if (typeof window !== 'undefined') {
             }
 
             try {
-                const result = await aiGenerator.generateCodeWithRetry(prompt);
+                // 获取当前编辑器中的代码（用于多轮对话上下文）
+                const currentCode = monacoEditor ? monacoEditor.getValue() : null;
+                
+                const result = await aiGenerator.generateCodeWithRetry(prompt, currentCode);
                 
                 // 将生成的代码插入到编辑器
                 if (monacoEditor) {
@@ -252,6 +433,16 @@ if (typeof window !== 'undefined') {
                         monacoEditor.evaluateCode(true);
                     }, 500);
                 }
+
+                // 清空输入框
+                const promptInput = document.getElementById('aiPromptInputModule');
+                if (promptInput) {
+                    promptInput.value = '';
+                }
+
+                // 显示成功提示
+                console.log(`生成成功！消耗 ${result.tokensUsed} tokens，${result.creditsUsed.toFixed(2)} 积分`);
+                
             } catch (error) {
                 alert('生成失败: ' + error.message);
             } finally {
@@ -266,6 +457,29 @@ if (typeof window !== 'undefined') {
                         生成模型
                     `;
                 }
+            }
+        },
+        
+        // 清空当前对话
+        clearCurrentConversation: function() {
+            if (confirm('确定要开始新对话吗？当前对话历史将被清空。')) {
+                aiGenerator.clearConversation();
+                alert('已开始新对话');
+                
+                // 刷新对话列表
+                if (window.refreshConversationList) {
+                    window.refreshConversationList();
+                }
+            }
+        },
+        
+        // 加载对话
+        loadConversation: async function(conversationId) {
+            try {
+                await aiGenerator.loadConversation(conversationId);
+                alert('对话已加载');
+            } catch (error) {
+                alert('加载对话失败: ' + error.message);
             }
         }
     };
