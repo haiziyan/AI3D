@@ -787,73 +787,8 @@ function initialize(projectContent = null) {
             window.refreshConversationList();
             window.refreshConversationHistory();
         });
-                        const codePreview = hasCode ? record.generated_code.substring(0, 80) + (record.generated_code.length > 80 ? '...' : '') : '';
-                        
-                        return `
-                        <div class="history-item" data-record-id="${record.id}">
-                            <div class="history-item-header">
-                                <span class="history-date">${new Date(record.created_at).toLocaleString('zh-CN', {
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}</span>
-                                <span class="history-credits">-${record.credits_consumed.toFixed(2)}</span>
-                            </div>
-                            <div class="history-description">${escapeHtml(record.description || 'AI生成任务')}</div>
-                            <div class="history-actions">
-                                ${hasCode ? `
-                                <button class="btn-load-history-code" onclick="loadHistoryCode('${record.id}')" data-i18n="ai.loadModel" title="加载到编辑器">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="16 18 22 12 16 6"/>
-                                        <polyline points="8 6 2 12 8 18"/>
-                                    </svg>
-                                    加载模型
-                                </button>
-                                ` : ''}
-                                <button class="btn-edit-history" onclick="editHistoryRecord('${record.id}', '${escapeHtml(record.description || '').replace(/'/g, "\\'")}', event)" data-i18n="ai.edit" title="编辑描述">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                    </svg>
-                                </button>
-                                <button class="btn-delete-history" onclick="deleteHistoryRecord('${record.id}', event)" data-i18n="ai.delete" title="删除记录">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="3 6 5 6 21 6"/>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                        <line x1="10" y1="11" x2="10" y2="17"/>
-                                        <line x1="14" y1="11" x2="14" y2="17"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    `}).join('');
-                    if (window.i18n) window.i18n.updatePageLanguage();
-                }
-            } catch (err) {
-                console.error('加载生成记录异常:', err);
-                historyContent.innerHTML = `
-                    <div class="empty-state">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="8" x2="12" y2="12"/>
-                            <line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                        <p>加载失败</p>
-                        <span>${err.message}</span>
-                    </div>
-                `;
-            }
-        };
-
-        // HTML转义函数
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // 加载历史代码到编辑器
+        
+        // 加载历史代码到编辑器（保留旧功能兼容性）
         window.loadHistoryCode = async function(recordId) {
             if (!authManager || !authManager.currentUser) {
                 alert('请先登录');
@@ -894,7 +829,7 @@ function initialize(projectContent = null) {
             }
         };
         
-        // 编辑历史记录描述
+        // 编辑历史记录描述（保留旧功能兼容性）
         window.editHistoryRecord = async function(recordId, currentDescription, event) {
             if (event) {
                 event.stopPropagation();
@@ -924,15 +859,13 @@ function initialize(projectContent = null) {
                 }
 
                 console.log('描述已更新');
-                // 刷新历史记录列表
-                window.refreshGenerationHistory();
             } catch (err) {
                 console.error('更新描述异常:', err);
                 alert('更新描述失败: ' + err.message);
             }
         };
         
-        // 删除历史记录
+        // 删除历史记录（保留旧功能兼容性）
         window.deleteHistoryRecord = async function(recordId, event) {
             if (event) {
                 event.stopPropagation();
@@ -959,19 +892,11 @@ function initialize(projectContent = null) {
                     alert('删除记录失败: ' + error.message);
                     return;
                 }
-
-                // 刷新历史记录列表
-                window.refreshGenerationHistory();
             } catch (err) {
                 console.error('删除记录异常:', err);
                 alert('删除记录失败: ' + err.message);
             }
         };
-
-        // 修复Bug 1: 初始加载历史记录，延迟更长时间确保authManager已初始化
-        setTimeout(() => {
-            window.refreshGenerationHistory();
-        }, 1500);
         
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {
