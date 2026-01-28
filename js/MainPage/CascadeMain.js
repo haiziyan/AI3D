@@ -849,6 +849,16 @@ function initialize(projectContent = null) {
                                 ${msg.tokens_used ? `<span style="margin-left: auto; font-size: 9px; padding: 2px 6px; background: rgba(107, 107, 107, 0.2); border-radius: 8px;">${msg.tokens_used} tokens</span>` : ''}
                             </div>
                             <div class="message-content" style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); background: rgba(15, 15, 15, 0.6); padding: 8px; border-radius: 6px; overflow-x: auto; max-height: 100px; overflow-y: auto;">${escapeHtml(msg.generated_code ? msg.generated_code.substring(0, 200) + (msg.generated_code.length > 200 ? '...' : '') : '生成中...')}</div>
+                            ${msg.generated_code ? `
+                            <button class="btn-load-message-code-mobile" onclick="loadGenerationCode('${msg.id}', event)" style="margin-top: 8px; width: 100%; padding: 8px; background: rgba(74, 158, 255, 0.15); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 6px; color: #4a9eff; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                <span>加载此模型</span>
+                            </button>
+                            ` : ''}
                         </div>
                         `;
                     }
@@ -900,13 +910,57 @@ function initialize(projectContent = null) {
             }
         };
 
+        // 加载单条生成记录的代码（用于移动端对话详情中的加载按钮）
+        window.loadGenerationCode = async function(generationId, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            
+            try {
+                const { data, error } = await authManager.supabase
+                    .from('ai_generations')
+                    .select('generated_code')
+                    .eq('id', generationId)
+                    .single();
+
+                if (error) throw error;
+
+                if (data && data.generated_code && monacoEditor) {
+                    monacoEditor.setValue(data.generated_code);
+                    
+                    // 自动评估代码
+                    setTimeout(() => {
+                        monacoEditor.evaluateCode(true);
+                    }, 500);
+                    
+                    // 关闭模态框
+                    const modal = document.getElementById('mobileHistoryModal');
+                    if (modal) {
+                        modal.classList.remove('active');
+                    }
+                    
+                    console.log('已加载模型代码');
+                } else {
+                    alert('未找到生成的代码');
+                }
+            } catch (error) {
+                console.error('加载模型失败:', error);
+                alert('加载模型失败: ' + error.message);
+            }
+        };
+
         // 删除对话
         window.deleteConversationById = async function(conversationId, event) {
             if (event) {
                 event.stopPropagation();
+                event.preventDefault();
             }
             
-            if (!confirm('确定要删除这个对话吗？')) {
+            // 修复Bug 2: 使用用户确认结果来决定是否删除
+            const userConfirmed = confirm('确定要删除这个对话吗？');
+            if (!userConfirmed) {
+                console.log('用户取消删除操作');
                 return;
             }
 
