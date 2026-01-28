@@ -152,12 +152,30 @@ body {
   border-radius: 8px;
   padding: 8px 0;
   z-index: 1000;
-  margin-top: 4px;
+  margin-top: 0;
   border: 1px solid var(--divider-color);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .menu-dropdown:hover .dropdown-content {
   display: block;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 扩大hover区域，防止鼠标移动时菜单消失 */
+.menu-dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: transparent;
 }
 
 .dropdown-content a,
