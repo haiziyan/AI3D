@@ -521,33 +521,41 @@ function initialize(projectContent = null) {
         aiModuleContainer.className = "ai-module-container";
         aiModuleContainer.innerHTML = `
             <div class="ai-module-content">
-                <!-- 对话列表面板 -->
-                <div class="conversation-list-panel">
-                    <div class="conversation-header">
+                <!-- 顶部工具栏 -->
+                <div class="ai-toolbar">
+                    <button class="btn-history-dropdown" id="historyDropdownBtn" title="对话历史">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
                         </svg>
-                        <span data-i18n="ai.conversations">对话列表</span>
-                        <button class="btn-new-conversation" onclick="window.aiGenerator.clearCurrentConversation()" title="新建对话">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div id="conversationListContent" class="conversation-list-content"></div>
+                        <span data-i18n="ai.history">历史</span>
+                        <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                    <button class="btn-new-conversation" onclick="window.aiGenerator.clearCurrentConversation()" title="新建对话">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span data-i18n="ai.newChat">新对话</span>
+                    </button>
                 </div>
                 
-                <!-- 当前对话历史面板 -->
-                <div class="current-conversation-panel">
-                    <div class="conversation-history-header">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <!-- 对话历史下拉面板 -->
+                <div class="history-dropdown-panel" id="historyDropdownPanel">
+                    <div class="history-dropdown-header">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
-                        <span data-i18n="ai.currentConversation">当前对话</span>
-                        <span class="conversation-status" id="conversationStatus">新对话</span>
+                        <span data-i18n="ai.conversationHistory">对话历史</span>
                     </div>
-                    <div id="conversationHistoryContent" class="conversation-history-content"></div>
+                    <div id="conversationListContent" class="history-dropdown-content"></div>
+                </div>
+                
+                <!-- 当前对话消息区域（占据主要空间） -->
+                <div class="conversation-messages-panel">
+                    <div id="conversationHistoryContent" class="conversation-messages-content"></div>
                 </div>
                 
                 <!-- AI输入区域 - 现代化设计 -->
@@ -667,12 +675,10 @@ function initialize(projectContent = null) {
         // 刷新当前对话历史
         window.refreshConversationHistory = function() {
             const historyContent = document.getElementById('conversationHistoryContent');
-            const statusSpan = document.getElementById('conversationStatus');
             
             if (!historyContent) return;
 
             if (!aiGenerator.currentConversationId) {
-                if (statusSpan) statusSpan.textContent = '新对话';
                 historyContent.innerHTML = `
                     <div class="empty-state-small">
                         <p data-i18n="ai.newConversation">开始新对话</p>
@@ -681,8 +687,6 @@ function initialize(projectContent = null) {
                 `;
                 return;
             }
-
-            if (statusSpan) statusSpan.textContent = `对话中 (${aiGenerator.conversationHistory.length / 2} 轮)`;
 
             if (aiGenerator.conversationHistory.length === 0) {
                 historyContent.innerHTML = `
@@ -743,6 +747,12 @@ function initialize(projectContent = null) {
                 await aiGenerator.loadConversation(conversationId);
                 window.refreshConversationList();
                 window.refreshConversationHistory();
+                
+                // 关闭历史下拉面板
+                const historyPanel = document.getElementById('historyDropdownPanel');
+                const historyBtn = document.getElementById('historyDropdownBtn');
+                if (historyPanel) historyPanel.classList.remove('active');
+                if (historyBtn) historyBtn.classList.remove('active');
                 
                 // 如果对话历史中有代码，加载最后一次生成的代码
                 const lastAssistantMsg = aiGenerator.conversationHistory
@@ -805,6 +815,37 @@ function initialize(projectContent = null) {
             window.refreshConversationList();
             window.refreshConversationHistory();
         });
+        
+        // 绑定历史下拉按钮事件
+        setTimeout(() => {
+            const historyBtn = document.getElementById('historyDropdownBtn');
+            const historyPanel = document.getElementById('historyDropdownPanel');
+            
+            if (historyBtn && historyPanel) {
+                historyBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isActive = historyPanel.classList.contains('active');
+                    
+                    if (isActive) {
+                        historyPanel.classList.remove('active');
+                        historyBtn.classList.remove('active');
+                    } else {
+                        historyPanel.classList.add('active');
+                        historyBtn.classList.add('active');
+                        // 刷新对话列表
+                        window.refreshConversationList();
+                    }
+                });
+                
+                // 点击外部关闭下拉面板
+                document.addEventListener('click', function(e) {
+                    if (!historyBtn.contains(e.target) && !historyPanel.contains(e.target)) {
+                        historyPanel.classList.remove('active');
+                        historyBtn.classList.remove('active');
+                    }
+                });
+            }
+        }, 100);
         
         // 加载历史代码到编辑器（保留旧功能兼容性）
         window.loadHistoryCode = async function(recordId) {

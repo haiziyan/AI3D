@@ -2136,55 +2136,103 @@ body {
 
 /* ==================== 多轮对话Agent模式样式 - 现代化设计 ==================== */
 
-/* 对话列表面板 */
-.conversation-list-panel {
-  display: flex;
-  flex-direction: column;
-  height: 35%;
-  border-bottom: 1px solid rgba(107, 107, 107, 0.15);
-  background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
-  position: relative;
-}
-
-.conversation-header {
+/* 顶部工具栏 */
+.ai-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  background: rgba(15, 15, 15, 0.8);
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(15, 15, 15, 0.9);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(107, 107, 107, 0.15);
+  position: relative;
+  z-index: 10;
+}
+
+/* 历史下拉按钮 */
+.btn-history-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(36, 36, 36, 0.8);
+  border: 1px solid rgba(107, 107, 107, 0.2);
+  border-radius: 8px;
   color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-.conversation-header svg {
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.conversation-header span {
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex: 1;
-  margin-left: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
+.btn-history-dropdown::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(107, 107, 107, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-history-dropdown:hover::before {
+  width: 200px;
+  height: 200px;
+}
+
+.btn-history-dropdown:hover {
+  background: rgba(36, 36, 36, 1);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-history-dropdown.active {
+  background: rgba(107, 107, 107, 0.2);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+}
+
+.btn-history-dropdown svg,
+.btn-history-dropdown span {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-history-dropdown .dropdown-arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.btn-history-dropdown.active .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* 新对话按钮 */
 .btn-new-conversation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
   background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
   border: none;
   border-radius: 8px;
-  padding: 7px 9px;
-  cursor: pointer;
   color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(107, 107, 107, 0.2);
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .btn-new-conversation::before {
@@ -2201,8 +2249,8 @@ body {
 }
 
 .btn-new-conversation:hover::before {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
 }
 
 .btn-new-conversation:hover {
@@ -2214,35 +2262,74 @@ body {
   transform: translateY(0);
 }
 
-.btn-new-conversation svg {
+.btn-new-conversation svg,
+.btn-new-conversation span {
   position: relative;
   z-index: 1;
 }
 
-.conversation-list-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  background: transparent;
+/* 历史下拉面板 */
+.history-dropdown-panel {
+  position: absolute;
+  top: 100%;
+  left: 14px;
+  right: 14px;
+  max-height: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(26, 26, 26, 0.98) 0%, rgba(36, 36, 36, 0.98) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(107, 107, 107, 0.2);
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 9;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  opacity: 0;
+  margin-top: -1px;
 }
 
-.conversation-list-content::-webkit-scrollbar {
+.history-dropdown-panel.active {
+  max-height: 400px;
+  opacity: 1;
+}
+
+.history-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(15, 15, 15, 0.6);
+  border-bottom: 1px solid rgba(107, 107, 107, 0.15);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.history-dropdown-content {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.history-dropdown-content::-webkit-scrollbar {
   width: 5px;
 }
 
-.conversation-list-content::-webkit-scrollbar-track {
+.history-dropdown-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.conversation-list-content::-webkit-scrollbar-thumb {
+.history-dropdown-content::-webkit-scrollbar-thumb {
   background: rgba(107, 107, 107, 0.3);
   border-radius: 3px;
 }
 
-.conversation-list-content::-webkit-scrollbar-thumb:hover {
+.history-dropdown-content::-webkit-scrollbar-thumb:hover {
   background: rgba(107, 107, 107, 0.5);
 }
 
+/* 对话项样式（用于历史下拉列表） */
 .conversation-item {
   padding: 12px 14px;
   margin-bottom: 8px;
@@ -2345,71 +2432,37 @@ body {
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* 当前对话历史面板 */
-.current-conversation-panel {
+/* 当前对话消息面板（占据主要空间） */
+.conversation-messages-panel {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  height: 40%;
-  border-bottom: 1px solid rgba(107, 107, 107, 0.15);
-  background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+  overflow: hidden;
+  background: transparent;
+  position: relative;
 }
 
-.conversation-history-header {
-  display: flex;
-  align-items: center;
-  padding: 14px 16px;
-  background: rgba(15, 15, 15, 0.8);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(107, 107, 107, 0.15);
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-.conversation-history-header svg {
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.conversation-history-header span:first-of-type {
-  flex: 1;
-  margin-left: 8px;
-}
-
-.conversation-status {
-  font-size: 10px;
-  padding: 5px 10px;
-  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-  color: white;
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  box-shadow: 0 2px 8px rgba(107, 107, 107, 0.2);
-}
-
-.conversation-history-content {
+.conversation-messages-content {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 14px;
   background: transparent;
 }
 
-.conversation-history-content::-webkit-scrollbar {
+.conversation-messages-content::-webkit-scrollbar {
   width: 5px;
 }
 
-.conversation-history-content::-webkit-scrollbar-track {
+.conversation-messages-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.conversation-history-content::-webkit-scrollbar-thumb {
+.conversation-messages-content::-webkit-scrollbar-thumb {
   background: rgba(107, 107, 107, 0.3);
   border-radius: 3px;
 }
 
-.conversation-history-content::-webkit-scrollbar-thumb:hover {
+.conversation-messages-content::-webkit-scrollbar-thumb:hover {
   background: rgba(107, 107, 107, 0.5);
 }
 
@@ -2560,24 +2613,76 @@ body {
 
 /* 移动端适配 */
 @media (max-width: 768px) {
+  /* 对话列表面板 */
   .conversation-list-panel {
     height: 30%;
   }
   
+  /* 当前对话面板 */
   .current-conversation-panel {
     height: 35%;
   }
   
+  /* 工具栏 */
+  .ai-toolbar {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  
+  .btn-history-dropdown {
+    padding: 7px 12px;
+    font-size: 11px;
+    gap: 6px;
+  }
+  
+  .btn-new-conversation {
+    padding: 7px 12px;
+    font-size: 11px;
+    gap: 5px;
+  }
+  
+  .btn-new-conversation span {
+    display: none;
+  }
+  
+  /* 历史下拉面板 */
+  .history-dropdown-panel {
+    left: 12px;
+    right: 12px;
+  }
+  
+  .history-dropdown-panel.active {
+    max-height: 300px;
+  }
+  
+  .history-dropdown-header {
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+  
+  .history-dropdown-content {
+    max-height: 240px;
+    padding: 8px;
+  }
+  
+  /* 对话项 */
   .conversation-item {
-    padding: 8px 10px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
   }
   
   .conversation-title {
     font-size: 12px;
   }
   
+  /* 消息面板 */
+  .conversation-messages-content {
+    padding: 12px;
+  }
+  
   .conversation-message {
-    padding: 8px 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
   }
   
   .message-content {
