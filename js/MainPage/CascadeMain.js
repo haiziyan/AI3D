@@ -578,6 +578,24 @@ function initialize(projectContent = null) {
                     </div>
                     <div class="ai-input-toolbar">
                         <div class="ai-input-actions">
+                            <!-- 对话历史按钮（移动端显示） -->
+                            <button class="ai-toolbar-btn" id="mobileHistoryBtn" title="对话历史">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                                <span>历史</span>
+                            </button>
+                            
+                            <!-- 新建对话按钮（移动端显示） -->
+                            <button class="ai-toolbar-btn new-chat" id="mobileNewChatBtn" title="新建对话">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                <span>新对话</span>
+                            </button>
+                            
                             <div class="ai-model-selector">
                                 <svg class="ai-model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"/>
@@ -1066,6 +1084,151 @@ function initialize(projectContent = null) {
                         }
                     });
                 }
+            }
+            
+            // 移动端：绑定对话历史按钮事件
+            const mobileHistoryBtn = document.getElementById('mobileHistoryBtn');
+            if (mobileHistoryBtn && window.innerWidth <= 768) {
+                mobileHistoryBtn.onclick = () => {
+                    // 创建移动端对话历史模态框
+                    let modal = document.getElementById('mobileHistoryModal');
+                    if (!modal) {
+                        modal = document.createElement('div');
+                        modal.id = 'mobileHistoryModal';
+                        modal.className = 'mobile-history-modal';
+                        modal.innerHTML = `
+                            <div class="mobile-history-modal-header">
+                                <div class="mobile-history-modal-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span>对话历史</span>
+                                </div>
+                                <button class="mobile-history-modal-close" onclick="document.getElementById('mobileHistoryModal').classList.remove('active')">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="mobile-history-modal-content" id="mobileHistoryModalContent"></div>
+                        `;
+                        document.body.appendChild(modal);
+                        
+                        // 点击背景关闭
+                        modal.addEventListener('click', function(e) {
+                            if (e.target === modal) {
+                                modal.classList.remove('active');
+                            }
+                        });
+                    }
+                    
+                    // 加载对话列表到模态框
+                    const loadMobileHistory = async () => {
+                        const modalContent = document.getElementById('mobileHistoryModalContent');
+                        if (!modalContent) return;
+                        
+                        const isLoggedIn = authManager && authManager.currentUser && authManager.supabase;
+                        
+                        if (!isLoggedIn) {
+                            modalContent.innerHTML = `
+                                <div class="empty-state">
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                    <p>请先登录</p>
+                                    <button class="btn-login-prompt" onclick="authManager.showAuthModal(); document.getElementById('mobileHistoryModal').classList.remove('active')">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                            <polyline points="10 17 15 12 10 7"/>
+                                            <line x1="15" y1="12" x2="3" y2="12"/>
+                                        </svg>
+                                        登录账户
+                                    </button>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        try {
+                            modalContent.innerHTML = '<div class="loading-state"><svg class="loading-spinner" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><p>加载中...</p></div>';
+                            
+                            const conversations = await aiGenerator.getConversationList(50);
+
+                            if (!conversations || conversations.length === 0) {
+                                modalContent.innerHTML = `
+                                    <div class="empty-state">
+                                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                        </svg>
+                                        <p>暂无对话</p>
+                                        <span>开始新对话来创建你的第一个3D模型</span>
+                                    </div>
+                                `;
+                            } else {
+                                modalContent.innerHTML = conversations.map(conv => {
+                                    const isActive = aiGenerator.currentConversationId === conv.id;
+                                    return `
+                                    <div class="conversation-item ${isActive ? 'active' : ''}" onclick="loadConversationById('${conv.id}'); document.getElementById('mobileHistoryModal').classList.remove('active')">
+                                        <div class="conversation-item-header">
+                                            <span class="conversation-title">${escapeHtml(conv.title || '未命名对话')}</span>
+                                            <button class="btn-delete-conversation" onclick="deleteConversationById('${conv.id}', event)" title="删除">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="conversation-date">${new Date(conv.updated_at).toLocaleString('zh-CN', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</div>
+                                    </div>
+                                    `;
+                                }).join('');
+                            }
+                        } catch (err) {
+                            console.error('加载对话列表失败:', err);
+                            modalContent.innerHTML = `
+                                <div class="empty-state">
+                                    <p>加载失败</p>
+                                    <span>${err.message}</span>
+                                </div>
+                            `;
+                        }
+                    };
+                    
+                    loadMobileHistory();
+                    modal.classList.add('active');
+                };
+            }
+            
+            // 移动端：绑定新建对话按钮事件
+            const mobileNewChatBtn = document.getElementById('mobileNewChatBtn');
+            if (mobileNewChatBtn && window.innerWidth <= 768) {
+                mobileNewChatBtn.onclick = () => {
+                    if (window.aiGenerator) {
+                        if (confirm('确定要开始新对话吗？当前对话将被保存。')) {
+                            window.aiGenerator.clearCurrentConversation();
+                            // 清空输入框
+                            if (aiInput) {
+                                aiInput.value = '';
+                            }
+                            // 刷新显示
+                            if (window.refreshConversationList) {
+                                window.refreshConversationList();
+                            }
+                            if (window.refreshConversationHistory) {
+                                window.refreshConversationHistory();
+                            }
+                        }
+                    }
+                };
             }
         }, 100);
     });
