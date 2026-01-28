@@ -410,11 +410,10 @@ if (typeof window !== 'undefined') {
                 aiButton.disabled = true;
                 aiButton.classList.add('generating');
                 aiButton.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
+                        <path d="M12 6v6l4 2"/>
                     </svg>
-                    生成中...
                 `;
             }
 
@@ -450,11 +449,10 @@ if (typeof window !== 'undefined') {
                     aiButton.disabled = false;
                     aiButton.classList.remove('generating');
                     aiButton.innerHTML = `
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M22 2L11 13"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
                         </svg>
-                        生成模型
                     `;
                 }
             }

@@ -550,24 +550,42 @@ function initialize(projectContent = null) {
                     <div id="conversationHistoryContent" class="conversation-history-content"></div>
                 </div>
                 
-                <!-- AI输入区域 -->
+                <!-- AI输入区域 - 现代化设计 -->
                 <div class="ai-input-wrapper" id="aiInputWrapper">
                     <div class="ai-section-title">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                            <path d="M2 17l10 5 10-5"/>
-                            <path d="M2 12l10 5 10-5"/>
-                        </svg>
-                        <span data-i18n="ai.title">AI 模型描述</span>
-                    </div>
-                    <textarea id="aiPromptInputModule" class="ai-prompt-textarea" data-i18n-placeholder="ai.placeholder" placeholder="描述你想要的3D模型，或对当前模型提出修改建议..."></textarea>
-                    <button id="aiGenerateBtnModule" class="ai-generate-btn-module">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
+                            <path d="M12 6v6l4 2"/>
                         </svg>
-                        <span data-i18n="ai.generate">生成模型</span>
-                    </button>
+                        <span data-i18n="ai.title">AI 模型生成</span>
+                    </div>
+                    <div class="ai-input-container">
+                        <textarea id="aiPromptInputModule" class="ai-prompt-textarea" data-i18n-placeholder="ai.placeholder" placeholder="描述你想要的3D模型，或对当前模型提出修改建议..." rows="1"></textarea>
+                        <button id="aiGenerateBtnModule" class="ai-generate-btn-module" title="生成模型 (Ctrl+Enter)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M22 2L11 13"/>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="ai-input-toolbar">
+                        <div class="ai-input-actions">
+                            <div class="ai-model-selector">
+                                <svg class="ai-model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 16v-4"/>
+                                    <path d="M12 8h.01"/>
+                                </svg>
+                                <span>DeepSeek</span>
+                            </div>
+                        </div>
+                        <div class="ai-shortcut-hint">
+                            <span class="ai-shortcut-key">Ctrl</span>
+                            <span>+</span>
+                            <span class="ai-shortcut-key">Enter</span>
+                            <span>发送</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -958,6 +976,12 @@ function initialize(projectContent = null) {
             const aiInput = document.getElementById('aiPromptInputModule');
             
             if (aiBtn && aiInput) {
+                // 自动调整输入框高度
+                aiInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                });
+                
                 aiBtn.onclick = () => {
                     const prompt = aiInput.value.trim();
                     if (prompt && window.aiGenerator) {
