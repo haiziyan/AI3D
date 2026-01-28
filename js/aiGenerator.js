@@ -439,6 +439,16 @@ if (typeof window !== 'undefined') {
                     promptInput.value = '';
                 }
 
+                // 刷新对话历史显示
+                if (window.refreshConversationHistory) {
+                    window.refreshConversationHistory();
+                }
+                
+                // 刷新对话列表（更新时间戳）
+                if (window.refreshConversationList) {
+                    window.refreshConversationList();
+                }
+
                 // 显示成功提示
                 console.log(`生成成功！消耗 ${result.tokensUsed} tokens，${result.creditsUsed.toFixed(2)} 积分`);
                 
