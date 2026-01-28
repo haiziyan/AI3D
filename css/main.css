@@ -294,8 +294,9 @@ body {
   background: var(--primary-bg);
   border: 1.5px solid var(--divider-color);
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   transition: all 0.3s ease;
+  min-height: 60px;
 }
 
 .ai-input-container:focus-within {
@@ -2147,6 +2148,7 @@ body {
   border-bottom: 1px solid rgba(107, 107, 107, 0.15);
   position: relative;
   z-index: 10;
+  flex-shrink: 0;
 }
 
 /* 历史下拉按钮 */
@@ -2219,13 +2221,13 @@ body {
 .btn-new-conversation {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 5px;
+  padding: 8px 12px;
   background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
   border: none;
   border-radius: 8px;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2272,19 +2274,19 @@ body {
 .history-dropdown-panel {
   position: absolute;
   top: 100%;
-  left: 14px;
-  right: 14px;
+  left: 0;
+  right: 0;
   max-height: 0;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(26, 26, 26, 0.98) 0%, rgba(36, 36, 36, 0.98) 100%);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(107, 107, 107, 0.2);
+  border-top: none;
   border-radius: 0 0 12px 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  z-index: 9;
+  z-index: 100;
   transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
   opacity: 0;
-  margin-top: -1px;
 }
 
 .history-dropdown-panel.active {
@@ -2440,6 +2442,7 @@ body {
   overflow: hidden;
   background: transparent;
   position: relative;
+  min-height: 0;
 }
 
 .conversation-messages-content {
@@ -2447,6 +2450,7 @@ body {
   overflow-y: auto;
   padding: 14px;
   background: transparent;
+  min-height: 0;
 }
 
 .conversation-messages-content::-webkit-scrollbar {
@@ -2647,8 +2651,8 @@ body {
   
   /* 历史下拉面板 */
   .history-dropdown-panel {
-    left: 12px;
-    right: 12px;
+    left: 0;
+    right: 0;
   }
   
   .history-dropdown-panel.active {

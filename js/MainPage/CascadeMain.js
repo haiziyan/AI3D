@@ -533,24 +533,24 @@ function initialize(projectContent = null) {
                             <polyline points="6 9 12 15 18 9"/>
                         </svg>
                     </button>
-                    <button class="btn-new-conversation" onclick="window.aiGenerator.clearCurrentConversation()" title="新建对话">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <button class="btn-new-conversation" onclick="window.aiGenerator && window.aiGenerator.clearCurrentConversation()" title="新建对话">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
                         </svg>
                         <span data-i18n="ai.newChat">新对话</span>
                     </button>
-                </div>
-                
-                <!-- 对话历史下拉面板 -->
-                <div class="history-dropdown-panel" id="historyDropdownPanel">
-                    <div class="history-dropdown-header">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <span data-i18n="ai.conversationHistory">对话历史</span>
+                    
+                    <!-- 对话历史下拉面板 -->
+                    <div class="history-dropdown-panel" id="historyDropdownPanel">
+                        <div class="history-dropdown-header">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span data-i18n="ai.conversationHistory">对话历史</span>
+                        </div>
+                        <div id="conversationListContent" class="history-dropdown-content"></div>
                     </div>
-                    <div id="conversationListContent" class="history-dropdown-content"></div>
                 </div>
                 
                 <!-- 当前对话消息区域（占据主要空间） -->
