@@ -460,17 +460,15 @@ if (typeof window !== 'undefined') {
         
         // 清空当前对话
         clearCurrentConversation: function() {
-            if (confirm('确定要开始新对话吗？当前对话历史将被清空。')) {
-                aiGenerator.clearConversation();
-                console.log('已开始新对话');
-                
-                // 刷新对话列表和历史
-                if (window.refreshConversationList) {
-                    window.refreshConversationList();
-                }
-                if (window.refreshConversationHistory) {
-                    window.refreshConversationHistory();
-                }
+            aiGenerator.clearConversation();
+            console.log('已开始新对话');
+            
+            // 刷新对话列表和历史
+            if (window.refreshConversationList) {
+                window.refreshConversationList();
+            }
+            if (window.refreshConversationHistory) {
+                window.refreshConversationHistory();
             }
         },
         
