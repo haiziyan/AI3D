@@ -13,6 +13,9 @@ window.initialCodeEvaluated = false; // 标记初始代码是否已评估
 let starterCode = 
 `Text3D("AI 3D Studio", 70, 0.2, 'Consolas')`;
 
+// 将 starterCode 设置为全局变量，方便其他地方访问
+window.starterCode = starterCode;
+
 function initialize(projectContent = null) {
     this.searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
 
@@ -1344,21 +1347,45 @@ function initialize(projectContent = null) {
             const mobileNewChatBtn = document.getElementById('mobileNewChatBtn');
             if (mobileNewChatBtn && window.innerWidth <= 768) {
                 mobileNewChatBtn.onclick = () => {
+                    console.log('点击新建对话按钮');
+                    
                     if (window.aiGenerator) {
                         // 移动端不显示确认提示框，直接执行
                         window.aiGenerator.clearCurrentConversation();
+                        console.log('已清空对话历史');
                         
                         // 清空输入框
                         if (aiInput) {
                             aiInput.value = '';
+                            console.log('已清空输入框');
                         }
                         
                         // 恢复3D视图到初始状态
                         if (monacoEditor) {
-                            monacoEditor.setValue(starterCode);
+                            // 使用全局的 starterCode 或默认代码
+                            const initialCode = window.starterCode || starterCode || `Text3D("AI 3D Studio", 70, 0.2, 'Consolas')`;
+                            console.log('设置初始代码:', initialCode);
+                            monacoEditor.setValue(initialCode);
+                            
+                            // 确保代码评估执行
                             setTimeout(() => {
-                                monacoEditor.evaluateCode(true);
-                            }, 500);
+                                console.log('第一次尝试评估代码, workerWorking:', window.workerWorking);
+                                if (monacoEditor && monacoEditor.evaluateCode) {
+                                    monacoEditor.evaluateCode(true);
+                                    console.log('已调用 evaluateCode');
+                                }
+                            }, 300);
+                            
+                            // 再次尝试评估（确保执行）
+                            setTimeout(() => {
+                                console.log('第二次尝试评估代码, workerWorking:', window.workerWorking);
+                                if (monacoEditor && monacoEditor.evaluateCode && !window.workerWorking) {
+                                    monacoEditor.evaluateCode(true);
+                                    console.log('已再次调用 evaluateCode');
+                                }
+                            }, 800);
+                        } else {
+                            console.error('monacoEditor 不存在');
                         }
                         
                         // 刷新显示
@@ -1368,6 +1395,8 @@ function initialize(projectContent = null) {
                         if (window.refreshConversationHistory) {
                             window.refreshConversationHistory();
                         }
+                    } else {
+                        console.error('window.aiGenerator 不存在');
                     }
                 };
             }
